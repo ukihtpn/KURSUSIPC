@@ -1128,19 +1128,18 @@ async function renderQuiz(main, kind, unlocked){
       document.getElementById('qp-label').textContent = (targetIdx+1)+' / '+QUESTIONS.length;
     });
   });
-  document.addEventListener('click', async function submitHandler(e){
-    if(e.target && e.target.id === 'btn-submit-quiz'){
-      document.removeEventListener('click', submitHandler);
+  document.getElementById('btn-submit-quiz').addEventListener('click', async function submitHandler(e){
       let score = 0;
       QUESTIONS.forEach((q,qi)=>{ if(answers[qi]===q.correct) score++; });
       const result = {answers, score, total:QUESTIONS.length, submittedAt:new Date().toISOString()};
+      const btn = e.target;
+      btn.disabled = true; btn.textContent = "Menghantar...";
       await sSet(kind+':'+key, result, false);
       let allResults = await sGet(kind+'-results', true) || [];
       allResults = allResults.filter(r=>icKey(r.ic)!==key);
       allResults.push({name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, score, total:QUESTIONS.length});
       await sSet(kind+'-results', allResults, true);
       renderQuizResult(main, kind, result);
-    }
   }, {once:true});
 }
 function renderQuizResult(main, kind, result){
