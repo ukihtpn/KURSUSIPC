@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICAMS 2026 — Unit Kawalan Infeksi HTPN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Google Apps Script kadang-kadang buang <link> stylesheet luar dalam sandbox iframe —
+   @import di bawah ni jadi backup supaya font tetap load walaupun <link> di atas gugur. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+:root{
+  --teal-deep:#0F5C5C;
+  --teal-mid:#137A76;
+  --aqua-tint:#EAF6F4;
+  --ink:#15304A;
+  --amber:#F2A93B;
+  --success:#2F9E68;
+  --danger:#D64545;
+  --purple:#6E5DC6;
+  --paper:#FBFBF8;
+  --line:#D8E4E1;
+  --shadow:0 10px 30px -12px rgba(15,92,92,0.25);
+  --radius:14px;
+  --font-display:'Space Grotesk','Segoe UI',ui-sans-serif,system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  --font-body:'Inter','Segoe UI',ui-sans-serif,system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:'IBM Plex Mono','Cascadia Code','Consolas',ui-monospace,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::selection{background:var(--amber);color:var(--ink);}
+a{color:inherit;}
+.hidden{display:none !important;}
+.screen{
+  min-height:100vh;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+}
+.mono{font-family:var(--font-mono);}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--teal-mid);
+  font-weight:600;
+}
+
+/* ---------- SPLASH ---------- */
+#screen-splash{
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255,255,255,0.10) 0, transparent 45%),
+    radial-gradient(circle at 82% 78%, rgba(242,169,59,0.18) 0, transparent 50%),
+    linear-gradient(160deg,var(--teal-deep) 0%, #0B4444 65%, #0A3838 100%);
+  color:#fff;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:32px;
+  position:relative;
+  overflow:hidden;
+}
+.badge-card{
+  position:relative;
+  z-index:2;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(6px);
+  border-radius:20px;
+  padding:48px 40px 40px;
+  max-width:560px;
+  animation:riseIn .9s cubic-bezier(.19,1,.22,1) both;
+}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.badge-clip{
+  width:46px;height:14px;background:rgba(255,255,255,0.35);
+  border-radius:0 0 8px 8px;margin:-70px auto 26px;position:relative;z-index:3;
+}
+.splash-logo-ring{
+  width:88px;height:88px;border-radius:50%;
+  margin:0 auto 22px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--amber),#ffcf7d);
+  box-shadow:0 0 0 6px rgba(255,255,255,0.10), 0 12px 24px -8px rgba(0,0,0,0.4);
+  font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--teal-deep);
+}
+.splash-eyebrow{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,0.65);margin-bottom:10px;
+}
+#screen-splash h1{
+  font-family:var(--font-display);
+  font-size:clamp(30px,5vw,44px);
+  line-height:1.08;
+  margin:0 0 12px;
+  letter-spacing:-0.01em;
+}
+#screen-splash h1 em{
+  font-style:normal;color:var(--amber);
+}
+.splash-sub{
+  color:rgba(255,255,255,0.78);
+  font-size:15.5px;
+  line-height:1.6;
+  max-width:440px;
+  margin:0 auto 30px;
+}
+.splash-meta{
+  display:flex;gap:18px;justify-content:center;flex-wrap:wrap;
+  font-family:var(--font-mono);font-size:12.5px;color:rgba(255,255,255,0.7);
+  margin-bottom:32px;
+}
+.splash-meta span{display:flex;align-items:center;gap:6px;}
+.splash-meta span::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--amber);}
+.enter-key{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--amber);color:var(--teal-deep);
+  border:none;border-radius:999px;
+  padding:14px 30px;
+  font-weight:700;font-size:15px;
+  box-shadow:0 10px 24px -8px rgba(242,169,59,0.6);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.enter-key:hover{transform:translateY(-2px);box-shadow:0 14px 28px -8px rgba(242,169,59,0.75);}
+.enter-key kbd{
+  font-family:var(--font-mono);background:rgba(15,48,74,0.18);
+  padding:2px 8px;border-radius:6px;font-size:12px;
+}
+.splash-hint{
+  margin-top:16px;font-size:12px;color:rgba(255,255,255,0.5);
+}
+
+/* ---------- AUTH (register/login/coordinator) ---------- */
+.auth-screen{
+  align-items:center;justify-content:center;
+  background:var(--aqua-tint);
+  padding:32px 16px;
+}
+.auth-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  width:100%;max-width:440px;
+  padding:34px 32px 30px;
+}
+.auth-top{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+.auth-mark{
+  width:36px;height:36px;border-radius:9px;background:var(--teal-deep);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:14px;
+}
+.auth-top .t{font-family:var(--font-display);font-weight:600;font-size:15px;}
+.auth-top .s{font-size:12px;color:#5b7a76;}
+.auth-card h2{font-family:var(--font-display);font-size:22px;margin:0 0 6px;}
+.auth-card p.desc{font-size:13.5px;color:#5b7a76;margin:0 0 22px;line-height:1.5;}
+.field{margin-bottom:16px;}
+.field label{
+  display:block;font-size:12px;font-weight:600;letter-spacing:.02em;
+  color:var(--ink);margin-bottom:6px;
+}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;
+  font-size:14.5px;color:var(--ink);background:#fcfdfc;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(19,122,118,0.14);
+}
+.field .hint{font-size:11.5px;color:#8098a0;margin-top:5px;}
+.btn{
+  border:none;border-radius:10px;padding:12px 20px;font-weight:600;font-size:14.5px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .15s ease, filter .15s ease, box-shadow .15s ease;
+}
+.btn:active{transform:scale(0.98);}
+.btn-primary{background:var(--teal-deep);color:#fff;box-shadow:0 8px 18px -8px rgba(15,92,92,0.55);width:100%;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;}
+.btn-ghost{background:transparent;color:var(--teal-deep);border:1.5px solid var(--line);width:100%;}
+.btn-ghost:hover{border-color:var(--teal-mid);background:var(--aqua-tint);}
+.btn-amber{background:var(--amber);color:var(--teal-deep);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px;}
+.auth-switch{
+  margin-top:18px;text-align:center;font-size:13px;color:#5b7a76;
+}
+.auth-switch a{color:var(--teal-deep);font-weight:600;text-decoration:underline;cursor:pointer;}
+.form-error{
+  background:#FDEDED;border:1px solid #F5C6C6;color:var(--danger);
+  font-size:12.5px;padding:9px 12px;border-radius:8px;margin-bottom:14px;
+  display:none;
+}
+.coord-tag{
+  position:absolute;top:18px;right:18px;font-size:11px;font-family:var(--font-mono);
+  color:#8098a0;letter-spacing:.04em;
+}
+
+/* ---------- DASHBOARD ---------- */
+#screen-dashboard{background:var(--aqua-tint);}
+.topbar{
+  background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px;position:sticky;top:0;z-index:20;
+}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-logo{
+  width:32px;height:32px;border-radius:8px;background:var(--teal-deep);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:12px;
+}
+.topbar-title{font-family:var(--font-display);font-weight:600;font-size:14.5px;}
+.topbar-title span{display:block;font-family:var(--font-body);font-weight:400;font-size:11px;color:#5b7a76;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.who{text-align:right;font-size:12.5px;}
+.who .n{font-weight:600;}
+.who .r{font-size:11px;color:#5b7a76;font-family:var(--font-mono);}
+.avatar-chip{
+  width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#8f7fe0);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+}
+.logout-btn{
+  background:transparent;border:1px solid var(--line);border-radius:8px;padding:7px 12px;
+  font-size:12.5px;color:#5b7a76;
+}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+.dash-body{display:flex;min-height:calc(100vh - 58px);}
+.rail{
+  width:216px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);
+  padding:18px 12px;position:sticky;top:58px;align-self:flex-start;height:calc(100vh - 58px);overflow-y:auto;
+}
+.rail-group-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:#9fb5b2;padding:10px 10px 6px;
+}
+.rail-btn{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:transparent;border:none;border-radius:9px;padding:10px 10px;
+  font-size:13.5px;color:var(--ink);margin-bottom:2px;font-weight:500;
+  position:relative;
+}
+.rail-btn .ic{
+  width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;background:var(--aqua-tint);color:var(--teal-mid);flex-shrink:0;
+}
+.rail-btn:hover{background:var(--aqua-tint);}
+.rail-btn.active{background:var(--teal-deep);color:#fff;}
+.rail-btn.active .ic{background:rgba(255,255,255,0.2);color:#fff;}
+.rail-btn .lockdot{
+  margin-left:auto;width:15px;height:15px;border-radius:50%;
+  background:#F1E6D0;color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:9px;
+}
+.rail-btn.active .lockdot{background:rgba(255,255,255,0.25);color:#fff;}
+
+.dash-main{flex:1;padding:28px 32px 60px;max-width:920px;margin:0 auto;}
+.panel-head{margin-bottom:22px;}
+.panel-head .eyebrow{margin-bottom:6px;display:block;}
+.panel-head h2{font-family:var(--font-display);font-size:26px;margin:0 0 6px;}
+.panel-head p{color:#5b7a76;font-size:14px;max-width:640px;line-height:1.55;margin:0;}
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;margin-bottom:16px;
+}
+.card h3{font-family:var(--font-display);font-size:16px;margin:0 0 10px;}
+.locked-card{
+  text-align:center;padding:48px 24px;
+}
+.locked-card .lock-ic{
+  width:52px;height:52px;border-radius:50%;background:#FBF3E4;color:var(--amber);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;
+}
+.locked-card h3{margin-bottom:6px;}
+.locked-card p{color:#5b7a76;font-size:13.5px;max-width:340px;margin:0 auto;}
+
+/* objectives list */
+.obj-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+.obj-list li{
+  display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.55;
+}
+.obj-num{
+  font-family:var(--font-mono);font-size:11px;color:var(--teal-mid);background:var(--aqua-tint);
+  border-radius:6px;width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+
+/* schedule table */
+.sched-table{width:100%;border-collapse:collapse;font-size:13px;}
+.sched-table th{
+  text-align:left;font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;
+  color:#8098a0;padding:8px 10px;border-bottom:1.5px solid var(--line);
+}
+.sched-table td{padding:11px 10px;border-bottom:1px solid #EEF3F2;vertical-align:top;}
+.sched-table tr:last-child td{border-bottom:none;}
+.sched-time{font-family:var(--font-mono);font-size:12px;color:var(--teal-mid);white-space:nowrap;font-weight:600;}
+.sched-speaker{color:#5b7a76;font-size:12px;}
+
+/* quiz (pretest/posttest) */
+.q-progress{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.q-progress-bar{flex:1;height:6px;background:var(--line);border-radius:99px;overflow:hidden;}
+.q-progress-fill{height:100%;background:var(--teal-mid);border-radius:99px;transition:width .3s ease;}
+.q-progress-label{font-family:var(--font-mono);font-size:11.5px;color:#5b7a76;white-space:nowrap;}
+.q-block{display:none;}
+.q-block.active{display:block;}
+.q-text{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0 0 16px;line-height:1.4;}
+.opt-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.opt-btn{
+  text-align:left;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;
+  background:#fff;font-size:14px;display:flex;gap:10px;align-items:flex-start;transition:all .15s ease;
+}
+.opt-btn .opt-let{
+  font-family:var(--font-mono);font-size:11.5px;font-weight:700;color:var(--teal-mid);
+  background:var(--aqua-tint);border-radius:6px;width:22px;height:22px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.opt-btn:hover{border-color:var(--teal-mid);}
+.opt-btn.selected{border-color:var(--teal-deep);background:var(--aqua-tint);}
+.opt-btn.selected .opt-let{background:var(--teal-deep);color:#fff;}
+.q-nav{display:flex;justify-content:space-between;gap:10px;}
+.q-nav .btn{width:auto;padding:10px 20px;}
+.result-score{
+  text-align:center;padding:30px 10px 14px;
+}
+.result-score .num{font-family:var(--font-display);font-size:52px;font-weight:700;color:var(--teal-deep);}
+.result-score .of{font-size:14px;color:#5b7a76;margin-top:2px;}
+
+/* feedback */
+.rating-row{display:flex;gap:8px;margin-bottom:4px;}
+.rating-pill{
+  flex:1;text-align:center;border:1.5px solid var(--line);border-radius:9px;padding:10px 6px;
+  font-size:13px;font-weight:600;color:#5b7a76;
+}
+.rating-pill.selected{background:var(--amber);border-color:var(--amber);color:var(--ink);}
+
+/* slides list */
+.slide-item{
+  display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);
+  border-radius:10px;margin-bottom:10px;
+}
+.slide-ic{
+  width:38px;height:38px;border-radius:9px;background:var(--aqua-tint);color:var(--teal-mid);
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.slide-meta{flex:1;min-width:0;}
+.slide-meta .t{font-weight:600;font-size:13.5px;}
+.slide-meta .s{font-size:11.5px;color:#8098a0;}
+.slide-open{
+  font-size:12.5px;font-weight:600;color:var(--teal-deep);border:1px solid var(--line);
+  border-radius:8px;padding:7px 12px;background:#fff;white-space:nowrap;
+}
+.slide-open:hover{border-color:var(--teal-mid);}
+.empty-note{
+  text-align:center;color:#8098a0;font-size:13px;padding:24px 10px;
+}
+
+/* attendance */
+.att-status{
+  display:flex;align-items:center;gap:14px;padding:20px;border-radius:12px;
+  background:var(--aqua-tint);margin-bottom:16px;
+}
+.att-status .dot{width:12px;height:12px;border-radius:50%;background:#c9d6d4;flex-shrink:0;}
+.att-status.marked .dot{background:var(--success);}
+.att-status .txt .t{font-weight:600;font-size:14px;}
+.att-status .txt .s{font-size:12px;color:#5b7a76;font-family:var(--font-mono);}
+
+/* stat chips */
+.stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+.stat-chip{
+  flex:1;min-width:140px;border:1px solid var(--line);border-radius:12px;padding:16px 16px;
+}
+.stat-chip .v{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--teal-deep);}
+.stat-chip .l{font-size:11.5px;color:#5b7a76;margin-top:2px;}
+
+/* ---------- IPC GO! ---------- */
+.go-hero{
+  background:linear-gradient(135deg,var(--teal-deep),var(--purple));
+  border-radius:16px;padding:26px 26px;color:#fff;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.go-hero::after{
+  content:'';position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:50%;
+  background:rgba(255,255,255,0.08);
+}
+.go-hero h2{font-family:var(--font-display);font-size:24px;margin:0 0 6px;position:relative;}
+.go-hero p{font-size:13.5px;opacity:.85;margin:0;max-width:480px;position:relative;}
+.go-lobby-wait{
+  text-align:center;padding:50px 20px;
+}
+.pulse-dot{
+  width:14px;height:14px;border-radius:50%;background:var(--amber);margin:0 auto 18px;
+  animation:pulseDot 1.4s ease-in-out infinite;
+}
+@keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(242,169,59,.5)}50%{box-shadow:0 0 0 14px rgba(242,169,59,0)}}
+.go-timer-ring{
+  width:76px;height:76px;border-radius:50%;margin:0 auto 18px;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(var(--amber) calc(var(--pct,100)*1%), #EEF3F2 0);
+}
+.go-timer-ring::before{
+  content:'';position:absolute;inset:6px;border-radius:50%;background:#fff;
+}
+.go-timer-ring span{position:relative;font-family:var(--font-mono);font-weight:700;font-size:20px;color:var(--ink);}
+.go-tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:560px){.go-tile-grid{grid-template-columns:1fr;}}
+.go-tile{
+  border:none;border-radius:12px;padding:20px 16px;color:#fff;font-size:14.5px;font-weight:700;
+  text-align:left;display:flex;align-items:center;gap:12px;min-height:76px;
+  box-shadow:0 8px 18px -10px rgba(0,0,0,0.35);transition:transform .12s ease, filter .12s ease;
+}
+.go-tile:hover{transform:translateY(-2px);filter:brightness(1.06);}
+.go-tile:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+.go-tile .shape{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(255,255,255,0.22);border-radius:7px;}
+.go-tile-1{background:var(--purple);}
+.go-tile-2{background:var(--teal-mid);}
+.go-tile-3{background:var(--amber);color:var(--ink);}
+.go-tile-3 .shape{color:var(--ink);}
+.go-tile-4{background:var(--danger);}
+.go-waiting-answer{text-align:center;padding:40px 20px;}
+.go-result-flag{
+  text-align:center;padding:34px 20px;border-radius:14px;margin-bottom:14px;
+}
+.go-result-flag.correct{background:#EAF8F0;color:var(--success);}
+.go-result-flag.wrong{background:#FDEDED;color:var(--danger);}
+.go-result-flag .big{font-family:var(--font-display);font-size:22px;font-weight:700;}
+.leaderboard{list-style:none;margin:0;padding:0;}
+.leaderboard li{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;
+  border:1px solid var(--line);margin-bottom:8px;
+}
+.leaderboard li.me{border-color:var(--teal-deep);background:var(--aqua-tint);}
+.lb-rank{
+  font-family:var(--font-mono);font-weight:700;font-size:13px;width:24px;text-align:center;color:#8098a0;
+}
+.leaderboard li:nth-child(1) .lb-rank{color:var(--amber);}
+.lb-name{flex:1;font-size:13.5px;font-weight:600;}
+.lb-score{font-family:var(--font-mono);font-weight:700;font-size:13.5px;color:var(--teal-deep);}
+
+/* ---------- COORDINATOR ---------- */
+#screen-coordinator{background:var(--aqua-tint);}
+.coord-topbar{
+  background:var(--ink);color:#fff;padding:14px 26px;display:flex;justify-content:space-between;align-items:center;
+}
+.coord-topbar .l{display:flex;align-items:center;gap:10px;}
+.coord-topbar .l .tag{
+  font-family:var(--font-mono);font-size:10px;background:var(--amber);color:var(--ink);
+  padding:3px 8px;border-radius:5px;letter-spacing:.06em;font-weight:700;
+}
+.coord-topbar h1{font-family:var(--font-display);font-size:15px;margin:0;font-weight:600;}
+.coord-body{padding:26px 30px 60px;max-width:1080px;margin:0 auto;}
+.coord-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media (max-width:820px){.coord-grid{grid-template-columns:1fr;}}
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:1px solid #EEF3F2;
+}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-row .t{font-size:13.5px;font-weight:600;}
+.toggle-row .s{font-size:11.5px;color:#8098a0;margin-top:2px;}
+.switch{
+  width:46px;height:26px;border-radius:99px;background:#D8E4E1;position:relative;flex-shrink:0;border:none;
+  transition:background .2s ease;
+}
+.switch::after{
+  content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;
+  transition:transform .2s ease;box-shadow:0 2px 4px rgba(0,0,0,0.2);
+}
+.switch.on{background:var(--success);}
+.switch.on::after{transform:translateX(20px);}
+table.plist{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.plist th{text-align:left;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;color:#8098a0;padding:7px 8px;border-bottom:1.5px solid var(--line);}
+table.plist td{padding:9px 8px;border-bottom:1px solid #EEF3F2;}
+.scroll-box{max-height:280px;overflow-y:auto;}
+.go-host-question{font-family:var(--font-display);font-size:19px;font-weight:600;margin:10px 0 14px;}
+.go-host-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;}
+.go-host-bar .lab{width:26px;font-family:var(--font-mono);font-weight:700;color:var(--teal-mid);}
+.go-host-bar .track{flex:1;height:20px;background:#EEF3F2;border-radius:6px;overflow:hidden;}
+.go-host-bar .fill{height:100%;background:var(--teal-mid);border-radius:6px;transition:width .4s ease;}
+.go-host-bar.correct .fill{background:var(--success);}
+.go-host-bar .cnt{font-family:var(--font-mono);width:22px;text-align:right;}
+
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;
+  box-shadow:0 10px 24px -8px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:all .25s ease;z-index:999;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media (max-width:760px){
+  .dash-body{flex-direction:column;}
+  .rail{
+    width:100%;height:auto;position:sticky;top:58px;
+    display:flex;overflow-x:auto;padding:10px 12px;gap:4px;
+  }
+  .rail-group-label{display:none;}
+  .rail-btn{flex-direction:column;gap:4px;white-space:nowrap;font-size:11px;padding:8px 10px;}
+  .rail-btn .lockdot{margin-left:0;}
+  .dash-main{padding:20px 16px 50px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ SPLASH ============ -->
+<div class="screen" id="screen-splash">
+  <div class="badge-clip"></div>
+  <div class="badge-card">
+    <div class="splash-logo-ring">IPC</div>
+    <div class="splash-eyebrow">Unit Kawalan Infeksi &nbsp;·&nbsp; HTPN Kajang</div>
+    <h1>Welcome to <em>ICAMS 2026</em></h1>
+    <p class="splash-sub">Infection Control &amp; Antimicrobial Stewardship Workshop — dianjurkan oleh Unit Kawalan Infeksi, Hospital Tengku Permaisuri Norashikin, Kajang.</p>
+    <div class="splash-meta">
+      <span>27 Ogos 2026</span>
+      <span>8.00 AM – 5.00 PM</span>
+      <span>Dewan Akasia, Aras 5, WCC</span>
+    </div>
+    <button class="enter-key" id="btn-splash-enter">Masuk / Enter <kbd>↵</kbd></button>
+    <div class="splash-hint">Tekan ENTER pada papan kekunci, atau klik butang di atas</div>
+  </div>
+</div>
+
+<!-- ============ REGISTER ============ -->
+<div class="screen auth-screen hidden" id="screen-register">
+  <div class="auth-card" style="position:relative;">
+    <div class="auth-top">
+      <div class="auth-mark">IPC</div>
+      <div><div class="t">Pendaftaran Peserta</div><div class="s">ICAMS 2026 · HTPN</div></div>
+    </div>
+    <h2>Daftar Kehadiran</h2>
+    <p class="desc">Isikan maklumat penuh anda. Gunakan Nama &amp; No. K/P yang sama untuk log masuk kali seterusnya.</p>
+    <div class="form-error" id="reg-error"></div>
+    <div class="field">
+      <label>Nama Penuh</label>
+      <input type="text" id="reg-name" placeholder="Cth: Dr Ahmad bin Ali" autocomplete="name">
+    </div>
+    <div class="field">
+      <label>No. Kad Pengenalan (IC)</label>
+      <input type="text" id="reg-ic" placeholder="Cth: 900101-10-1234" class="mono">
+    </div>
+    <div class="field">
+      <label>Jabatan</label>
+      <select id="reg-dept">
+        <option value="">— Pilih Jabatan —</option>
+        <option>Jabatan Kecemasan &amp; Trauma</option>
+        <option>Jabatan Perubatan</option>
+        <option>Jabatan Pembedahan</option>
+        <option>Jabatan Pediatrik</option>
+        <option>Jabatan O&amp;G</option>
+        <option>Jabatan Ortopedik</option>
+        <option>Jabatan Anestesiologi</option>
+        <option>Jabatan Radiologi</option>
+        <option>Jabatan Patologi</option>
+        <option>Jabatan Psikiatri</option>
+        <option>Jabatan Forensik</option>
+        <option>Lain-lain</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="btn-register">Daftar &amp; Masuk</button>
+    <div class="auth-switch">Sudah berdaftar? <a id="link-to-login">Log Masuk</a></div>
+    <div class="auth-switch" style="margin-top:6px;">Koordinator? <a id="link-to-coord-from-reg">Log Masuk Koordinator</a></div>
+  </div>
+</div>
+
+<!-- ============ LOGIN ============ -->
+<div class="screen auth-screen hidden" id="screen-login">
+  <div class="auth-card">
+    <div class="auth-top">
+      <div class="auth-mark">IPC</div>
+      <div><div class="t">Log Masuk Peserta</div><div class="s">ICAMS 2026 · HTPN</div></div>
+    </div>
+    <h2>Selamat Kembali</h2>
+    <p class="desc">Masukkan Nama &amp; No. K/P yang digunakan semasa pendaftaran.</p>
+    <div class="form-error" id="login-error"></div>
+    <div class="field">
+      <label>Nama Penuh</label>
+      <input type="text" id="login-name" placeholder="Cth: Dr Ahmad bin Ali">
+    </div>
+    <div class="field">
+      <label>No. Kad Pengenalan (IC)</label>
+      <input type="text" id="login-ic" placeholder="Cth: 900101-10-1234" class="mono">
+    </div>
+    <button class="btn btn-primary" id="btn-login">Log Masuk</button>
+    <div class="auth-switch">Belum daftar? <a id="link-to-register">Daftar di sini</a></div>
+    <div class="auth-switch" style="margin-top:6px;">Koordinator? <a id="link-to-coord-from-login">Log Masuk Koordinator</a></div>
+  </div>
+</div>
+
+<!-- ============ COORDINATOR LOGIN ============ -->
+<div class="screen auth-screen hidden" id="screen-coord-login">
+  <div class="auth-card">
+    <div class="auth-top">
+      <div class="auth-mark" style="background:var(--ink);">★</div>
+      <div><div class="t">Panel Koordinator</div><div class="s">ICAMS 2026 · Unit Kawalan Infeksi</div></div>
+    </div>
+    <h2>Log Masuk Koordinator</h2>
+    <p class="desc">Untuk pengendali program sahaja — kawal Post-Test, Maklum Balas &amp; permainan IPC GO!.</p>
+    <div class="form-error" id="coord-error"></div>
+    <div class="field">
+      <label>Kata Laluan Koordinator</label>
+      <input type="password" id="coord-pass" placeholder="••••••••••">
+    </div>
+    <button class="btn" style="background:var(--ink);color:#fff;width:100%;" id="btn-coord-login">Log Masuk</button>
+    <div class="auth-switch"><a id="link-to-login-from-coord">← Kembali ke Log Masuk Peserta</a></div>
+  </div>
+</div>
+
+<!-- ============ PARTICIPANT DASHBOARD ============ -->
+<div class="screen hidden" id="screen-dashboard">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">IPC</div>
+      <div class="topbar-title">ICAMS 2026<span>Unit Kawalan Infeksi · HTPN</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="who"><div class="n" id="topbar-name">—</div><div class="r" id="topbar-dept">—</div></div>
+      <div class="avatar-chip" id="topbar-avatar">–</div>
+      <button class="logout-btn" id="btn-logout">Log Keluar</button>
+    </div>
+  </div>
+  <div class="dash-body">
+    <div class="rail">
+      <div class="rail-group-label">Program</div>
+      <button class="rail-btn" data-panel="intro"><span class="ic">i</span> Pengenalan</button>
+      <button class="rail-btn" data-panel="objectives"><span class="ic">⊙</span> Objektif &amp; Jadual</button>
+      <button class="rail-btn" data-panel="slides"><span class="ic">▤</span> Slaid</button>
+      <div class="rail-group-label">Penilaian</div>
+      <button class="rail-btn" data-panel="pretest"><span class="ic">1</span> Pre-Test</button>
+      <button class="rail-btn" data-panel="posttest"><span class="ic">2</span> Post-Test <span class="lockdot" id="lockdot-posttest">⚿</span></button>
+      <button class="rail-btn" data-panel="feedback"><span class="ic">✎</span> Maklum Balas <span class="lockdot" id="lockdot-feedback">⚿</span></button>
+      <div class="rail-group-label">Aktiviti</div>
+      <button class="rail-btn" data-panel="attendance"><span class="ic">✓</span> Kehadiran</button>
+      <button class="rail-btn" data-panel="ipcgo"><span class="ic">⚡</span> IPC GO!</button>
+      <button class="rail-btn" data-panel="certificate"><span class="ic">🎓</span> Sijil <span class="lockdot" id="lockdot-certificate">⚿</span></button>
+    </div>
+    <div class="dash-main" id="dash-main">
+      <!-- panels injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ============ COORDINATOR PANEL ============ -->
+<div class="screen hidden" id="screen-coordinator">
+  <div class="coord-topbar">
+    <div class="l"><span class="tag">COORDINATOR</span><h1>ICAMS 2026 — Panel Kawalan</h1></div>
+    <button class="logout-btn" style="border-color:rgba(255,255,255,0.3);color:#fff;" id="btn-coord-logout">Log Keluar</button>
+  </div>
+  <div class="coord-body" id="coord-body"><!-- injected --></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   CONFIG & DATA
+========================================================= */
+const COORD_PASSWORD = "Handhygiene26";
+
+// Dikongsi oleh tab "Jana Laporan" (koordinator) & "Sijil" (peserta).
+// Ubah sini je kalau tarikh/tempat/anjuran berubah.
+const COURSE_INFO = {
+  namaKursus: "ICAMS 2026",
+  tarikh: "27 Ogos 2026",
+  tempat: "Dewan Akasia, Aras 5, WCC, HTPN",
+  anjuran: "Unit Kawalan Infeksi Hospital Tengku Permaisuri Norashikin Kajang",
+  penyedia: "Unit Kawalan Infeksi, HTPN Kajang"
+};
+
+const QUESTIONS = [
+  {q:"Apakah komponen asas 'Chain of Infection' yang perlu diputuskan untuk mengawal penularan jangkitan?",
+   opts:["Infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host","Hanya infectious agent dan susceptible host sahaja","Hand hygiene dan PPE sahaja","Antibiotic dan vaccination sahaja"],correct:0},
+  {q:"Antara berikut, yang manakah definisi paling tepat bagi Antimicrobial Resistance (AMR)?",
+   opts:["Keupayaan mikroorganisma untuk bertahan terhadap ubat antimikrob yang sepatutnya membunuh/menghalangnya","Kesan sampingan antibiotik terhadap pesakit","Alahan pesakit terhadap penisilin","Kegagalan peralatan perubatan disterilkan"],correct:0},
+  {q:"Apakah salah satu langkah utama pencegahan Bloodstream Infection (BSI) berkaitan CLABSI?",
+   opts:["Amalan aseptic non-touch technique (ANTT) semasa insertion dan maintenance central line","Menukar central line setiap hari tanpa indikasi klinikal","Mengelakkan hand hygiene sebelum akses line untuk jimat masa","Membiarkan dressing central line lembap untuk selesa pesakit"],correct:0},
+  {q:"Bilakah masa paling sesuai untuk mengeluarkan central venous catheter (CVC) bagi mengurangkan risiko BSI?",
+   opts:["Sebaik sahaja ia tidak lagi diperlukan secara klinikal","Hanya selepas 30 hari digunakan","Hanya apabila pesakit demam","Tidak perlu dikeluarkan selagi masih berfungsi"],correct:0},
+  {q:"Apakah amalan yang BETUL semasa mengambil blood culture untuk mengelakkan kontaminasi?",
+   opts:["Membersihkan kulit dengan antiseptik dan membiarkan ia kering sepenuhnya sebelum venepuncture","Mengambil sampel dari IV line sedia ada tanpa persediaan tambahan","Menyentuh semula tapak selepas dibersihkan","Menggunakan botol kultur yang sama untuk dua pesakit berbeza"],correct:0},
+  {q:"Apakah kesilapan (DON'T) yang sering berlaku semasa pengambilan blood culture di wad?",
+   opts:["Mengambil volume darah yang tidak mencukupi untuk botol kultur","Melabel botol dengan nama dan nombor pesakit yang betul","Menggunakan teknik aseptik yang betul","Menghantar sampel ke makmal dalam masa yang ditetapkan"],correct:0},
+  {q:"Antara berikut, yang manakah langkah pencegahan SSI sebelum pembedahan (pre-operative)?",
+   opts:["Surgical antibiotic prophylaxis diberikan dalam 60 minit sebelum insisi","Mencukur kawasan pembedahan sehari sebelum operasi","Mengelakkan mandi sebelum pembedahan","Memberikan antibiotik selepas insisi dibuat"],correct:0},
+  {q:"Apakah kaedah yang disyorkan untuk penyediaan kulit sebelum pembedahan bagi mengurangkan risiko SSI?",
+   opts:["Menggunakan antiseptik berasaskan alkohol (cth: chlorhexidine-alcohol)","Mencukur kawasan pembedahan sejam sebelum operasi","Tidak membersihkan kulit langsung sebelum insisi","Menggunakan air paip sahaja"],correct:0},
+  {q:"Manakah antara berikut adalah faktor risiko pesakit (patient-related) untuk SSI?",
+   opts:["Diabetes mellitus tidak terkawal, obesiti, dan status pemakanan lemah","Penggunaan sarung tangan steril oleh pembedah","Ventilasi bilik pembedahan yang baik","Tempoh pembedahan yang singkat"],correct:0},
+  {q:"Apakah matlamat utama program Antimicrobial Stewardship (AMS)?",
+   opts:["Memastikan penggunaan antibiotik yang optimum bagi hasil rawatan terbaik & membendung AMR","Meningkatkan penggunaan antibiotik spektrum luas bagi semua kes","Memanjangkan tempoh terapi antibiotik untuk semua pesakit","Menggantikan tugas Infection Control Doctor sepenuhnya"],correct:0}
+];
+
+const SCHEDULE = [
+  {time:"8.00 – 8.30 AM", topic:"Registration & Pre-Test", speaker:""},
+  {time:"8.30 – 9.15 AM", topic:"Introduction to ICAMS, Antimicrobial Resistance & Basics of Infection Control", speaker:"Dr Siti Saihah Selamat — Infection Control Doctor"},
+  {time:"9.15 – 10.00 AM", topic:"Bloodstream Infections (BSI) Prevention", speaker:"Dr Aneesa Tharek — Infection Control Doctor"},
+  {time:"10.00 – 10.45 AM", topic:"Taking a Blood Culture: Do's and Don'ts", speaker:"Dr Siti Fazilah Situ — Clinical Microbiologist"},
+  {time:"10.45 – 11.30 AM", topic:"Surgical Site Infection (SSI) Prevention", speaker:"Dr Siti Saihah Selamat — Infection Control Doctor"},
+  {time:"11.30 – 11.45 AM", topic:"Break", speaker:""},
+  {time:"11.40 AM – 12.30 PM", topic:"Introduction to Antimicrobial Stewardship (AMS)", speaker:"Ms Ong Ann Gie — AMS Pharmacist"},
+  {time:"12.30 – 2.00 PM", topic:"Lunch Break", speaker:""},
+  {time:"2.00 – 4.00 PM", topic:"Practical Session (4 Stations)", speaker:"Facilitators"},
+  {time:"4.00 – 5.00 PM", topic:"Post-Test & Feedback", speaker:""},
+  {time:"5.00 PM", topic:"End of Session", speaker:""}
+];
+
+const OBJECTIVES = [
+  "Memberi pengetahuan asas kepada pegawai perubatan & pegawai perubatan latihan siswazah berkaitan kawalan infeksi.",
+  "Meningkatkan kesedaran dan pengetahuan peserta mengenai kesilapan yang sering dilakukan ketika melakukan prosedur di wad.",
+  "Membimbing pegawai menggunakan garis panduan antibiotik secara berhemah (antimicrobial stewardship) bagi membendung isu rintangan antimikrob (AMR)."
+];
+
+const GO_TILE_CLASSES = ["go-tile-1","go-tile-2","go-tile-3","go-tile-4"];
+const GO_TILE_SHAPES = ["◆","●","▲","■"];
+const GO_TIME_LIMIT = 20; // seconds per question
+
+/* =========================================================
+   STORAGE HELPERS
+========================================================= */
+/* Wrapper Promise untuk google.script.run (backend Apps Script) */
+function gsRun(fnName, ...args){
+  return new Promise((resolve, reject)=>{
+    google.script.run
+      .withSuccessHandler(resolve)
+      .withFailureHandler(reject)
+      [fnName](...args);
+  });
+}
+async function sGet(key, shared){
+  try{
+    const raw = await gsRun('kvGet', key);
+    if(raw === null || raw === undefined || raw === '') return null;
+    try{ return JSON.parse(raw); }catch(e){ return raw; }
+  }catch(e){ console.error("storage get failed", key, e); return null; }
+}
+async function sSet(key, value, shared){
+  try{
+    await gsRun('kvSet', key, JSON.stringify(value));
+    return true;
+  }catch(e){ console.error("storage set failed", key, e); return false; }
+}
+
+function icKey(ic){ return (ic||"").replace(/[^a-zA-Z0-9]/g,""); }
+
+/* =========================================================
+   APP STATE
+========================================================= */
+let currentUser = null;    // {name, ic, dept}
+let isCoordinator = false;
+let activePanel = "intro";
+let goPollTimer = null;
+let goAnswered = false;
+let goLastStatus = null;
+let goTimerInterval = null;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+/* =========================================================
+   SPLASH
+========================================================= */
+document.getElementById('btn-splash-enter').addEventListener('click', goToLogin);
+document.addEventListener('keydown', (e)=>{
+  if(!document.getElementById('screen-splash').classList.contains('hidden') && e.key === 'Enter'){
+    goToLogin();
+  }
+});
+function goToLogin(){ show('screen-login'); }
+
+/* =========================================================
+   NAV LINKS
+========================================================= */
+document.getElementById('link-to-login').onclick = ()=>show('screen-login');
+document.getElementById('link-to-register').onclick = ()=>show('screen-register');
+document.getElementById('link-to-coord-from-reg').onclick = ()=>show('screen-coord-login');
+document.getElementById('link-to-coord-from-login').onclick = ()=>show('screen-coord-login');
+document.getElementById('link-to-login-from-coord').onclick = ()=>show('screen-login');
+
+/* =========================================================
+   REGISTER
+========================================================= */
+document.getElementById('btn-register').addEventListener('click', async ()=>{
+  const name = document.getElementById('reg-name').value.trim();
+  const ic = document.getElementById('reg-ic').value.trim();
+  const dept = document.getElementById('reg-dept').value;
+  const errEl = document.getElementById('reg-error');
+  errEl.style.display = 'none';
+  if(!name || !ic || !dept){
+    errEl.textContent = "Sila lengkapkan semua ruangan.";
+    errEl.style.display = 'block';
+    return;
+  }
+  const key = icKey(ic);
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true; btn.textContent = "Mendaftar...";
+  let list = await sGet('participants', true) || [];
+  const existing = list.find(p=>icKey(p.ic)===key);
+  if(!existing){
+    list.push({name, ic, dept, registeredAt: new Date().toISOString()});
+    await sSet('participants', list, true);
+  }
+  await sSet('profile:'+key, {name, ic, dept}, false);
+  btn.disabled = false; btn.textContent = "Daftar & Masuk";
+  loginUser({name, ic, dept});
+});
+
+/* =========================================================
+   LOGIN
+========================================================= */
+document.getElementById('btn-login').addEventListener('click', async ()=>{
+  const name = document.getElementById('login-name').value.trim();
+  const ic = document.getElementById('login-ic').value.trim();
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if(!name || !ic){
+    errEl.textContent = "Sila masukkan nama dan No. K/P.";
+    errEl.style.display = 'block';
+    return;
+  }
+  const key = icKey(ic);
+  const list = await sGet('participants', true) || [];
+  const found = list.find(p=>icKey(p.ic)===key && p.name.trim().toLowerCase()===name.toLowerCase());
+  if(!found){
+    errEl.textContent = "Rekod tidak dijumpai. Sila semak Nama & No. K/P, atau daftar dahulu.";
+    errEl.style.display = 'block';
+    return;
+  }
+  loginUser(found);
+});
+
+function loginUser(user){
+  currentUser = user;
+  isCoordinator = false;
+  document.getElementById('topbar-name').textContent = user.name;
+  document.getElementById('topbar-dept').textContent = user.dept;
+  document.getElementById('topbar-avatar').textContent = (user.name||'?').trim().charAt(0).toUpperCase();
+  show('screen-dashboard');
+  setActivePanel('intro');
+}
+
+document.getElementById('btn-logout').addEventListener('click', ()=>{
+  stopGoPolling();
+  currentUser = null;
+  show('screen-splash');
+});
+
+/* =========================================================
+   COORDINATOR LOGIN
+========================================================= */
+document.getElementById('btn-coord-login').addEventListener('click', ()=>{
+  const pass = document.getElementById('coord-pass').value;
+  const errEl = document.getElementById('coord-error');
+  if(pass !== COORD_PASSWORD){
+    errEl.textContent = "Kata laluan tidak sah.";
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  isCoordinator = true;
+  show('screen-coordinator');
+  renderCoordinator();
+});
+document.getElementById('btn-coord-logout').addEventListener('click', ()=>{
+  isCoordinator = false;
+  stopGoPolling();
+  show('screen-splash');
+});
+
+/* =========================================================
+   DASHBOARD NAV
+========================================================= */
+document.querySelectorAll('.rail-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> setActivePanel(btn.dataset.panel));
+});
+function setActivePanel(panel){
+  activePanel = panel;
+  document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active', b.dataset.panel===panel));
+  if(panel !== 'ipcgo') stopGoPolling();
+  renderPanel(panel);
+}
+
+async function renderPanel(panel){
+  const main = document.getElementById('dash-main');
+  const coordState = await sGet('coordinator-state', true) || {postTestUnlocked:false, feedbackUnlocked:false};
+  updateLockDots(coordState);
+  updateCertificateLockDot();
+
+  if(panel === 'intro') return renderIntro(main);
+  if(panel === 'objectives') return renderObjectives(main);
+  if(panel === 'slides') return renderSlides(main);
+  if(panel === 'pretest') return renderQuiz(main, 'pretest', true);
+  if(panel === 'posttest') return renderQuiz(main, 'posttest', coordState.postTestUnlocked);
+  if(panel === 'feedback') return renderFeedback(main, coordState.feedbackUnlocked);
+  if(panel === 'attendance') return renderAttendance(main);
+  if(panel === 'ipcgo') return renderIpcGo(main);
+  if(panel === 'certificate') return renderCertificate(main);
+}
+
+function updateLockDots(coordState){
+  const pt = document.getElementById('lockdot-posttest');
+  const fb = document.getElementById('lockdot-feedback');
+  pt.textContent = coordState.postTestUnlocked ? '✓' : '⚿';
+  fb.textContent = coordState.feedbackUnlocked ? '✓' : '⚿';
+}
+
+async function updateCertificateLockDot(){
+  const dot = document.getElementById('lockdot-certificate');
+  if(!dot || !currentUser) return;
+  const key = icKey(currentUser.ic);
+  const fb = await sGet('feedback:'+key, false);
+  dot.textContent = fb ? '✓' : '⚿';
+}
+
+/* Muat turun fail base64 (dari Apps Script) sebagai fail sebenar di browser */
+function downloadBase64File(base64, fileName, mime){
+  const byteChars = atob(base64);
+  const byteNumbers = new Array(byteChars.length);
+  for (let i=0;i<byteChars.length;i++){ byteNumbers[i] = byteChars.charCodeAt(i); }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fileName;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ---------- INTRO ---------- */
+function renderIntro(main){
+  main.innerHTML = `
+    <div class="panel-head">
+      <span class="eyebrow">Pengenalan Program</span>
+      <h2>Apa itu ICAMS?</h2>
+      <p>Infection Control and Antimicrobial Stewardship (ICAMS) — bengkel sehari anjuran Unit Kawalan Infeksi HTPN untuk pegawai perubatan & pegawai perubatan latihan siswazah.</p>
+    </div>
+    <div class="card">
+      <h3>Latar Belakang</h3>
+      <p style="font-size:14px;line-height:1.7;color:#33504c;">
+      Jangkitan berkaitan penjagaan kesihatan (Healthcare-Associated Infections) dan rintangan antimikrob (Antimicrobial Resistance) merupakan cabaran utama dalam penjagaan pesakit hari ini. Bengkel ICAMS 2026 direka khusus untuk membekalkan pengetahuan asas serta kemahiran praktikal kepada peserta bagi mencegah jangkitan seperti CLABSI, SSI, dan mempromosikan penggunaan antibiotik yang berhemah di wad.
+      </p>
+    </div>
+    <div class="stat-row">
+      <div class="stat-chip"><div class="v">5</div><div class="l">Topik Utama</div></div>
+      <div class="stat-chip"><div class="v">4</div><div class="l">Stesen Praktikal</div></div>
+      <div class="stat-chip"><div class="v">9 Jam</div><div class="l">Tempoh Bengkel</div></div>
+    </div>
+    <div class="card">
+      <h3>Tempat & Tarikh</h3>
+      <p style="font-size:14px;color:#33504c;margin:0;">Dewan Akasia, Aras 5, WCC, HTPN &nbsp;·&nbsp; 27 Ogos 2026 &nbsp;·&nbsp; 8.00 Pagi – 5.00 Petang</p>
+    </div>
+  `;
+}
+
+/* ---------- OBJECTIVES & SCHEDULE ---------- */
+function renderObjectives(main){
+  main.innerHTML = `
+    <div class="panel-head">
+      <span class="eyebrow">Objektif & Jadual</span>
+      <h2>Objektif Bengkel</h2>
+    </div>
+    <div class="card">
+      <ul class="obj-list">
+        ${OBJECTIVES.map((o,i)=>`<li><span class="obj-num">${i+1}</span><span>${o}</span></li>`).join('')}
+      </ul>
+    </div>
+    <div class="panel-head" style="margin-top:26px;">
+      <h2 style="font-size:20px;">Jadual Program</h2>
+    </div>
+    <div class="card" style="padding:14px 18px;">
+      <table class="sched-table">
+        <thead><tr><th>Masa</th><th>Topik</th><th>Fasilitator</th></tr></thead>
+        <tbody>
+          ${SCHEDULE.map(s=>`<tr><td class="sched-time">${s.time}</td><td>${s.topic}</td><td class="sched-speaker">${s.speaker||'—'}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ---------- SLIDES ---------- */
+async function renderSlides(main){
+  const slides = await sGet('slides', true) || [];
+  main.innerHTML = `
+    <div class="panel-head">
+      <span class="eyebrow">Bahan Bengkel</span>
+      <h2>Slaid & Bahan Rujukan</h2>
+      <p>Pautan slaid akan dimuat naik oleh koordinator sepanjang program.</p>
+    </div>
+    <div class="card">
+      ${slides.length ? slides.map(s=>`
+        <div class="slide-item">
+          <div class="slide-ic">▤</div>
+          <div class="slide-meta"><div class="t">${escapeHtml(s.title)}</div><div class="s">${escapeHtml(s.note||'')}</div></div>
+          <a class="slide-open" href="${escapeHtml(s.url)}" target="_blank" rel="noopener">Buka</a>
+        </div>
+      `).join('') : `<div class="empty-note">Belum ada slaid dimuat naik oleh koordinator lagi.</div>`}
+    </div>
+  `;
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------- ATTENDANCE ---------- */
+async function renderAttendance(main){
+  const key = icKey(currentUser.ic);
+  const record = await sGet('attendance:'+key, false);
+  main.innerHTML = `
+    <div class="panel-head">
+      <span class="eyebrow">Kehadiran</span>
+      <h2>Tandakan Kehadiran</h2>
+      <p>Tandakan kehadiran anda sebaik sahaja tiba di Dewan Akasia.</p>
+    </div>
+    <div class="att-status ${record?'marked':''}" id="att-status">
+      <div class="dot"></div>
+      <div class="txt">
+        <div class="t">${record ? 'Kehadiran Direkodkan' : 'Kehadiran Belum Direkodkan'}</div>
+        <div class="s">${record ? new Date(record.timestamp).toLocaleString('ms-MY') : currentUser.name+' · '+currentUser.dept}</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn-mark-att" ${record?'disabled':''} style="max-width:260px;">
+      ${record ? 'Kehadiran Sudah Ditandakan' : 'Tandakan Kehadiran Saya'}
+    </button>
+  `;
+  const btn = document.getElementById('btn-mark-att');
+  if(btn && !record){
+    btn.addEventListener('click', async ()=>{
+      btn.disabled = true; btn.textContent = "Merekod...";
+      const rec = {name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, timestamp:new Date().toISOString()};
+      await sSet('attendance:'+key, rec, false);
+      let all = await sGet('attendance-list', true) || [];
+      if(!all.find(a=>icKey(a.ic)===key)){
+        all.push(rec);
+        await sSet('attendance-list', all, true);
+      }
+      toast("Kehadiran berjaya direkodkan!");
+      renderAttendance(main);
+    });
+  }
+}
+
+/* ---------- PRE/POST TEST ---------- */
+async function renderQuiz(main, kind, unlocked){
+  const label = kind==='pretest' ? 'Pre-Test' : 'Post-Test';
+  if(!unlocked){
+    main.innerHTML = `
+      <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>${label}</h2></div>
+      <div class="card locked-card">
+        <div class="lock-ic">⚿</div>
+        <h3>${label} Belum Dibuka</h3>
+        <p>Koordinator belum membuka ${label} lagi. Sila tunggu pengumuman semasa sesi.</p>
+      </div>`;
+    return;
+  }
+  const key = icKey(currentUser.ic);
+  const saved = await sGet(kind+':'+key, false);
+  if(saved){
+    return renderQuizResult(main, kind, saved);
+  }
+  let idx = 0;
+  const answers = new Array(QUESTIONS.length).fill(null);
+
+  main.innerHTML = `
+    <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>${label}</h2><p>Jawab semua ${QUESTIONS.length} soalan. Jawapan akan disimpan secara automatik.</p></div>
+    <div class="card">
+      <div class="q-progress">
+        <div class="q-progress-bar"><div class="q-progress-fill" id="qp-fill" style="width:${100/QUESTIONS.length}%;"></div></div>
+        <div class="q-progress-label" id="qp-label">1 / ${QUESTIONS.length}</div>
+      </div>
+      <div id="q-blocks"></div>
+    </div>
+  `;
+  const blocksEl = document.getElementById('q-blocks');
+  blocksEl.innerHTML = QUESTIONS.map((q,qi)=>`
+    <div class="q-block ${qi===0?'active':''}" data-qi="${qi}">
+      <p class="q-text">${qi+1}. ${q.q}</p>
+      <div class="opt-list">
+        ${q.opts.map((o,oi)=>`
+          <button class="opt-btn" data-qi="${qi}" data-oi="${oi}">
+            <span class="opt-let">${String.fromCharCode(65+oi)}</span><span>${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="q-nav">
+        <button class="btn btn-ghost" data-nav="prev" data-qi="${qi}" ${qi===0?'style="visibility:hidden;"':''}>← Sebelum</button>
+        ${qi === QUESTIONS.length-1
+          ? `<button class="btn btn-primary" id="btn-submit-quiz" style="width:auto;" disabled>Hantar Jawapan</button>`
+          : `<button class="btn btn-primary" style="width:auto;" data-nav="next" data-qi="${qi}" disabled>Seterusnya →</button>`}
+      </div>
+    </div>
+  `).join('');
+
+  blocksEl.querySelectorAll('.opt-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const qi = +btn.dataset.qi, oi = +btn.dataset.oi;
+      answers[qi] = oi;
+      blocksEl.querySelectorAll(`.opt-btn[data-qi="${qi}"]`).forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const nextBtn = blocksEl.querySelector(`[data-nav="next"][data-qi="${qi}"]`) || document.getElementById('btn-submit-quiz');
+      if(nextBtn) nextBtn.disabled = false;
+    });
+  });
+  blocksEl.querySelectorAll('[data-nav]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const qi = +btn.dataset.qi;
+      const dir = btn.dataset.nav;
+      const targetIdx = dir==='next' ? qi+1 : qi-1;
+      blocksEl.querySelector(`.q-block[data-qi="${qi}"]`).classList.remove('active');
+      blocksEl.querySelector(`.q-block[data-qi="${targetIdx}"]`).classList.add('active');
+      document.getElementById('qp-fill').style.width = (100*(targetIdx+1)/QUESTIONS.length)+'%';
+      document.getElementById('qp-label').textContent = (targetIdx+1)+' / '+QUESTIONS.length;
+    });
+  });
+  document.addEventListener('click', async function submitHandler(e){
+    if(e.target && e.target.id === 'btn-submit-quiz'){
+      document.removeEventListener('click', submitHandler);
+      let score = 0;
+      QUESTIONS.forEach((q,qi)=>{ if(answers[qi]===q.correct) score++; });
+      const result = {answers, score, total:QUESTIONS.length, submittedAt:new Date().toISOString()};
+      await sSet(kind+':'+key, result, false);
+      let allResults = await sGet(kind+'-results', true) || [];
+      allResults = allResults.filter(r=>icKey(r.ic)!==key);
+      allResults.push({name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, score, total:QUESTIONS.length});
+      await sSet(kind+'-results', allResults, true);
+      renderQuizResult(main, kind, result);
+    }
+  }, {once:true});
+}
+function renderQuizResult(main, kind, result){
+  const label = kind==='pretest' ? 'Pre-Test' : 'Post-Test';
+  main.innerHTML = `
+    <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>${label}</h2></div>
+    <div class="card">
+      <div class="result-score">
+        <div class="num">${result.score}<span style="font-size:24px;color:#8098a0;">/${result.total}</span></div>
+        <div class="of">Jawapan anda telah dihantar pada ${new Date(result.submittedAt).toLocaleString('ms-MY')}</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Semakan Jawapan</h3>
+      ${QUESTIONS.map((q,qi)=>{
+        const correct = result.answers[qi]===q.correct;
+        return `<div style="padding:10px 0;border-bottom:1px solid #EEF3F2;">
+          <div style="font-size:13.5px;font-weight:600;margin-bottom:4px;">${qi+1}. ${q.q}</div>
+          <div style="font-size:12.5px;color:${correct?'#2F9E68':'#D64545'};">
+            Jawapan anda: ${result.answers[qi]!=null ? q.opts[result.answers[qi]] : '—'} ${correct?'✓':'✗'}
+          </div>
+          ${!correct ? `<div style="font-size:12.5px;color:#5b7a76;">Jawapan betul: ${q.opts[q.correct]}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ---------- FEEDBACK ---------- */
+async function renderFeedback(main, unlocked){
+  if(!unlocked){
+    main.innerHTML = `
+      <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>Maklum Balas</h2></div>
+      <div class="card locked-card">
+        <div class="lock-ic">⚿</div>
+        <h3>Maklum Balas Belum Dibuka</h3>
+        <p>Borang maklum balas akan dibuka oleh koordinator selepas Post-Test.</p>
+      </div>`;
+    return;
+  }
+  const key = icKey(currentUser.ic);
+  const saved = await sGet('feedback:'+key, false);
+  if(saved){
+    main.innerHTML = `
+      <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>Maklum Balas</h2></div>
+      <div class="card locked-card">
+        <div class="lock-ic" style="background:#EAF8F0;color:var(--success);">✓</div>
+        <h3>Terima Kasih!</h3>
+        <p>Maklum balas anda telah dihantar. Kami menghargai pandangan anda.</p>
+      </div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>Maklum Balas Bengkel</h2><p>Pandangan anda membantu kami menambah baik program akan datang.</p></div>
+    <div class="card">
+      <h3>Kepuasan keseluruhan bengkel</h3>
+      <div class="rating-row" id="fb-overall">
+        ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
+      </div>
+      <div class="hint" style="margin-bottom:0;font-size:11.5px;color:#8098a0;">1 = Tidak Memuaskan &nbsp;·&nbsp; 5 = Sangat Memuaskan</div>
+    </div>
+    <div class="card">
+      <h3>Kualiti penyampaian fasilitator</h3>
+      <div class="rating-row" id="fb-facilitator">
+        ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h3>Sesi praktikal (4 Stesen)</h3>
+      <div class="rating-row" id="fb-practical">
+        ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h3>Cadangan / Komen</h3>
+      <div class="field" style="margin-bottom:0;">
+        <textarea id="fb-comment" rows="4" placeholder="Kongsikan pandangan anda mengenai bengkel ini..."></textarea>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn-submit-fb" style="max-width:260px;">Hantar Maklum Balas</button>
+  `;
+  const ratings = {overall:null, facilitator:null, practical:null};
+  [['overall','fb-overall'],['facilitator','fb-facilitator'],['practical','fb-practical']].forEach(([k,id])=>{
+    document.getElementById(id).querySelectorAll('.rating-pill').forEach(p=>{
+      p.addEventListener('click', ()=>{
+        document.getElementById(id).querySelectorAll('.rating-pill').forEach(x=>x.classList.remove('selected'));
+        p.classList.add('selected');
+        ratings[k] = +p.dataset.val;
+      });
+    });
+  });
+  document.getElementById('btn-submit-fb').addEventListener('click', async ()=>{
+    if(!ratings.overall || !ratings.facilitator || !ratings.practical){
+      toast("Sila lengkapkan semua penilaian rating.");
+      return;
+    }
+    const fb = {...ratings, comment: document.getElementById('fb-comment').value.trim(), submittedAt:new Date().toISOString()};
+    await sSet('feedback:'+key, fb, false);
+    let all = await sGet('feedback-list', true) || [];
+    all = all.filter(f=>icKey(f.ic)!==key);
+    all.push({name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, ...ratings, comment:fb.comment});
+    await sSet('feedback-list', all, true);
+    renderFeedback(main, true);
+    updateCertificateLockDot();
+    toast("Maklum balas dihantar. Terima kasih! Sijil anda kini boleh dimuat turun.");
+  });
+}
+
+/* =========================================================
+   SIJIL PENYERTAAN (participant side)
+========================================================= */
+async function renderCertificate(main){
+  const key = icKey(currentUser.ic);
+  const fb = await sGet('feedback:'+key, false);
+  if(!fb){
+    main.innerHTML = `
+      <div class="panel-head"><span class="eyebrow">Sijil</span><h2>Sijil Penyertaan</h2></div>
+      <div class="card locked-card">
+        <div class="lock-ic">⚿</div>
+        <h3>Sijil Belum Tersedia</h3>
+        <p>Lengkapkan borang Maklum Balas terlebih dahulu untuk membuka sijil penyertaan anda.</p>
+      </div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="panel-head"><span class="eyebrow">Sijil</span><h2>Sijil Penyertaan</h2><p>Terima kasih kerana melengkapkan maklum balas. Sijil penyertaan ${escapeHtml(COURSE_INFO.namaKursus)} anda sedia untuk dimuat turun.</p></div>
+    <div class="card locked-card">
+      <div class="lock-ic" style="background:#EAF8F0;color:var(--success);">🎓</div>
+      <h3>${escapeHtml(currentUser.name)}</h3>
+      <p>${escapeHtml(currentUser.dept)}</p>
+      <button class="btn btn-primary" id="btn-dl-cert" style="width:auto;margin-top:14px;">⬇ Muat Turun Sijil (PDF)</button>
+      <div id="cert-status" style="font-size:12.5px;color:#5b7a76;margin-top:10px;"></div>
+    </div>`;
+  document.getElementById('btn-dl-cert').addEventListener('click', async ()=>{
+    const btn = document.getElementById('btn-dl-cert');
+    const statusEl = document.getElementById('cert-status');
+    btn.disabled = true; btn.textContent = "Menjana sijil...";
+    statusEl.textContent = "Sila tunggu sebentar...";
+    try{
+      const result = await gsRun('generateCertificatePdf', {
+        name: currentUser.name,
+        dept: currentUser.dept,
+        ...COURSE_INFO
+      });
+      downloadBase64File(result.base64, result.fileName, 'application/pdf');
+      statusEl.textContent = "Sijil berjaya dimuat turun.";
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "Gagal jana sijil: " + (err && err.message ? err.message : err);
+    }
+    btn.disabled = false; btn.textContent = "⬇ Muat Turun Sijil (PDF)";
+  });
+}
+
+/* =========================================================
+   IPC GO! (participant side)
+========================================================= */
+async function renderIpcGo(main){
+  main.innerHTML = `
+    <div class="go-hero">
+      <h2>⚡ IPC GO!</h2>
+      <p>Permainan kuiz langsung — jawab pantas, kumpul mata paling banyak, kuasai Infection Control &amp; AMS!</p>
+    </div>
+    <div id="go-content"><div class="empty-note">Menyambung ke permainan...</div></div>
+  `;
+  await joinIpcGo();
+  goPollTimer && clearInterval(goPollTimer);
+  goPollTimer = setInterval(pollIpcGo, 1500);
+  pollIpcGo();
+}
+function stopGoPolling(){
+  if(goPollTimer){ clearInterval(goPollTimer); goPollTimer = null; }
+  if(goTimerInterval){ clearInterval(goTimerInterval); goTimerInterval = null; }
+}
+async function joinIpcGo(){
+  const key = icKey(currentUser.ic);
+  let players = await sGet('ipcgo-players', true) || {};
+  if(!players[key]){
+    players[key] = {name:currentUser.name, dept:currentUser.dept, score:0};
+    await sSet('ipcgo-players', players, true);
+  }
+}
+async function pollIpcGo(){
+  if(activePanel !== 'ipcgo' || !currentUser) return;
+  const state = await sGet('ipcgo-state', true) || {status:'lobby', qIndex:-1, startedAt:null};
+  const content = document.getElementById('go-content');
+  if(!content) return;
+  const key = icKey(currentUser.ic);
+
+  if(state.status !== goLastStatus || state.qIndex !== state._lastRenderedQ){
+    goAnswered = false;
+  }
+
+  if(state.status === 'lobby' || state.status === 'ended'){
+    if(state.status === 'ended'){
+      const players = await sGet('ipcgo-players', true) || {};
+      const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
+      content.innerHTML = renderLeaderboardHtml(list, key, "🏁 Permainan Tamat");
+    } else {
+      content.innerHTML = `
+        <div class="card go-lobby-wait">
+          <div class="pulse-dot"></div>
+          <h3 style="font-family:var(--font-display);margin:0 0 6px;">Menunggu Koordinator Memulakan Permainan</h3>
+          <p style="color:#5b7a76;font-size:13.5px;">Anda sudah berjaya menyertai IPC GO!. Kekal di skrin ini.</p>
+        </div>`;
+    }
+    goLastStatus = state.status;
+    return;
+  }
+
+  if(state.status === 'question'){
+    const qi = state.qIndex;
+    const q = QUESTIONS[qi % QUESTIONS.length];
+    const elapsed = (Date.now() - state.startedAt) / 1000;
+    const remaining = Math.max(0, GO_TIME_LIMIT - elapsed);
+    const pct = Math.round((remaining/GO_TIME_LIMIT)*100);
+
+    if(!goAnswered){
+      content.innerHTML = `
+        <div class="card">
+          <div class="go-timer-ring" style="--pct:${pct};"><span>${Math.ceil(remaining)}</span></div>
+          <p class="q-text" style="text-align:center;">${q.q}</p>
+          <div class="go-tile-grid">
+            ${q.opts.map((o,oi)=>`
+              <button class="go-tile ${GO_TILE_CLASSES[oi]}" data-oi="${oi}" ${remaining<=0?'disabled':''}>
+                <span class="shape">${GO_TILE_SHAPES[oi]}</span><span>${o}</span>
+              </button>`).join('')}
+          </div>
+        </div>`;
+      content.querySelectorAll('.go-tile').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          if(goAnswered) return;
+          goAnswered = true;
+          content.querySelectorAll('.go-tile').forEach(b=>b.disabled = true);
+          const oi = +btn.dataset.oi;
+          const timeTaken = Date.now() - state.startedAt;
+          let answers = await sGet('ipcgo-answers:'+qi, true) || {};
+          answers[key] = {oi, timeTaken, name:currentUser.name};
+          await sSet('ipcgo-answers:'+qi, answers, true);
+          content.innerHTML = `<div class="card go-waiting-answer"><div class="pulse-dot"></div><h3 style="font-family:var(--font-display);">Jawapan Dihantar!</h3><p style="color:#5b7a76;font-size:13.5px;">Menunggu peserta lain & keputusan koordinator...</p></div>`;
+        });
+      });
+      if(remaining <= 0 && !goAnswered){
+        content.innerHTML = `<div class="card go-waiting-answer"><h3 style="font-family:var(--font-display);">Masa Tamat!</h3><p style="color:#5b7a76;font-size:13.5px;">Menunggu keputusan koordinator...</p></div>`;
+      }
+    }
+    state._lastRenderedQ = qi;
+    goLastStatus = state.status;
+    return;
+  }
+
+  if(state.status === 'results'){
+    const qi = state.qIndex;
+    const q = QUESTIONS[qi % QUESTIONS.length];
+    const answers = await sGet('ipcgo-answers:'+qi, true) || {};
+    const mine = answers[key];
+    const correct = mine && mine.oi === q.correct;
+    const players = await sGet('ipcgo-players', true) || {};
+    const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
+    content.innerHTML = `
+      <div class="go-result-flag ${correct?'correct':'wrong'}">
+        <div class="big">${mine ? (correct ? '✓ Betul!' : '✗ Kurang Tepat') : '— Tiada Jawapan —'}</div>
+        <div style="font-size:12.5px;margin-top:4px;">Jawapan betul: ${q.opts[q.correct]}</div>
+      </div>
+      <div class="card">
+        <h3>Papan Pendahulu</h3>
+        <ul class="leaderboard">
+          ${list.slice(0,10).map((p,i)=>`
+            <li class="${p.key===key?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
+          `).join('')}
+        </ul>
+      </div>`;
+    goLastStatus = state.status;
+    return;
+  }
+}
+function renderLeaderboardHtml(list, myKey, title){
+  return `
+    <div class="card">
+      <h3>${title}</h3>
+      <ul class="leaderboard">
+        ${list.map((p,i)=>`
+          <li class="${p.key===myKey?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
+        `).join('') || '<div class="empty-note">Tiada peserta lagi.</div>'}
+      </ul>
+    </div>`;
+}
+
+/* =========================================================
+   COORDINATOR PANEL
+========================================================= */
+async function renderCoordinator(){
+  const body = document.getElementById('coord-body');
+  body.innerHTML = `<div class="empty-note">Memuatkan panel...</div>`;
+
+  const coordState = await sGet('coordinator-state', true) || {postTestUnlocked:false, feedbackUnlocked:false};
+  const participants = await sGet('participants', true) || [];
+  const attendance = await sGet('attendance-list', true) || [];
+  const preResults = await sGet('pretest-results', true) || [];
+  const postResults = await sGet('posttest-results', true) || [];
+  const feedbackList = await sGet('feedback-list', true) || [];
+  const slides = await sGet('slides', true) || [];
+
+  body.innerHTML = `
+    <div class="coord-grid">
+      <div class="card">
+        <h3>Kawalan Akses</h3>
+        <div class="toggle-row">
+          <div><div class="t">Buka Post-Test</div><div class="s">Membenarkan peserta menjawab Post-Test</div></div>
+          <button class="switch ${coordState.postTestUnlocked?'on':''}" id="toggle-posttest"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="t">Buka Maklum Balas</div><div class="s">Membenarkan peserta menghantar maklum balas</div></div>
+          <button class="switch ${coordState.feedbackUnlocked?'on':''}" id="toggle-feedback"></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Ringkasan</h3>
+        <div class="stat-row">
+          <div class="stat-chip"><div class="v">${participants.length}</div><div class="l">Berdaftar</div></div>
+          <div class="stat-chip"><div class="v">${attendance.length}</div><div class="l">Hadir</div></div>
+        </div>
+        <div class="stat-row" style="margin-top:12px;">
+          <div class="stat-chip"><div class="v">${preResults.length}</div><div class="l">Pre-Test Selesai</div></div>
+          <div class="stat-chip"><div class="v">${postResults.length}</div><div class="l">Post-Test Selesai</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Muat Naik Slaid</h3>
+        <div class="field"><label>Tajuk Slaid</label><input type="text" id="slide-title" placeholder="Cth: Introduction to ICAMS"></div>
+        <div class="field"><label>Pautan (Google Drive / SlideShare / dsb)</label><input type="text" id="slide-url" placeholder="https://..."></div>
+        <div class="field"><label>Nota (pilihan)</label><input type="text" id="slide-note" placeholder="Cth: Dr Siti Saihah Selamat"></div>
+        <button class="btn btn-primary" id="btn-add-slide" style="width:auto;">+ Tambah Slaid</button>
+        <div style="margin-top:14px;">${slides.map((s,i)=>`
+          <div class="slide-item">
+            <div class="slide-ic">▤</div>
+            <div class="slide-meta"><div class="t">${escapeHtml(s.title)}</div><div class="s">${escapeHtml(s.note||'')}</div></div>
+            <button class="slide-open" data-remove-slide="${i}" style="color:var(--danger);">Buang</button>
+          </div>`).join('') || '<div class="empty-note">Belum ada slaid.</div>'}
+        </div>
+      </div>
+
+      <div class="card" id="report-card">
+        <h3>📄 Jana Laporan Kursus (.docx)</h3>
+        <p style="font-size:12.5px;color:#5b7a76;margin:-4px 0 14px;">Laporan akan diisi automatik guna data pendaftaran, jadual &amp; keputusan pre/post-test. Lengkapkan medan di bawah untuk bahagian yang tiada dalam sistem.</p>
+        <div class="field"><label>Kategori Kursus</label>
+          <select id="rpt-kategori">
+            <option value="Fungsional">Fungsional</option>
+            <option value="Teknikal">Teknikal</option>
+            <option value="Pengurusan">Pengurusan</option>
+            <option value="Klinikal">Klinikal</option>
+          </select>
+        </div>
+        <div class="field"><label>Tarikh Kursus</label><input type="text" id="rpt-tarikh" value="27 Ogos 2026"></div>
+        <div class="field"><label>Tempat Kursus</label><input type="text" id="rpt-tempat" value="Dewan Akasia, Aras 5, WCC, HTPN"></div>
+        <div class="field"><label>Anjuran Jabatan/Unit</label><input type="text" id="rpt-anjuran" value="Unit Kawalan Infeksi Hospital Tengku Permaisuri Norashikin Kajang"></div>
+        <div class="field"><label>Disediakan oleh</label><input type="text" id="rpt-penyedia" value="DR ANEESA BINTI THAREK, Unit Pencegahan Kawalan Infeksi, HTPN Kajang."></div>
+        <button class="btn btn-primary" id="btn-gen-report" style="width:auto;">⬇ Jana &amp; Muat Turun Laporan</button>
+        <div id="report-status" style="font-size:12.5px;color:#5b7a76;margin-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <h3>Peserta Berdaftar (${participants.length})</h3>
+        <div class="scroll-box">
+          <table class="plist">
+            <thead><tr><th>Nama</th><th>Jabatan</th><th>Hadir</th><th>Maklum Balas</th><th>Sijil</th></tr></thead>
+            <tbody>
+              ${participants.map(p=>{
+                const key = icKey(p.ic);
+                const present = attendance.find(a=>icKey(a.ic)===key);
+                const gaveFeedback = feedbackList.find(f=>icKey(f.ic)===key);
+                return `<tr>
+                  <td>${escapeHtml(p.name)}</td>
+                  <td>${escapeHtml(p.dept)}</td>
+                  <td>${present?'✓':'—'}</td>
+                  <td>${gaveFeedback?'✓':'—'}</td>
+                  <td>${gaveFeedback ? `<button class="slide-open" data-cert-name="${escapeHtml(p.name)}" data-cert-dept="${escapeHtml(p.dept)}">Muat Turun</button>` : '—'}</td>
+                </tr>`;
+              }).join('') || '<tr><td colspan="5">Tiada peserta lagi.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Keputusan Pre / Post-Test</h3>
+        <div class="scroll-box">
+          <table class="plist">
+            <thead><tr><th>Nama</th><th>Pre</th><th>Post</th></tr></thead>
+            <tbody>
+              ${participants.map(p=>{
+                const pre = preResults.find(r=>icKey(r.ic)===icKey(p.ic));
+                const post = postResults.find(r=>icKey(r.ic)===icKey(p.ic));
+                return `<tr><td>${escapeHtml(p.name)}</td><td>${pre?pre.score+'/'+pre.total:'—'}</td><td>${post?post.score+'/'+post.total:'—'}</td></tr>`;
+              }).join('') || '<tr><td colspan="3">Tiada data lagi.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Maklum Balas (${feedbackList.length})</h3>
+        <div class="scroll-box">
+          ${feedbackList.map(f=>`
+            <div style="padding:10px 0;border-bottom:1px solid #EEF3F2;">
+              <div style="font-size:13px;font-weight:600;">${escapeHtml(f.name)} — Keseluruhan: ${f.overall}/5</div>
+              <div style="font-size:12px;color:#5b7a76;">Fasilitator: ${f.facilitator}/5 · Praktikal: ${f.practical}/5</div>
+              ${f.comment ? `<div style="font-size:12.5px;margin-top:4px;color:#33504c;">"${escapeHtml(f.comment)}"</div>` : ''}
+            </div>`).join('') || '<div class="empty-note">Tiada maklum balas lagi.</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>⚡ Kawalan IPC GO!</h3>
+      <div id="coord-go-panel"></div>
+    </div>
+  `;
+
+  document.getElementById('toggle-posttest').addEventListener('click', async (e)=>{
+    const cs = await sGet('coordinator-state', true) || {postTestUnlocked:false, feedbackUnlocked:false};
+    cs.postTestUnlocked = !cs.postTestUnlocked;
+    await sSet('coordinator-state', cs, true);
+    e.target.classList.toggle('on', cs.postTestUnlocked);
+    toast(cs.postTestUnlocked ? "Post-Test dibuka." : "Post-Test ditutup.");
+  });
+  document.getElementById('toggle-feedback').addEventListener('click', async (e)=>{
+    const cs = await sGet('coordinator-state', true) || {postTestUnlocked:false, feedbackUnlocked:false};
+    cs.feedbackUnlocked = !cs.feedbackUnlocked;
+    await sSet('coordinator-state', cs, true);
+    e.target.classList.toggle('on', cs.feedbackUnlocked);
+    toast(cs.feedbackUnlocked ? "Maklum Balas dibuka." : "Maklum Balas ditutup.");
+  });
+  document.getElementById('btn-add-slide').addEventListener('click', async ()=>{
+    const title = document.getElementById('slide-title').value.trim();
+    const url = document.getElementById('slide-url').value.trim();
+    const note = document.getElementById('slide-note').value.trim();
+    if(!title || !url){ toast("Sila isi tajuk & pautan."); return; }
+    let list = await sGet('slides', true) || [];
+    list.push({title, url, note});
+    await sSet('slides', list, true);
+    toast("Slaid ditambah.");
+    renderCoordinator();
+  });
+  body.querySelectorAll('[data-remove-slide]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      let list = await sGet('slides', true) || [];
+      list.splice(+btn.dataset.removeSlide, 1);
+      await sSet('slides', list, true);
+      renderCoordinator();
+    });
+  });
+
+  body.querySelectorAll('[data-cert-name]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const originalText = btn.textContent;
+      btn.textContent = "Menjana..."; btn.disabled = true;
+      try{
+        const result = await gsRun('generateCertificatePdf', {
+          name: btn.dataset.certName,
+          dept: btn.dataset.certDept,
+          ...COURSE_INFO
+        });
+        downloadBase64File(result.base64, result.fileName, 'application/pdf');
+      }catch(err){
+        console.error(err);
+        toast("Gagal jana sijil: " + (err && err.message ? err.message : err));
+      }
+      btn.textContent = originalText; btn.disabled = false;
+    });
+  });
+
+  document.getElementById('btn-gen-report').addEventListener('click', async ()=>{
+    const btn = document.getElementById('btn-gen-report');
+    const statusEl = document.getElementById('report-status');
+    btn.disabled = true; btn.textContent = "Menjana laporan...";
+    statusEl.textContent = "Mengumpul data peserta & keputusan kuiz...";
+    try{
+      await generateAndDownloadReport({
+        kategori: document.getElementById('rpt-kategori').value,
+        tarikh: document.getElementById('rpt-tarikh').value.trim(),
+        tempat: document.getElementById('rpt-tempat').value.trim(),
+        anjuran: document.getElementById('rpt-anjuran').value.trim(),
+        penyedia: document.getElementById('rpt-penyedia').value.trim()
+      }, statusEl);
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "Gagal jana laporan: " + (err && err.message ? err.message : err);
+    }
+    btn.disabled = false; btn.textContent = "⬇ Jana & Muat Turun Laporan";
+  });
+
+  renderCoordGoPanel();
+  goPollTimer && clearInterval(goPollTimer);
+  goPollTimer = setInterval(renderCoordGoPanel, 2000);
+}
+
+/* =========================================================
+   JANA LAPORAN (.docx)
+========================================================= */
+async function generateAndDownloadReport(info, statusEl){
+  const participants = await sGet('participants', true) || [];
+  const attendance = await sGet('attendance-list', true) || [];
+
+  statusEl.textContent = "Mengira statistik pre/post-test setiap soalan...";
+  const preRecords = await gsRun('kvGetByPrefix', 'pretest:');
+  const postRecords = await gsRun('kvGetByPrefix', 'posttest:');
+
+  function parseRecords(raw){
+    return Object.values(raw || {}).map(v=>{ try{ return JSON.parse(v); }catch(e){ return null; } }).filter(Boolean);
+  }
+  const preList = parseRecords(preRecords);
+  const postList = parseRecords(postRecords);
+
+  const questions = QUESTIONS.map((q, qi)=>{
+    let preCorrect=0, preWrong=0, postCorrect=0, postWrong=0;
+    preList.forEach(r=>{ if(r.answers && r.answers[qi]!=null){ if(r.answers[qi]===q.correct) preCorrect++; else preWrong++; } });
+    postList.forEach(r=>{ if(r.answers && r.answers[qi]!=null){ if(r.answers[qi]===q.correct) postCorrect++; else postWrong++; } });
+    return {
+      text: q.q,
+      preCorrect, preWrong,
+      postCorrect, postWrong,
+      prePct: (preCorrect+preWrong) ? Math.round(100*preCorrect/(preCorrect+preWrong)) : 0,
+      postPct: (postCorrect+postWrong) ? Math.round(100*postCorrect/(postCorrect+postWrong)) : 0
+    };
+  });
+
+  // Ahli jawatankuasa/penceramah unik dari jadual
+  const committee = [...new Set(SCHEDULE.map(s=>s.speaker).filter(Boolean))];
+
+  statusEl.textContent = "Menjana fail Word...";
+  const result = await gsRun('generateReportDocx', {
+    namaKursus: "ICAMS 2026",
+    anjuran: info.anjuran,
+    kategori: info.kategori,
+    tarikh: info.tarikh,
+    tempat: info.tempat,
+    objectives: OBJECTIVES,
+    participantCount: participants.length,
+    attendanceCount: attendance.length,
+    committee: committee,
+    schedule: SCHEDULE,
+    questions: questions,
+    penyedia: info.penyedia
+  });
+
+  downloadBase64File(result.base64, result.fileName, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  statusEl.textContent = "Laporan berjaya dimuat turun: " + result.fileName;
+}
+async function renderCoordGoPanel(){
+  const panel = document.getElementById('coord-go-panel');
+  if(!panel || !isCoordinator) return;
+  const state = await sGet('ipcgo-state', true) || {status:'lobby', qIndex:-1, startedAt:null};
+  const players = await sGet('ipcgo-players', true) || {};
+  const playerCount = Object.keys(players).length;
+
+  if(state.status === 'lobby'){
+    panel.innerHTML = `
+      <p style="font-size:13px;color:#5b7a76;">${playerCount} peserta telah menyertai lobi.</p>
+      <button class="btn btn-amber" id="go-start-btn" style="width:auto;">▶ Mulakan Soalan 1</button>
+      <button class="btn btn-ghost" id="go-reset-btn" style="width:auto;margin-left:8px;">↺ Set Semula Permainan</button>
+    `;
+    document.getElementById('go-start-btn').onclick = ()=>startGoQuestion(0);
+    document.getElementById('go-reset-btn').onclick = resetGoGame;
+    return;
+  }
+
+  if(state.status === 'question'){
+    const q = QUESTIONS[state.qIndex % QUESTIONS.length];
+    const answers = await sGet('ipcgo-answers:'+state.qIndex, true) || {};
+    const answeredCount = Object.keys(answers).length;
+    const elapsed = (Date.now()-state.startedAt)/1000;
+    const remaining = Math.max(0, GO_TIME_LIMIT-elapsed);
+    panel.innerHTML = `
+      <div class="go-host-question">Soalan ${state.qIndex+1} / ${QUESTIONS.length}: ${q.q}</div>
+      <p style="font-size:12.5px;color:#5b7a76;">⏱ ${Math.ceil(remaining)}s tinggal &nbsp;·&nbsp; ${answeredCount}/${playerCount} telah menjawab</p>
+      <button class="btn btn-amber" id="go-reveal-btn" style="width:auto;">Tunjuk Keputusan →</button>
+    `;
+    document.getElementById('go-reveal-btn').onclick = ()=>revealGoResults(state.qIndex);
+    return;
+  }
+
+  if(state.status === 'results'){
+    const q = QUESTIONS[state.qIndex % QUESTIONS.length];
+    const answers = await sGet('ipcgo-answers:'+state.qIndex, true) || {};
+    const counts = [0,0,0,0];
+    Object.values(answers).forEach(a=>{ if(counts[a.oi]!=null) counts[a.oi]++; });
+    const total = Object.keys(answers).length || 1;
+    const isLast = state.qIndex >= QUESTIONS.length-1;
+    panel.innerHTML = `
+      <div class="go-host-question">Keputusan Soalan ${state.qIndex+1}</div>
+      ${q.opts.map((o,oi)=>`
+        <div class="go-host-bar ${oi===q.correct?'correct':''}">
+          <span class="lab">${String.fromCharCode(65+oi)}</span>
+          <div class="track"><div class="fill" style="width:${Math.round(100*counts[oi]/total)}%;"></div></div>
+          <span class="cnt">${counts[oi]}</span>
+        </div>`).join('')}
+      <div style="margin-top:14px;">
+        ${isLast
+          ? `<button class="btn btn-amber" id="go-end-btn" style="width:auto;">🏁 Tamatkan Permainan</button>`
+          : `<button class="btn btn-amber" id="go-next-btn" style="width:auto;">Soalan Seterusnya →</button>`}
+        <button class="btn btn-ghost" id="go-reset-btn2" style="width:auto;margin-left:8px;">↺ Set Semula</button>
+      </div>
+    `;
+    if(isLast){
+      document.getElementById('go-end-btn').onclick = endGoGame;
+    } else {
+      document.getElementById('go-next-btn').onclick = ()=>startGoQuestion(state.qIndex+1);
+    }
+    document.getElementById('go-reset-btn2').onclick = resetGoGame;
+    return;
+  }
+
+  if(state.status === 'ended'){
+    const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
+    panel.innerHTML = `
+      <p style="font-size:13px;color:#5b7a76;margin-bottom:10px;">Permainan telah tamat. Papan pendahulu akhir:</p>
+      <ul class="leaderboard">
+        ${list.slice(0,10).map((p,i)=>`<li><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>`).join('') || '<div class="empty-note">Tiada peserta.</div>'}
+      </ul>
+      <button class="btn btn-ghost" id="go-reset-btn3" style="width:auto;margin-top:10px;">↺ Mulakan Permainan Baharu</button>
+    `;
+    document.getElementById('go-reset-btn3').onclick = resetGoGame;
+  }
+}
+
+async function startGoQuestion(qIndex){
+  await sSet('ipcgo-answers:'+qIndex, {}, true);
+  await sSet('ipcgo-state', {status:'question', qIndex, startedAt: Date.now()}, true);
+  renderCoordGoPanel();
+}
+async function revealGoResults(qIndex){
+  const q = QUESTIONS[qIndex % QUESTIONS.length];
+  const answers = await sGet('ipcgo-answers:'+qIndex, true) || {};
+  let players = await sGet('ipcgo-players', true) || {};
+  Object.entries(answers).forEach(([key, a])=>{
+    if(a.oi === q.correct && players[key]){
+      const speedBonus = Math.max(0, GO_TIME_LIMIT*1000 - a.timeTaken) / (GO_TIME_LIMIT*1000);
+      const pts = Math.round(500 + speedBonus*500);
+      players[key].score = (players[key].score||0) + pts;
+    }
+  });
+  await sSet('ipcgo-players', players, true);
+  await sSet('ipcgo-state', {status:'results', qIndex, startedAt:null}, true);
+  renderCoordGoPanel();
+}
+async function endGoGame(){
+  const state = await sGet('ipcgo-state', true) || {qIndex:0};
+  await sSet('ipcgo-state', {status:'ended', qIndex:state.qIndex, startedAt:null}, true);
+  renderCoordGoPanel();
+}
+async function resetGoGame(){
+  await sSet('ipcgo-state', {status:'lobby', qIndex:-1, startedAt:null}, true);
+  await sSet('ipcgo-players', {}, true);
+  renderCoordGoPanel();
+}
+</script>
+</body>
+</html>
