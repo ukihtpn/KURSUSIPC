@@ -809,12 +809,18 @@ document.getElementById('btn-register').addEventListener('click', async ()=>{
   btn.disabled = true; btn.textContent = "Mendaftar...";
   let list = await sGet('participants', true) || [];
   const existing = list.find(p=>icKey(p.ic)===key);
+  let ok = true;
   if(!existing){
     list.push({name, ic, dept, registeredAt: new Date().toISOString()});
-    await sSet('participants', list, true);
+    ok = await sSet('participants', list, true);
   }
-  await sSet('profile:'+key, {name, ic, dept}, false);
+  ok = (await sSet('profile:'+key, {name, ic, dept}, false)) && ok;
   btn.disabled = false; btn.textContent = "Daftar & Masuk";
+  if(!ok){
+    errEl.textContent = "Pendaftaran GAGAL disimpan — sambungan ke Google Sheet bermasalah. Sila cuba lagi sekejap, atau maklumkan koordinator.";
+    errEl.style.display = 'block';
+    return;
+  }
   loginUser({name, ic, dept});
 });
 
