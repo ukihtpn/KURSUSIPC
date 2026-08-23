@@ -487,6 +487,34 @@ table.plist td{padding:9px 8px;border-bottom:1px solid #EEF3F2;}
 .go-host-bar.correct .fill{background:var(--success);}
 .go-host-bar .cnt{font-family:var(--font-mono);width:22px;text-align:right;}
 
+/* Mod Skrin Penuh — untuk projektor semasa IPC GO! */
+#go-panel-card:fullscreen{
+  background:var(--paper);display:flex;flex-direction:column;justify-content:center;
+  padding:60px 80px;overflow-y:auto;
+}
+#go-panel-card:fullscreen h3{font-size:22px;margin-bottom:24px;}
+#go-panel-card:fullscreen #go-fullscreen-btn{display:none;}
+#go-panel-card:fullscreen .go-host-question{font-size:36px;margin:20px 0 30px;}
+#go-panel-card:fullscreen .go-host-bar{font-size:22px;gap:16px;margin-bottom:16px;}
+#go-panel-card:fullscreen .go-host-bar .track{height:28px;}
+#go-panel-card:fullscreen .leaderboard li{font-size:24px;padding:12px 16px;}
+#go-panel-card:fullscreen .lb-rank{font-size:24px;}
+#go-panel-card:fullscreen p{font-size:20px!important;}
+#go-panel-card:fullscreen .btn{font-size:18px;padding:14px 28px;}
+#go-panel-card:fullscreen .go-tile-grid{gap:16px;margin-top:20px;}
+#go-panel-card:fullscreen .go-tile{padding:24px;font-size:22px;}
+#go-panel-card:fullscreen .go-tile .shape{font-size:28px;}
+
+.go-avatar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px;margin-top:18px;}
+.go-avatar-btn{
+  display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 10px;
+  border:1.5px solid var(--line);border-radius:14px;background:var(--paper);cursor:pointer;
+  font-family:var(--font-body);font-weight:600;font-size:13px;color:var(--ink);
+  transition:transform .12s, border-color .12s;
+}
+.go-avatar-btn:hover{transform:translateY(-3px);border-color:var(--teal-mid);}
+.go-avatar-emoji{font-size:34px;}
+
 .toast{
   position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
   background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;
@@ -719,6 +747,22 @@ const OBJECTIVES = [
 const GO_TILE_CLASSES = ["go-tile-1","go-tile-2","go-tile-3","go-tile-4"];
 const GO_TILE_SHAPES = ["◆","●","▲","■"];
 const GO_TIME_LIMIT = 20; // seconds per question
+const GO_CHARACTERS = [
+  {emoji:"🦁", name:"Singa"}, {emoji:"🐯", name:"Harimau"}, {emoji:"🦅", name:"Helang"},
+  {emoji:"🐉", name:"Naga"}, {emoji:"🦉", name:"Burung Hantu"}, {emoji:"🐺", name:"Serigala"},
+  {emoji:"🦊", name:"Musang"}, {emoji:"🐻", name:"Beruang"}, {emoji:"🦈", name:"Yu"},
+  {emoji:"🐼", name:"Panda"}, {emoji:"🦓", name:"Zebra"}, {emoji:"🐸", name:"Katak"},
+  {emoji:"🐘", name:"Gajah"}, {emoji:"🦒", name:"Zirafah"}, {emoji:"🐊", name:"Buaya"},
+  {emoji:"🦋", name:"Rama-rama"}, {emoji:"🐢", name:"Kura-kura"}, {emoji:"🦔", name:"Landak"},
+  {emoji:"🐨", name:"Koala"}, {emoji:"🦘", name:"Kanggaru"}, {emoji:"🐧", name:"Penguin"},
+  {emoji:"🦚", name:"Burung Merak"}, {emoji:"🦩", name:"Flamingo"}, {emoji:"🐙", name:"Gurita"},
+  {emoji:"🦑", name:"Sotong"}, {emoji:"🦀", name:"Ketam"}, {emoji:"🐬", name:"Lumba-lumba"},
+  {emoji:"🐳", name:"Paus"}, {emoji:"🦥", name:"Kongkang"}, {emoji:"🦦", name:"Memerang"},
+  {emoji:"🐿️", name:"Tupai"}, {emoji:"🦫", name:"Berang-berang"}, {emoji:"🐝", name:"Lebah"},
+  {emoji:"🐞", name:"Kumbang"}, {emoji:"🦂", name:"Kala Jengking"}, {emoji:"🐍", name:"Ular"},
+  {emoji:"🦎", name:"Cicak"}, {emoji:"🐆", name:"Cheetah"}, {emoji:"🐴", name:"Kuda"},
+  {emoji:"🐂", name:"Lembu"}, {emoji:"🐐", name:"Kambing"}
+];
 
 /* =========================================================
    STORAGE HELPERS
@@ -735,6 +779,7 @@ async function gsRun(action, ...args){
   if(action === 'kvGet') payload.key = args[0];
   else if(action === 'kvSet'){ payload.key = args[0]; payload.value = args[1]; }
   else if(action === 'kvGetByPrefix') payload.prefix = args[0];
+  else if(action === 'kvDeleteByPrefix') payload.prefix = args[0];
   else if(action === 'generateReportDocx') payload.reportData = args[0];
   else if(action === 'generateCertificatePdf') payload.info = args[0];
 
@@ -1313,7 +1358,42 @@ async function renderCertificate(main){
 /* =========================================================
    IPC GO! (participant side)
 ========================================================= */
+/* =========================================================
+   IPC GO! — storan per-peserta (bukan satu blob dikongsi), supaya
+   50+ staff boleh join/jawab serentak tanpa race condition/overwrite.
+========================================================= */
+async function fetchGoPlayers(){
+  const raw = await gsRun('kvGetByPrefix', 'ipcgo-players:');
+  const out = {};
+  Object.keys(raw).forEach(k=>{
+    const pk = k.slice('ipcgo-players:'.length);
+    try{ out[pk] = JSON.parse(raw[k]); }catch(e){}
+  });
+  return out;
+}
+async function saveGoPlayer(key, data){
+  await sSet('ipcgo-players:'+key, data, true);
+}
+async function fetchGoAnswers(qi){
+  const prefix = 'ipcgo-answers:'+qi+':';
+  const raw = await gsRun('kvGetByPrefix', prefix);
+  const out = {};
+  Object.keys(raw).forEach(k=>{
+    const pk = k.slice(prefix.length);
+    try{ out[pk] = JSON.parse(raw[k]); }catch(e){}
+  });
+  return out;
+}
+async function saveGoAnswer(qi, key, data){
+  await sSet('ipcgo-answers:'+qi+':'+key, data, true);
+}
+
 async function renderIpcGo(main){
+  const key = icKey(currentUser.ic);
+  const players = await fetchGoPlayers();
+  if(!players[key] || !players[key].avatarName){
+    return renderGoCharacterPicker(main, players);
+  }
   main.innerHTML = `
     <div class="go-hero">
       <h2>⚡ IPC GO!</h2>
@@ -1321,22 +1401,57 @@ async function renderIpcGo(main){
     </div>
     <div id="go-content"><div class="empty-note">Menyambung ke permainan...</div></div>
   `;
-  await joinIpcGo();
   goPollTimer && clearInterval(goPollTimer);
   goPollTimer = setInterval(pollIpcGo, 1500);
   pollIpcGo();
 }
+function renderGoCharacterPicker(main, existingPlayers){
+  main.innerHTML = `
+    <div class="go-hero">
+      <h2>⚡ IPC GO!</h2>
+      <p>Nama sebenar anda TIDAK dipaparkan pada papan pendahulu — hanya avatar &amp; nickname di bawah.</p>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <label style="font-size:12.5px;font-weight:600;color:#5b7a76;display:block;margin-bottom:6px;">Nickname (pilihan — kosongkan untuk guna nama avatar sahaja)</label>
+      <input type="text" id="go-nickname-input" maxlength="20" placeholder="Contoh: Ali IPC, Ward5Hero..." style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-body);font-size:14px;">
+    </div>
+    <p style="font-size:12.5px;color:#5b7a76;margin:-4px 0 10px;">Pilih avatar untuk masuk permainan:</p>
+    <div class="go-avatar-grid">
+      ${GO_CHARACTERS.map((c,i)=>`
+        <button class="go-avatar-btn" data-i="${i}">
+          <span class="go-avatar-emoji">${c.emoji}</span>
+          <span>${c.name}</span>
+        </button>`).join('')}
+    </div>
+  `;
+  main.querySelectorAll('.go-avatar-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      main.querySelectorAll('.go-avatar-btn').forEach(b=>b.disabled = true);
+      const c = GO_CHARACTERS[+btn.dataset.i];
+      const key = icKey(currentUser.ic);
+      const players = existingPlayers || await fetchGoPlayers();
+      const nickname = (document.getElementById('go-nickname-input').value || '').trim();
+      let displayName;
+      if(nickname){
+        const takenCount = Object.values(players).filter(p=>p.name===nickname).length;
+        displayName = takenCount > 0 ? (nickname + ' ' + (takenCount+1)) : nickname;
+      } else {
+        const takenCount = Object.values(players).filter(p=>p.avatarBase===c.name).length;
+        displayName = takenCount > 0 ? (c.name + ' ' + (takenCount+1)) : c.name;
+      }
+      const data = {
+        name: displayName, avatarEmoji: c.emoji, avatarName: displayName, avatarBase: c.name,
+        dept: currentUser.dept, score: (players[key] && players[key].score) || 0,
+        realName: currentUser.name
+      };
+      await saveGoPlayer(key, data);
+      renderIpcGo(main);
+    });
+  });
+}
 function stopGoPolling(){
   if(goPollTimer){ clearInterval(goPollTimer); goPollTimer = null; }
   if(goTimerInterval){ clearInterval(goTimerInterval); goTimerInterval = null; }
-}
-async function joinIpcGo(){
-  const key = icKey(currentUser.ic);
-  let players = await sGet('ipcgo-players', true) || {};
-  if(!players[key]){
-    players[key] = {name:currentUser.name, dept:currentUser.dept, score:0};
-    await sSet('ipcgo-players', players, true);
-  }
 }
 async function pollIpcGo(){
   if(activePanel !== 'ipcgo' || !currentUser) return;
@@ -1351,7 +1466,7 @@ async function pollIpcGo(){
 
   if(state.status === 'lobby' || state.status === 'ended'){
     if(state.status === 'ended'){
-      const players = await sGet('ipcgo-players', true) || {};
+      const players = await fetchGoPlayers();
       const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
       content.innerHTML = renderLeaderboardHtml(list, key, "🏁 Permainan Tamat");
     } else {
@@ -1392,9 +1507,7 @@ async function pollIpcGo(){
           content.querySelectorAll('.go-tile').forEach(b=>b.disabled = true);
           const oi = +btn.dataset.oi;
           const timeTaken = Date.now() - state.startedAt;
-          let answers = await sGet('ipcgo-answers:'+qi, true) || {};
-          answers[key] = {oi, timeTaken, name:currentUser.name};
-          await sSet('ipcgo-answers:'+qi, answers, true);
+          await saveGoAnswer(qi, key, {oi, timeTaken, name:currentUser.name});
           content.innerHTML = `<div class="card go-waiting-answer"><div class="pulse-dot"></div><h3 style="font-family:var(--font-display);">Jawapan Dihantar!</h3><p style="color:#5b7a76;font-size:13.5px;">Menunggu peserta lain & keputusan koordinator...</p></div>`;
         });
       });
@@ -1410,10 +1523,10 @@ async function pollIpcGo(){
   if(state.status === 'results'){
     const qi = state.qIndex;
     const q = QUESTIONS[qi % QUESTIONS.length];
-    const answers = await sGet('ipcgo-answers:'+qi, true) || {};
+    const answers = await fetchGoAnswers(qi);
     const mine = answers[key];
     const correct = mine && mine.oi === q.correct;
-    const players = await sGet('ipcgo-players', true) || {};
+    const players = await fetchGoPlayers();
     const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
     content.innerHTML = `
       <div class="go-result-flag ${correct?'correct':'wrong'}">
@@ -1424,7 +1537,7 @@ async function pollIpcGo(){
         <h3>Papan Pendahulu</h3>
         <ul class="leaderboard">
           ${list.slice(0,10).map((p,i)=>`
-            <li class="${p.key===key?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
+            <li class="${p.key===key?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${p.avatarEmoji?p.avatarEmoji+' ':''}${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
           `).join('')}
         </ul>
       </div>`;
@@ -1438,7 +1551,7 @@ function renderLeaderboardHtml(list, myKey, title){
       <h3>${title}</h3>
       <ul class="leaderboard">
         ${list.map((p,i)=>`
-          <li class="${p.key===myKey?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
+          <li class="${p.key===myKey?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${p.avatarEmoji?p.avatarEmoji+' ':''}${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
         `).join('') || '<div class="empty-note">Tiada peserta lagi.</div>'}
       </ul>
     </div>`;
@@ -1571,11 +1684,17 @@ async function renderCoordinator(){
       </div>
     </div>
 
-    <div class="card" style="margin-top:16px;">
-      <h3>⚡ Kawalan IPC GO!</h3>
+    <div class="card" id="go-panel-card" style="margin-top:16px;">
+      <h3>⚡ Kawalan IPC GO! <button class="btn btn-ghost" id="go-fullscreen-btn" style="width:auto;float:right;font-size:12px;padding:6px 12px;">🖥 Skrin Penuh (Projektor)</button></h3>
       <div id="coord-go-panel"></div>
     </div>
   `;
+
+  document.getElementById('go-fullscreen-btn').addEventListener('click', ()=>{
+    const el = document.getElementById('go-panel-card');
+    if(el.requestFullscreen) el.requestFullscreen();
+    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  });
 
   document.getElementById('toggle-posttest').addEventListener('click', async (e)=>{
     const cs = await sGet('coordinator-state', true) || {postTestUnlocked:false, feedbackUnlocked:false};
@@ -1711,7 +1830,7 @@ async function renderCoordGoPanel(){
   const panel = document.getElementById('coord-go-panel');
   if(!panel || !isCoordinator) return;
   const state = await sGet('ipcgo-state', true) || {status:'lobby', qIndex:-1, startedAt:null};
-  const players = await sGet('ipcgo-players', true) || {};
+  const players = await fetchGoPlayers();
   const playerCount = Object.keys(players).length;
 
   if(state.status === 'lobby'){
@@ -1727,14 +1846,20 @@ async function renderCoordGoPanel(){
 
   if(state.status === 'question'){
     const q = QUESTIONS[state.qIndex % QUESTIONS.length];
-    const answers = await sGet('ipcgo-answers:'+state.qIndex, true) || {};
+    const answers = await fetchGoAnswers(state.qIndex);
     const answeredCount = Object.keys(answers).length;
     const elapsed = (Date.now()-state.startedAt)/1000;
     const remaining = Math.max(0, GO_TIME_LIMIT-elapsed);
     panel.innerHTML = `
       <div class="go-host-question">Soalan ${state.qIndex+1} / ${QUESTIONS.length}: ${q.q}</div>
       <p style="font-size:12.5px;color:#5b7a76;">⏱ ${Math.ceil(remaining)}s tinggal &nbsp;·&nbsp; ${answeredCount}/${playerCount} telah menjawab</p>
-      <button class="btn btn-amber" id="go-reveal-btn" style="width:auto;">Tunjuk Keputusan →</button>
+      <div class="go-tile-grid">
+        ${q.opts.map((o,oi)=>`
+          <div class="go-tile ${GO_TILE_CLASSES[oi]}" style="cursor:default;">
+            <span class="shape">${GO_TILE_SHAPES[oi]}</span><span>${o}</span>
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-amber" id="go-reveal-btn" style="width:auto;margin-top:14px;">Tunjuk Keputusan →</button>
     `;
     document.getElementById('go-reveal-btn').onclick = ()=>revealGoResults(state.qIndex);
     return;
@@ -1742,11 +1867,12 @@ async function renderCoordGoPanel(){
 
   if(state.status === 'results'){
     const q = QUESTIONS[state.qIndex % QUESTIONS.length];
-    const answers = await sGet('ipcgo-answers:'+state.qIndex, true) || {};
+    const answers = await fetchGoAnswers(state.qIndex);
     const counts = [0,0,0,0];
     Object.values(answers).forEach(a=>{ if(counts[a.oi]!=null) counts[a.oi]++; });
     const total = Object.keys(answers).length || 1;
     const isLast = state.qIndex >= QUESTIONS.length-1;
+    const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score).slice(0,5);
     panel.innerHTML = `
       <div class="go-host-question">Keputusan Soalan ${state.qIndex+1}</div>
       ${q.opts.map((o,oi)=>`
@@ -1755,6 +1881,10 @@ async function renderCoordGoPanel(){
           <div class="track"><div class="fill" style="width:${Math.round(100*counts[oi]/total)}%;"></div></div>
           <span class="cnt">${counts[oi]}</span>
         </div>`).join('')}
+      <h3 style="margin-top:18px;">🏆 Ketua Papan Pendahulu</h3>
+      <ul class="leaderboard">
+        ${list.map((p,i)=>`<li><span class="lb-rank">${i+1}</span><span class="lb-name">${p.avatarEmoji?p.avatarEmoji+' ':''}${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>`).join('') || '<div class="empty-note">Tiada peserta.</div>'}
+      </ul>
       <div style="margin-top:14px;">
         ${isLast
           ? `<button class="btn btn-amber" id="go-end-btn" style="width:auto;">🏁 Tamatkan Permainan</button>`
@@ -1776,7 +1906,7 @@ async function renderCoordGoPanel(){
     panel.innerHTML = `
       <p style="font-size:13px;color:#5b7a76;margin-bottom:10px;">Permainan telah tamat. Papan pendahulu akhir:</p>
       <ul class="leaderboard">
-        ${list.slice(0,10).map((p,i)=>`<li><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>`).join('') || '<div class="empty-note">Tiada peserta.</div>'}
+        ${list.slice(0,10).map((p,i)=>`<li><span class="lb-rank">${i+1}</span><span class="lb-name">${p.avatarEmoji?p.avatarEmoji+' ':''}${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>`).join('') || '<div class="empty-note">Tiada peserta.</div>'}
       </ul>
       <button class="btn btn-ghost" id="go-reset-btn3" style="width:auto;margin-top:10px;">↺ Mulakan Permainan Baharu</button>
     `;
@@ -1785,22 +1915,23 @@ async function renderCoordGoPanel(){
 }
 
 async function startGoQuestion(qIndex){
-  await sSet('ipcgo-answers:'+qIndex, {}, true);
   await sSet('ipcgo-state', {status:'question', qIndex, startedAt: Date.now()}, true);
   renderCoordGoPanel();
 }
 async function revealGoResults(qIndex){
   const q = QUESTIONS[qIndex % QUESTIONS.length];
-  const answers = await sGet('ipcgo-answers:'+qIndex, true) || {};
-  let players = await sGet('ipcgo-players', true) || {};
+  const answers = await fetchGoAnswers(qIndex);
+  const players = await fetchGoPlayers();
+  const updates = [];
   Object.entries(answers).forEach(([key, a])=>{
     if(a.oi === q.correct && players[key]){
       const speedBonus = Math.max(0, GO_TIME_LIMIT*1000 - a.timeTaken) / (GO_TIME_LIMIT*1000);
       const pts = Math.round(500 + speedBonus*500);
-      players[key].score = (players[key].score||0) + pts;
+      const updated = {...players[key], score: (players[key].score||0) + pts};
+      updates.push(saveGoPlayer(key, updated));
     }
   });
-  await sSet('ipcgo-players', players, true);
+  await Promise.all(updates);
   await sSet('ipcgo-state', {status:'results', qIndex, startedAt:null}, true);
   renderCoordGoPanel();
 }
@@ -1811,7 +1942,8 @@ async function endGoGame(){
 }
 async function resetGoGame(){
   await sSet('ipcgo-state', {status:'lobby', qIndex:-1, startedAt:null}, true);
-  await sSet('ipcgo-players', {}, true);
+  await gsRun('kvDeleteByPrefix', 'ipcgo-players:');
+  await gsRun('kvDeleteByPrefix', 'ipcgo-answers:');
   renderCoordGoPanel();
 }
 </script>
