@@ -47,6 +47,7 @@ a{color:inherit;}
   width:100%;
   display:flex;
   flex-direction:column;
+  position:relative;
 }
 .mono{font-family:var(--font-mono);}
 .eyebrow{
@@ -235,6 +236,37 @@ a{color:inherit;}
   font-size:12.5px;color:#8A6355;
 }
 .logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+.lang-toggle{
+  background:var(--aqua-tint);border:1px solid var(--line);border-radius:20px;padding:6px 14px;
+  font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--teal-deep);font-family:var(--font-mono);
+}
+.lang-toggle:hover{border-color:var(--teal-mid);}
+.auth-card .lang-toggle, .badge-card .lang-toggle{position:absolute;top:18px;right:18px;background:#fff;}
+#screen-splash .lang-toggle{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25);color:#fff;position:absolute;top:22px;right:22px;}
+
+.notif-wrap{position:relative;}
+.notif-bell{
+  position:relative;background:transparent;border:1px solid var(--line);border-radius:10px;
+  width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+.notif-bell:hover{border-color:var(--teal-mid);}
+.notif-badge{
+  position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;
+  font-family:var(--font-mono);font-size:10px;font-weight:700;min-width:16px;height:16px;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;
+}
+.notif-dropdown{
+  position:absolute;top:44px;right:0;width:320px;max-height:400px;overflow-y:auto;
+  background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
+  z-index:50;padding:6px;
+}
+.notif-item{padding:12px 14px;border-bottom:1px solid var(--aqua-tint);}
+.notif-item:last-child{border-bottom:none;}
+.notif-title{font-size:13px;font-weight:700;color:var(--ink);}
+.notif-body{font-size:12.5px;color:#8A6355;margin-top:2px;line-height:1.4;}
+.notif-time{font-size:10.5px;color:#A6857A;margin-top:4px;font-family:var(--font-mono);}
+.notif-empty{padding:24px 14px;text-align:center;font-size:13px;color:#A6857A;}
 
 .dash-body{display:flex;min-height:calc(100vh - 58px);}
 .rail{
@@ -524,14 +556,50 @@ table.plist td{padding:9px 8px;border-bottom:1px solid #F6EAE1;}
 
 @media (max-width:760px){
   .dash-body{flex-direction:column;}
-  .rail{
-    width:100%;height:auto;position:sticky;top:58px;
-    display:flex;overflow-x:auto;padding:10px 12px;gap:4px;
+  .rail{display:none;}
+  .dash-main{padding:20px 16px 90px;}
+}
+.mobile-bottom-nav{display:none;}
+.mobile-sheet{display:none;}
+@media (max-width:760px){
+  .mobile-bottom-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;
+    border-top:1px solid var(--line);padding:8px 4px calc(6px + env(safe-area-inset-bottom));
+    z-index:40;box-shadow:0 -6px 18px -10px rgba(0,0,0,0.12);
   }
-  .rail-group-label{display:none;}
-  .rail-btn{flex-direction:column;gap:4px;white-space:nowrap;font-size:11px;padding:8px 10px;}
-  .rail-btn .lockdot{margin-left:0;}
-  .dash-main{padding:20px 16px 50px;}
+  .mnav-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    background:transparent;border:none;font-size:10px;color:#A6857A;padding:4px 2px;font-family:var(--font-body);
+  }
+  .mnav-btn.active{color:var(--teal-deep);font-weight:700;}
+  .mnav-ic{font-size:19px;position:relative;}
+  .mnav-ic .notif-badge{top:-6px;right:-10px;}
+  .mobile-sheet{
+    display:block;position:fixed;inset:0;z-index:60;
+  }
+  .mobile-sheet.hidden{display:none;}
+  .mobile-sheet-backdrop{position:absolute;inset:0;background:rgba(30,10,5,0.45);}
+  .mobile-sheet-panel{
+    position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;
+    padding:20px 20px calc(20px + env(safe-area-inset-bottom));max-height:72vh;overflow-y:auto;
+  }
+  .mobile-sheet-item{
+    display:flex;align-items:center;gap:12px;padding:14px 8px;border-bottom:1px solid var(--aqua-tint);
+    font-size:14.5px;font-weight:600;color:var(--ink);
+  }
+  .mobile-sheet-item .ic{font-size:18px;width:24px;text-align:center;}
+  .mobile-sheet-item:last-child{border-bottom:none;}
+  .mobile-sheet-item .lockdot{margin-left:auto;font-size:12px;color:#A6857A;}
+}
+.quick-shortcuts-wrap{display:none;}
+@media (max-width:760px){
+  .quick-shortcuts-wrap{display:block;}
+  .quick-shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .qshortcut-btn{
+    display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;
+    background:#fff;border:1px solid var(--line);border-radius:14px;font-size:11px;font-weight:600;color:var(--ink);
+  }
+  .qshortcut-btn .ic{font-size:20px;}
 }
 </style>
 </head>
@@ -539,104 +607,108 @@ table.plist td{padding:9px 8px;border-bottom:1px solid #F6EAE1;}
 
 <!-- ============ SPLASH ============ -->
 <div class="screen" id="screen-splash">
+  <button class="lang-toggle" id="lang-toggle-splash"></button>
   <div class="badge-clip"></div>
   <div class="badge-card">
     <div class="splash-logo-ring">IPC</div>
-    <div class="splash-eyebrow">Unit Kawalan Infeksi &nbsp;·&nbsp; HTPN Kajang</div>
-    <h1>Welcome to <em>ICAMS 2026</em></h1>
-    <p class="splash-sub">Infection Control &amp; Antimicrobial Stewardship Workshop — dianjurkan oleh Unit Kawalan Infeksi, Hospital Tengku Permaisuri Norashikin, Kajang.</p>
+    <div class="splash-eyebrow" data-i18n="splash_eyebrow">Unit Kawalan Infeksi &nbsp;·&nbsp; HTPN Kajang</div>
+    <h1 data-i18n-html="splash_title">Welcome to <em>ICAMS 2026</em></h1>
+    <p class="splash-sub" data-i18n="splash_sub">Infection Control &amp; Antimicrobial Stewardship Workshop — dianjurkan oleh Unit Kawalan Infeksi, Hospital Tengku Permaisuri Norashikin, Kajang.</p>
     <div class="splash-meta">
       <span>27 Ogos 2026</span>
       <span>8.00 AM – 5.00 PM</span>
       <span>Dewan Akasia, Aras 5, WCC</span>
     </div>
-    <button class="enter-key" id="btn-splash-enter">Masuk / Enter <kbd>↵</kbd></button>
-    <div class="splash-hint">Tekan ENTER pada papan kekunci, atau klik butang di atas</div>
+    <button class="enter-key" id="btn-splash-enter"><span data-i18n="splash_enter">Masuk / Enter</span> <kbd>↵</kbd></button>
+    <div class="splash-hint" data-i18n="splash_hint">Tekan ENTER pada papan kekunci, atau klik butang di atas</div>
   </div>
 </div>
 
 <!-- ============ REGISTER ============ -->
 <div class="screen auth-screen hidden" id="screen-register">
   <div class="auth-card" style="position:relative;">
+    <button class="lang-toggle" id="lang-toggle-register"></button>
     <div class="auth-top">
       <div class="auth-mark">IPC</div>
-      <div><div class="t">Pendaftaran Peserta</div><div class="s">ICAMS 2026 · HTPN</div></div>
+      <div><div class="t" data-i18n="reg_top_title">Pendaftaran Peserta</div><div class="s">ICAMS 2026 · HTPN</div></div>
     </div>
-    <h2>Daftar Kehadiran</h2>
-    <p class="desc">Isikan maklumat penuh anda. Gunakan Nama &amp; No. K/P yang sama untuk log masuk kali seterusnya.</p>
+    <h2 data-i18n="reg_heading">Daftar Kehadiran</h2>
+    <p class="desc" data-i18n="reg_desc">Isikan maklumat penuh anda. Gunakan Nama &amp; No. K/P yang sama untuk log masuk kali seterusnya.</p>
     <div class="form-error" id="reg-error"></div>
     <div class="field">
-      <label>Nama Penuh</label>
-      <input type="text" id="reg-name" placeholder="Cth: ahmad bin ali" autocomplete="name">
+      <label data-i18n="field_name">Nama Penuh</label>
+      <input type="text" id="reg-name" data-i18n-placeholder="ph_name" placeholder="Cth: ahmad bin ali" autocomplete="name">
     </div>
     <div class="field">
-      <label>No. Kad Pengenalan (IC)</label>
-      <input type="text" id="reg-ic" placeholder="Cth: 900101101234 (tanpa sengkang pun boleh)" class="mono" inputmode="numeric">
+      <label data-i18n="field_ic">No. Kad Pengenalan (IC)</label>
+      <input type="text" id="reg-ic" data-i18n-placeholder="ph_ic" placeholder="Cth: 900101101234 (tanpa sengkang pun boleh)" class="mono" inputmode="numeric">
     </div>
     <div class="field">
-      <label>Jabatan</label>
+      <label data-i18n="field_dept">Jabatan</label>
       <select id="reg-dept">
-        <option value="">— Pilih Jabatan —</option>
-        <option>Jabatan Kecemasan &amp; Trauma</option>
-        <option>Jabatan Perubatan</option>
-        <option>Jabatan Pembedahan</option>
-        <option>Jabatan Pediatrik</option>
-        <option>Jabatan O&amp;G</option>
-        <option>Jabatan Ortopedik</option>
-        <option>Jabatan Anestesiologi</option>
-        <option>Jabatan Radiologi</option>
-        <option>Jabatan Patologi</option>
-        <option>Jabatan Psikiatri</option>
-        <option>Jabatan Forensik</option>
-        <option>Lain-lain</option>
+        <option value="" data-i18n="dept_choose">— Pilih Jabatan —</option>
+        <option value="Jabatan Kecemasan & Trauma" data-i18n="dept_1">Jabatan Kecemasan &amp; Trauma</option>
+        <option value="Jabatan Perubatan" data-i18n="dept_2">Jabatan Perubatan</option>
+        <option value="Jabatan Pembedahan" data-i18n="dept_3">Jabatan Pembedahan</option>
+        <option value="Jabatan Pediatrik" data-i18n="dept_4">Jabatan Pediatrik</option>
+        <option value="Jabatan O&G" data-i18n="dept_5">Jabatan O&amp;G</option>
+        <option value="Jabatan Ortopedik" data-i18n="dept_6">Jabatan Ortopedik</option>
+        <option value="Jabatan Anestesiologi" data-i18n="dept_7">Jabatan Anestesiologi</option>
+        <option value="Jabatan Radiologi" data-i18n="dept_8">Jabatan Radiologi</option>
+        <option value="Jabatan Patologi" data-i18n="dept_9">Jabatan Patologi</option>
+        <option value="Jabatan Psikiatri" data-i18n="dept_10">Jabatan Psikiatri</option>
+        <option value="Jabatan Forensik" data-i18n="dept_11">Jabatan Forensik</option>
+        <option value="Lain-lain" data-i18n="dept_12">Lain-lain</option>
       </select>
     </div>
-    <button class="btn btn-primary" id="btn-register">Daftar &amp; Masuk</button>
-    <div class="auth-switch">Sudah berdaftar? <a id="link-to-login">Log Masuk</a></div>
-    <div class="auth-switch" style="margin-top:6px;">Koordinator? <a id="link-to-coord-from-reg">Log Masuk Koordinator</a></div>
+    <button class="btn btn-primary" id="btn-register" data-i18n="btn_register">Daftar &amp; Masuk</button>
+    <div class="auth-switch" data-i18n-html="already_registered">Sudah berdaftar? <a id="link-to-login">Log Masuk</a></div>
+    <div class="auth-switch" style="margin-top:6px;" data-i18n-html="coord_link_reg">Koordinator? <a id="link-to-coord-from-reg">Log Masuk Koordinator</a></div>
   </div>
 </div>
 
 <!-- ============ LOGIN ============ -->
 <div class="screen auth-screen hidden" id="screen-login">
-  <div class="auth-card">
+  <div class="auth-card" style="position:relative;">
+    <button class="lang-toggle" id="lang-toggle-login"></button>
     <div class="auth-top">
       <div class="auth-mark">IPC</div>
-      <div><div class="t">Log Masuk Peserta</div><div class="s">ICAMS 2026 · HTPN</div></div>
+      <div><div class="t" data-i18n="login_top_title">Log Masuk Peserta</div><div class="s">ICAMS 2026 · HTPN</div></div>
     </div>
-    <h2>Selamat Kembali</h2>
-    <p class="desc">Masukkan Nama &amp; No. K/P yang digunakan semasa pendaftaran.</p>
+    <h2 data-i18n="login_heading">Selamat Kembali</h2>
+    <p class="desc" data-i18n="login_desc">Masukkan Nama &amp; No. K/P yang digunakan semasa pendaftaran.</p>
     <div class="form-error" id="login-error"></div>
     <div class="field">
-      <label>Nama Penuh</label>
-      <input type="text" id="login-name" placeholder="Cth: ahmad bin ali">
+      <label data-i18n="field_name">Nama Penuh</label>
+      <input type="text" id="login-name" data-i18n-placeholder="ph_name" placeholder="Cth: ahmad bin ali">
     </div>
     <div class="field">
-      <label>No. Kad Pengenalan (IC)</label>
-      <input type="text" id="login-ic" placeholder="Cth: 900101101234 (tanpa sengkang pun boleh)" class="mono" inputmode="numeric">
+      <label data-i18n="field_ic">No. Kad Pengenalan (IC)</label>
+      <input type="text" id="login-ic" data-i18n-placeholder="ph_ic" placeholder="Cth: 900101101234 (tanpa sengkang pun boleh)" class="mono" inputmode="numeric">
     </div>
-    <button class="btn btn-primary" id="btn-login">Log Masuk</button>
-    <div class="auth-switch">Belum daftar? <a id="link-to-register">Daftar di sini</a></div>
-    <div class="auth-switch" style="margin-top:6px;">Koordinator? <a id="link-to-coord-from-login">Log Masuk Koordinator</a></div>
+    <button class="btn btn-primary" id="btn-login" data-i18n="btn_login">Log Masuk</button>
+    <div class="auth-switch" data-i18n-html="not_registered">Belum daftar? <a id="link-to-register">Daftar di sini</a></div>
+    <div class="auth-switch" style="margin-top:6px;" data-i18n-html="coord_link_login">Koordinator? <a id="link-to-coord-from-login">Log Masuk Koordinator</a></div>
   </div>
 </div>
 
 <!-- ============ COORDINATOR LOGIN ============ -->
 <div class="screen auth-screen hidden" id="screen-coord-login">
-  <div class="auth-card">
+  <div class="auth-card" style="position:relative;">
+    <button class="lang-toggle" id="lang-toggle-coord-login"></button>
     <div class="auth-top">
       <div class="auth-mark" style="background:var(--ink);">★</div>
-      <div><div class="t">Panel Koordinator</div><div class="s">ICAMS 2026 · Unit Kawalan Infeksi</div></div>
+      <div><div class="t" data-i18n="coord_panel_title">Panel Koordinator</div><div class="s">ICAMS 2026 · Unit Kawalan Infeksi</div></div>
     </div>
-    <h2>Log Masuk Koordinator</h2>
-    <p class="desc">Untuk pengendali program sahaja — kawal Post-Test, Maklum Balas &amp; permainan IPC GO!.</p>
+    <h2 data-i18n="coord_login_heading">Log Masuk Koordinator</h2>
+    <p class="desc" data-i18n="coord_login_desc">Untuk pengendali program sahaja — kawal Post-Test, Maklum Balas &amp; permainan IPC GO!.</p>
     <div class="form-error" id="coord-error"></div>
     <div class="field">
-      <label>Kata Laluan Koordinator</label>
+      <label data-i18n="field_coord_pass">Kata Laluan Koordinator</label>
       <input type="password" id="coord-pass" placeholder="••••••••••">
     </div>
-    <button class="btn" style="background:var(--ink);color:#fff;width:100%;" id="btn-coord-login">Log Masuk</button>
-    <div class="auth-switch"><a id="link-to-login-from-coord">← Kembali ke Log Masuk Peserta</a></div>
+    <button class="btn" style="background:var(--ink);color:#fff;width:100%;" id="btn-coord-login" data-i18n="btn_login">Log Masuk</button>
+    <div class="auth-switch"><a id="link-to-login-from-coord" data-i18n="back_to_login">← Kembali ke Log Masuk Peserta</a></div>
   </div>
 </div>
 
@@ -648,29 +720,45 @@ table.plist td{padding:9px 8px;border-bottom:1px solid #F6EAE1;}
       <div class="topbar-title">ICAMS 2026<span>Unit Kawalan Infeksi · HTPN</span></div>
     </div>
     <div class="topbar-right">
+      <button class="lang-toggle" id="lang-toggle-dash"></button>
+      <div class="notif-wrap">
+        <button class="notif-bell" id="notif-bell">🔔<span class="notif-badge hidden" id="notif-badge">0</span></button>
+        <div class="notif-dropdown hidden" id="notif-dropdown"></div>
+      </div>
       <div class="who"><div class="n" id="topbar-name">—</div><div class="r" id="topbar-dept">—</div></div>
       <div class="avatar-chip" id="topbar-avatar">–</div>
-      <button class="logout-btn" id="btn-logout">Log Keluar</button>
+      <button class="logout-btn" id="btn-logout" data-i18n="btn_logout">Log Keluar</button>
     </div>
   </div>
   <div class="dash-body">
     <div class="rail">
-      <div class="rail-group-label">Program</div>
-      <button class="rail-btn" data-panel="intro"><span class="ic">i</span> Pengenalan</button>
-      <button class="rail-btn" data-panel="objectives"><span class="ic">⊙</span> Objektif &amp; Jadual</button>
-      <button class="rail-btn" data-panel="slides"><span class="ic">▤</span> Slaid</button>
-      <div class="rail-group-label">Penilaian</div>
-      <button class="rail-btn" data-panel="pretest"><span class="ic">1</span> Pre-Test</button>
-      <button class="rail-btn" data-panel="posttest"><span class="ic">2</span> Post-Test <span class="lockdot" id="lockdot-posttest">⚿</span></button>
-      <button class="rail-btn" data-panel="feedback"><span class="ic">✎</span> Maklum Balas <span class="lockdot" id="lockdot-feedback">⚿</span></button>
-      <div class="rail-group-label">Aktiviti</div>
-      <button class="rail-btn" data-panel="attendance"><span class="ic">✓</span> Kehadiran</button>
-      <button class="rail-btn" data-panel="ipcgo"><span class="ic">⚡</span> IPC GO!</button>
-      <button class="rail-btn" data-panel="certificate"><span class="ic">🎓</span> Sijil <span class="lockdot" id="lockdot-certificate">⚿</span></button>
+      <div class="rail-group-label" data-i18n="nav_group_program">Program</div>
+      <button class="rail-btn" data-panel="intro"><span class="ic">i</span> <span data-i18n="nav_intro">Pengenalan</span></button>
+      <button class="rail-btn" data-panel="objectives"><span class="ic">⊙</span> <span data-i18n="nav_objectives">Objektif &amp; Jadual</span></button>
+      <button class="rail-btn" data-panel="slides"><span class="ic">▤</span> <span data-i18n="nav_slides">Slaid</span></button>
+      <div class="rail-group-label" data-i18n="nav_group_assessment">Penilaian</div>
+      <button class="rail-btn" data-panel="pretest"><span class="ic">1</span> <span data-i18n="nav_pretest">Pre-Test</span></button>
+      <button class="rail-btn" data-panel="posttest"><span class="ic">2</span> <span data-i18n="nav_posttest">Post-Test</span> <span class="lockdot" id="lockdot-posttest">⚿</span></button>
+      <button class="rail-btn" data-panel="feedback"><span class="ic">✎</span> <span data-i18n="nav_feedback">Maklum Balas</span> <span class="lockdot" id="lockdot-feedback">⚿</span></button>
+      <div class="rail-group-label" data-i18n="nav_group_activity">Aktiviti</div>
+      <button class="rail-btn" data-panel="attendance"><span class="ic">✓</span> <span data-i18n="nav_attendance">Kehadiran</span></button>
+      <button class="rail-btn" data-panel="ipcgo"><span class="ic">⚡</span> <span data-i18n="nav_ipcgo">IPC GO!</span></button>
+      <button class="rail-btn" data-panel="certificate"><span class="ic">🎓</span> <span data-i18n="nav_certificate">Sijil</span> <span class="lockdot" id="lockdot-certificate">⚿</span></button>
     </div>
     <div class="dash-main" id="dash-main">
       <!-- panels injected by JS -->
     </div>
+  </div>
+  <div class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <button class="mnav-btn active" data-mnav="home"><span class="mnav-ic">🏠</span><span data-i18n="mnav_home">Utama</span></button>
+    <button class="mnav-btn" data-mnav="program"><span class="mnav-ic">📋</span><span data-i18n="mnav_program">Program</span></button>
+    <button class="mnav-btn" data-mnav="activity"><span class="mnav-ic">⚡</span><span data-i18n="mnav_activity">Aktiviti</span></button>
+    <button class="mnav-btn" data-mnav="notif"><span class="mnav-ic">🔔<span class="notif-badge hidden" id="notif-badge-mobile">0</span></span><span data-i18n="mnav_notif">Notifikasi</span></button>
+    <button class="mnav-btn" data-mnav="profile"><span class="mnav-ic">👤</span><span data-i18n="mnav_profile">Profil</span></button>
+  </div>
+  <div class="mobile-sheet hidden" id="mobile-sheet">
+    <div class="mobile-sheet-backdrop" id="mobile-sheet-backdrop"></div>
+    <div class="mobile-sheet-panel" id="mobile-sheet-panel"></div>
   </div>
 </div>
 
@@ -689,6 +777,198 @@ table.plist td{padding:9px 8px;border-bottom:1px solid #F6EAE1;}
 /* =========================================================
    CONFIG & DATA
 ========================================================= */
+/* =========================================================
+   I18N — BM / EN toggle
+========================================================= */
+const I18N = {
+  bm: {
+    splash_eyebrow: "Unit Kawalan Infeksi &nbsp;·&nbsp; HTPN Kajang",
+    splash_sub: "Infection Control &amp; Antimicrobial Stewardship Workshop — dianjurkan oleh Unit Kawalan Infeksi, Hospital Tengku Permaisuri Norashikin, Kajang.",
+    splash_enter: "Masuk / Enter",
+    splash_hint: "Tekan ENTER pada papan kekunci, atau klik butang di atas",
+    reg_top_title: "Pendaftaran Peserta",
+    reg_heading: "Daftar Kehadiran",
+    reg_desc: "Isikan maklumat penuh anda. Gunakan Nama &amp; No. K/P yang sama untuk log masuk kali seterusnya.",
+    field_name: "Nama Penuh",
+    field_ic: "No. Kad Pengenalan (IC)",
+    field_dept: "Jabatan",
+    field_coord_pass: "Kata Laluan Koordinator",
+    ph_name: "Cth: ahmad bin ali",
+    ph_ic: "Cth: 900101101234 (tanpa sengkang pun boleh)",
+    dept_choose: "— Pilih Jabatan —",
+    dept_1: "Jabatan Kecemasan & Trauma", dept_2: "Jabatan Perubatan", dept_3: "Jabatan Pembedahan",
+    dept_4: "Jabatan Pediatrik", dept_5: "Jabatan O&G", dept_6: "Jabatan Ortopedik",
+    dept_7: "Jabatan Anestesiologi", dept_8: "Jabatan Radiologi", dept_9: "Jabatan Patologi",
+    dept_10: "Jabatan Psikiatri", dept_11: "Jabatan Forensik", dept_12: "Lain-lain",
+    btn_register: "Daftar &amp; Masuk",
+    btn_login: "Log Masuk",
+    btn_logout: "Log Keluar",
+    already_registered: 'Sudah berdaftar? <a id="link-to-login">Log Masuk</a>',
+    coord_link_reg: 'Koordinator? <a id="link-to-coord-from-reg">Log Masuk Koordinator</a>',
+    coord_link_login: 'Koordinator? <a id="link-to-coord-from-login">Log Masuk Koordinator</a>',
+    not_registered: 'Belum daftar? <a id="link-to-register">Daftar di sini</a>',
+    login_top_title: "Log Masuk Peserta",
+    login_heading: "Selamat Kembali",
+    login_desc: "Masukkan Nama &amp; No. K/P yang digunakan semasa pendaftaran.",
+    coord_panel_title: "Panel Koordinator",
+    coord_login_heading: "Log Masuk Koordinator",
+    coord_login_desc: "Untuk pengendali program sahaja — kawal Post-Test, Maklum Balas &amp; permainan IPC GO!.",
+    back_to_login: "← Kembali ke Log Masuk Peserta",
+    nav_group_program: "Program", nav_group_assessment: "Penilaian", nav_group_activity: "Aktiviti",
+    nav_intro: "Pengenalan", nav_objectives: "Objektif & Jadual", nav_slides: "Slaid",
+    nav_pretest: "Pre-Test", nav_posttest: "Post-Test", nav_feedback: "Maklum Balas",
+    nav_attendance: "Kehadiran", nav_ipcgo: "IPC GO!", nav_certificate: "Sijil",
+    mnav_home: "Utama", mnav_program: "Program", mnav_activity: "Aktiviti", mnav_notif: "Notifikasi", mnav_profile: "Profil",
+    intro_eyebrow: "Pengenalan Program", intro_title: "Apa itu ICAMS?",
+    intro_body: "Infection Control and Antimicrobial Stewardship (ICAMS) — bengkel sehari anjuran Unit Kawalan Infeksi HTPN untuk pegawai perubatan & pegawai perubatan latihan siswazah.",
+    intro_summary_title: "📋 Ringkasan Saya",
+    intro_pretest_label: "Markah Pre-Test", intro_posttest_label: "Markah Post-Test",
+    intro_attendance_label: "Kehadiran", intro_feedback_label: "Maklum Balas",
+    intro_cert_ready: "🎓 Sijil penyertaan anda sudah boleh dimuat turun di tab <b>Sijil</b>.",
+    intro_cert_locked: "Lengkapkan borang <b>Maklum Balas</b> untuk membuka sijil penyertaan anda.",
+    intro_bg_title: "Latar Belakang",
+    intro_bg_body: "Jangkitan berkaitan penjagaan kesihatan (Healthcare-Associated Infections) dan rintangan antimikrob (Antimicrobial Resistance) merupakan cabaran utama dalam penjagaan pesakit hari ini. Bengkel ICAMS 2026 direka khusus untuk membekalkan pengetahuan asas serta kemahiran praktikal kepada peserta bagi mencegah jangkitan seperti CLABSI, SSI, dan mempromosikan penggunaan antibiotik yang berhemah di wad.",
+    stat_topics: "Topik Utama", stat_stations: "Stesen Praktikal", stat_duration: "Tempoh Bengkel",
+    intro_venue_title: "Tempat & Tarikh",
+    objectives_eyebrow: "Objektif & Jadual", objectives_title: "Objektif Bengkel",
+    schedule_title: "Jadual Program",
+    slides_eyebrow: "Bahan Kursus", slides_title: "Slaid",
+    quiz_pretest_eyebrow: "Penilaian", quiz_pretest_title: "Pre-Test",
+    quiz_posttest_title: "Post-Test",
+    quiz_locked_title: "Belum Dibuka",
+    quiz_locked_body: "Koordinator belum buka Post-Test lagi. Sila tunggu arahan.",
+    quiz_question_of: "Soalan",
+    quiz_submit: "Hantar Jawapan", quiz_next: "Seterusnya →",
+    quiz_result_title: "Keputusan Anda", quiz_your_score: "Markah anda",
+    feedback_eyebrow: "Penilaian", feedback_title: "Maklum Balas",
+    feedback_locked_body: "Koordinator belum buka borang Maklum Balas lagi. Sila tunggu arahan.",
+    feedback_overall: "Penilaian Keseluruhan Bengkel", feedback_facilitator: "Penilaian Fasilitator / Penceramah",
+    feedback_practical: "Penilaian Sesi Praktikal", feedback_comment_label: "Komen / Cadangan (pilihan)",
+    feedback_comment_ph: "Kongsikan pandangan anda tentang bengkel ini...",
+    feedback_submit: "Hantar Maklum Balas",
+    feedback_thanks_title: "Terima Kasih!", feedback_thanks_body: "Maklum balas anda telah direkodkan.",
+    attendance_eyebrow: "Aktiviti", attendance_title: "Kehadiran",
+    attendance_desc: "Tekan butang di bawah untuk merekod kehadiran anda pada hari bengkel.",
+    attendance_btn: "✓ Tandakan Kehadiran", attendance_done: "✓ Kehadiran Direkodkan",
+    cert_eyebrow: "Sijil", cert_title: "Sijil Penyertaan",
+    cert_locked_title: "Sijil Belum Tersedia",
+    cert_locked_body: "Lengkapkan borang Maklum Balas terlebih dahulu untuk membuka sijil penyertaan anda.",
+    cert_ready_desc: "Terima kasih kerana melengkapkan maklum balas. Sijil penyertaan anda sedia untuk dimuat turun.",
+    cert_download_btn: "⬇ Muat Turun Sijil (PDF)",
+    go_hero_title: "⚡ IPC GO!",
+    go_hero_desc: "Permainan kuiz langsung — jawab pantas, kumpul mata paling banyak, kuasai Infection Control & AMS!",
+    go_picker_desc: "Nama sebenar anda TIDAK dipaparkan pada papan pendahulu — hanya avatar & nickname di bawah.",
+    go_nickname_label: "Nickname (pilihan — kosongkan untuk guna nama avatar sahaja)",
+    go_nickname_ph: "Contoh: Ali IPC, Ward5Hero...",
+    go_pick_avatar: "Pilih avatar untuk masuk permainan:",
+    go_waiting_title: "Menunggu Koordinator", go_waiting_body: "Permainan akan bermula sebentar lagi...",
+    go_answered_title: "Jawapan Dihantar!", go_answered_body: "Menunggu peserta lain & keputusan koordinator...",
+  },
+  en: {
+    splash_eyebrow: "Infection Control Unit &nbsp;·&nbsp; HTPN Kajang",
+    splash_sub: "Infection Control &amp; Antimicrobial Stewardship Workshop — organised by the Infection Control Unit, Hospital Tengku Permaisuri Norashikin, Kajang.",
+    splash_enter: "Enter",
+    splash_hint: "Press ENTER on your keyboard, or click the button above",
+    reg_top_title: "Participant Registration",
+    reg_heading: "Register Attendance",
+    reg_desc: "Fill in your full details. Use the same Name &amp; IC Number to log in next time.",
+    field_name: "Full Name",
+    field_ic: "Identity Card (IC) Number",
+    field_dept: "Department",
+    field_coord_pass: "Coordinator Password",
+    ph_name: "e.g: ahmad bin ali",
+    ph_ic: "e.g: 900101101234 (dashes not required)",
+    dept_choose: "— Select Department —",
+    dept_1: "Emergency & Trauma Department", dept_2: "Medical Department", dept_3: "Surgical Department",
+    dept_4: "Paediatric Department", dept_5: "O&G Department", dept_6: "Orthopaedic Department",
+    dept_7: "Anaesthesiology Department", dept_8: "Radiology Department", dept_9: "Pathology Department",
+    dept_10: "Psychiatry Department", dept_11: "Forensic Department", dept_12: "Others",
+    btn_register: "Register &amp; Log In",
+    btn_login: "Log In",
+    btn_logout: "Log Out",
+    already_registered: 'Already registered? <a id="link-to-login">Log In</a>',
+    coord_link_reg: 'Coordinator? <a id="link-to-coord-from-reg">Coordinator Log In</a>',
+    coord_link_login: 'Coordinator? <a id="link-to-coord-from-login">Coordinator Log In</a>',
+    not_registered: 'Not registered yet? <a id="link-to-register">Register here</a>',
+    login_top_title: "Participant Log In",
+    login_heading: "Welcome Back",
+    login_desc: "Enter the Name &amp; IC Number used during registration.",
+    coord_panel_title: "Coordinator Panel",
+    coord_login_heading: "Coordinator Log In",
+    coord_login_desc: "For program organisers only — control Post-Test, Feedback &amp; the IPC GO! game.",
+    back_to_login: "← Back to Participant Log In",
+    nav_group_program: "Program", nav_group_assessment: "Assessment", nav_group_activity: "Activity",
+    nav_intro: "Introduction", nav_objectives: "Objectives & Schedule", nav_slides: "Slides",
+    nav_pretest: "Pre-Test", nav_posttest: "Post-Test", nav_feedback: "Feedback",
+    nav_attendance: "Attendance", nav_ipcgo: "IPC GO!", nav_certificate: "Certificate",
+    mnav_home: "Home", mnav_program: "Program", mnav_activity: "Activity", mnav_notif: "Notifications", mnav_profile: "Profile",
+    intro_eyebrow: "Programme Introduction", intro_title: "What is ICAMS?",
+    intro_body: "Infection Control and Antimicrobial Stewardship (ICAMS) — a one-day workshop organised by the HTPN Infection Control Unit for medical officers & house officers.",
+    intro_summary_title: "📋 My Summary",
+    intro_pretest_label: "Pre-Test Score", intro_posttest_label: "Post-Test Score",
+    intro_attendance_label: "Attendance", intro_feedback_label: "Feedback",
+    intro_cert_ready: "🎓 Your certificate of participation is ready to download in the <b>Certificate</b> tab.",
+    intro_cert_locked: "Complete the <b>Feedback</b> form to unlock your certificate of participation.",
+    intro_bg_title: "Background",
+    intro_bg_body: "Healthcare-Associated Infections and Antimicrobial Resistance (AMR) are major challenges in patient care today. The ICAMS 2026 workshop is specially designed to provide participants with foundational knowledge and practical skills to prevent infections such as CLABSI and SSI, and to promote judicious antibiotic use on the wards.",
+    stat_topics: "Core Topics", stat_stations: "Practical Stations", stat_duration: "Workshop Duration",
+    intro_venue_title: "Venue & Date",
+    objectives_eyebrow: "Objectives & Schedule", objectives_title: "Workshop Objectives",
+    schedule_title: "Programme Schedule",
+    slides_eyebrow: "Course Materials", slides_title: "Slides",
+    quiz_pretest_eyebrow: "Assessment", quiz_pretest_title: "Pre-Test",
+    quiz_posttest_title: "Post-Test",
+    quiz_locked_title: "Not Yet Open",
+    quiz_locked_body: "The coordinator hasn't opened the Post-Test yet. Please wait for instructions.",
+    quiz_question_of: "Question",
+    quiz_submit: "Submit Answers", quiz_next: "Next →",
+    quiz_result_title: "Your Result", quiz_your_score: "Your score",
+    feedback_eyebrow: "Assessment", feedback_title: "Feedback",
+    feedback_locked_body: "The coordinator hasn't opened the Feedback form yet. Please wait for instructions.",
+    feedback_overall: "Overall Workshop Rating", feedback_facilitator: "Facilitator / Speaker Rating",
+    feedback_practical: "Practical Session Rating", feedback_comment_label: "Comments / Suggestions (optional)",
+    feedback_comment_ph: "Share your thoughts about this workshop...",
+    feedback_submit: "Submit Feedback",
+    feedback_thanks_title: "Thank You!", feedback_thanks_body: "Your feedback has been recorded.",
+    attendance_eyebrow: "Activity", attendance_title: "Attendance",
+    attendance_desc: "Press the button below to record your attendance on the workshop day.",
+    attendance_btn: "✓ Mark Attendance", attendance_done: "✓ Attendance Recorded",
+    cert_eyebrow: "Certificate", cert_title: "Certificate of Participation",
+    cert_locked_title: "Certificate Not Yet Available",
+    cert_locked_body: "Complete the Feedback form first to unlock your certificate of participation.",
+    cert_ready_desc: "Thank you for completing the feedback. Your certificate of participation is ready to download.",
+    cert_download_btn: "⬇ Download Certificate (PDF)",
+    go_hero_title: "⚡ IPC GO!",
+    go_hero_desc: "Live quiz game — answer fast, score the most points, master Infection Control & AMS!",
+    go_picker_desc: "Your real name is NOT shown on the leaderboard — only the avatar & nickname below.",
+    go_nickname_label: "Nickname (optional — leave blank to use avatar name only)",
+    go_nickname_ph: "e.g: Ali IPC, Ward5Hero...",
+    go_pick_avatar: "Choose an avatar to join the game:",
+    go_waiting_title: "Waiting for Coordinator", go_waiting_body: "The game will start shortly...",
+    go_answered_title: "Answer Submitted!", go_answered_body: "Waiting for other players & the coordinator's results...",
+  }
+};
+let LANG = localStorage.getItem('icams_lang') || 'bm';
+function tr(key){ return (I18N[LANG] && I18N[LANG][key]) || (I18N.bm[key]) || key; }
+function applyStaticTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = tr(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{ el.innerHTML = tr(el.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ el.placeholder = tr(el.dataset.i18nPlaceholder); });
+  document.querySelectorAll('.lang-toggle').forEach(btn=>{ btn.textContent = LANG === 'bm' ? 'BM · EN' : 'EN · BM'; });
+}
+function setLang(lang){
+  LANG = lang;
+  localStorage.setItem('icams_lang', lang);
+  QUESTIONS = LANG === 'en' ? QUESTIONS_EN : QUESTIONS_BM;
+  OBJECTIVES = LANG === 'en' ? OBJECTIVES_EN : OBJECTIVES_BM;
+  applyStaticTranslations();
+  if(currentScreenId === 'screen-dashboard'){ renderPanel(activePanel); }
+  else if(currentScreenId === 'screen-coordinator'){ renderCoordinator(); }
+}
+document.querySelectorAll('.lang-toggle').forEach(btn=>{
+  btn.addEventListener('click', ()=> setLang(LANG === 'bm' ? 'en' : 'bm'));
+});
+
 const COORD_PASSWORD = "Handhygiene26";
 
 // Dikongsi oleh tab "Jana Laporan" (koordinator) & "Sijil" (peserta).
@@ -701,7 +981,7 @@ const COURSE_INFO = {
   penyedia: "Unit Kawalan Infeksi, HTPN Kajang"
 };
 
-const QUESTIONS = [
+const QUESTIONS_BM = [
   {q:"Apakah komponen asas 'Chain of Infection' yang perlu diputuskan untuk mengawal penularan jangkitan?",
    opts:["Infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host","Hanya infectious agent dan susceptible host sahaja","Hand hygiene dan PPE sahaja","Antibiotic dan vaccination sahaja"],correct:0},
   {q:"Antara berikut, yang manakah definisi paling tepat bagi Antimicrobial Resistance (AMR)?",
@@ -724,6 +1004,30 @@ const QUESTIONS = [
    opts:["Memastikan penggunaan antibiotik yang optimum bagi hasil rawatan terbaik & membendung AMR","Meningkatkan penggunaan antibiotik spektrum luas bagi semua kes","Memanjangkan tempoh terapi antibiotik untuk semua pesakit","Menggantikan tugas Infection Control Doctor sepenuhnya"],correct:0}
 ];
 
+const QUESTIONS_EN = [
+  {q:"What are the basic components of the 'Chain of Infection' that must be broken to control disease spread?",
+   opts:["Infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host","Only the infectious agent and susceptible host","Hand hygiene and PPE only","Antibiotics and vaccination only"],correct:0},
+  {q:"Which of the following is the most accurate definition of Antimicrobial Resistance (AMR)?",
+   opts:["The ability of microorganisms to survive antimicrobial drugs that would normally kill or inhibit them","Side effects of antibiotics on patients","Patient allergy to penicillin","Failure to sterilise medical equipment"],correct:0},
+  {q:"What is one of the key steps in preventing CLABSI-related Bloodstream Infection (BSI)?",
+   opts:["Practising aseptic non-touch technique (ANTT) during central line insertion and maintenance","Changing the central line daily without clinical indication","Skipping hand hygiene before line access to save time","Leaving central line dressing damp for patient comfort"],correct:0},
+  {q:"When is the most appropriate time to remove a central venous catheter (CVC) to reduce BSI risk?",
+   opts:["As soon as it is no longer clinically required","Only after 30 days of use","Only when the patient develops fever","It does not need to be removed as long as it is functioning"],correct:0},
+  {q:"What is the CORRECT practice when taking a blood culture to avoid contamination?",
+   opts:["Cleaning the skin with antiseptic and allowing it to dry completely before venepuncture","Drawing the sample from an existing IV line without extra preparation","Re-touching the site after it has been cleaned","Using the same culture bottle for two different patients"],correct:0},
+  {q:"What mistake (DON'T) commonly occurs during blood culture collection on the ward?",
+   opts:["Drawing an insufficient blood volume for the culture bottle","Labelling the bottle with the correct patient name and number","Using proper aseptic technique","Sending the sample to the lab within the required time"],correct:0},
+  {q:"Which of the following is a pre-operative step for SSI prevention?",
+   opts:["Surgical antibiotic prophylaxis given within 60 minutes before incision","Shaving the surgical site a day before the operation","Avoiding a shower before surgery","Giving antibiotics after the incision is made"],correct:0},
+  {q:"What is the recommended method for skin preparation before surgery to reduce SSI risk?",
+   opts:["Using an alcohol-based antiseptic (e.g. chlorhexidine-alcohol)","Shaving the surgical site an hour before the operation","Not cleaning the skin at all before incision","Using tap water only"],correct:0},
+  {q:"Which of the following is a patient-related risk factor for SSI?",
+   opts:["Uncontrolled diabetes mellitus, obesity, and poor nutritional status","Use of sterile gloves by the surgeon","Good operating theatre ventilation","Short duration of surgery"],correct:0},
+  {q:"What is the main goal of the Antimicrobial Stewardship (AMS) programme?",
+   opts:["Ensuring optimal antibiotic use for the best treatment outcomes & containing AMR","Increasing broad-spectrum antibiotic use for all cases","Extending antibiotic therapy duration for all patients","Fully replacing the role of the Infection Control Doctor"],correct:0}
+];
+let QUESTIONS = QUESTIONS_BM;
+
 const SCHEDULE = [
   {time:"8.00 – 8.30 AM", topic:"Registration & Pre-Test", speaker:""},
   {time:"8.30 – 9.15 AM", topic:"Introduction to ICAMS, Antimicrobial Resistance & Basics of Infection Control", speaker:"Dr Siti Saihah Selamat — Infection Control Doctor"},
@@ -738,11 +1042,17 @@ const SCHEDULE = [
   {time:"5.00 PM", topic:"End of Session", speaker:""}
 ];
 
-const OBJECTIVES = [
+const OBJECTIVES_BM = [
   "Memberi pengetahuan asas kepada pegawai perubatan & pegawai perubatan latihan siswazah berkaitan kawalan infeksi.",
   "Meningkatkan kesedaran dan pengetahuan peserta mengenai kesilapan yang sering dilakukan ketika melakukan prosedur di wad.",
   "Membimbing pegawai menggunakan garis panduan antibiotik secara berhemah (antimicrobial stewardship) bagi membendung isu rintangan antimikrob (AMR)."
 ];
+const OBJECTIVES_EN = [
+  "Provide medical officers & house officers with foundational knowledge of infection control.",
+  "Increase participants' awareness and knowledge of common mistakes made during ward procedures.",
+  "Guide officers in the judicious use of antibiotic guidelines (antimicrobial stewardship) to contain antimicrobial resistance (AMR)."
+];
+let OBJECTIVES = OBJECTIVES_BM;
 
 const GO_TILE_CLASSES = ["go-tile-1","go-tile-2","go-tile-3","go-tile-4"];
 const GO_TILE_SHAPES = ["◆","●","▲","■"];
@@ -780,6 +1090,8 @@ async function gsRun(action, ...args){
   else if(action === 'kvSet'){ payload.key = args[0]; payload.value = args[1]; }
   else if(action === 'kvGetByPrefix') payload.prefix = args[0];
   else if(action === 'kvDeleteByPrefix') payload.prefix = args[0];
+  else if(action === 'kvGetMultiple') payload.keys = args[0];
+  else if(action === 'getGoSnapshot') payload.qIndex = args[0];
   else if(action === 'generateReportDocx') payload.reportData = args[0];
   else if(action === 'generateCertificatePdf') payload.info = args[0];
 
@@ -806,8 +1118,80 @@ async function sSet(key, value, shared){
     return true;
   }catch(e){ console.error("storage set failed", key, e); return false; }
 }
+/* Ambil BANYAK key dalam SATU round-trip (elak lag bila banyak sGet berasingan
+   diperlukan serentak — contoh: buka panel Pengenalan). Pulangkan objek
+   { key: parsedValue|null } */
+async function sGetMultiple(keys){
+  try{
+    const raw = await gsRun('kvGetMultiple', keys);
+    const out = {};
+    keys.forEach(k=>{
+      const v = raw[k];
+      if(v === null || v === undefined || v === ''){ out[k] = null; return; }
+      try{ out[k] = JSON.parse(v); }catch(e){ out[k] = v; }
+    });
+    return out;
+  }catch(e){ console.error("storage getMultiple failed", keys, e); const out={}; keys.forEach(k=>out[k]=null); return out; }
+}
 
 function icKey(ic){ return (ic||"").replace(/[^a-zA-Z0-9]/g,""); }
+
+/* =========================================================
+   NOTIFIKASI — dihantar oleh koordinator, dibaca semua peserta
+========================================================= */
+async function pushNotification(title, body, type){
+  let list = await sGet('notifications', true) || [];
+  list.push({
+    id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+    title, body, type: type || 'info',
+    createdAt: new Date().toISOString()
+  });
+  if(list.length > 50) list = list.slice(-50); // simpan 50 terkini sahaja
+  await sSet('notifications', list, true);
+}
+let notifPollTimer = null;
+async function refreshNotifBadge(){
+  if(!currentUser || isCoordinator) return;
+  const key = icKey(currentUser.ic);
+  const data = await sGetMultiple(['notifications', 'notif-read:'+key]);
+  const list = data['notifications'] || [];
+  const lastSeen = (data['notif-read:'+key] || {}).lastSeenAt || null;
+  const unread = lastSeen ? list.filter(n=>n.createdAt > lastSeen) : list;
+  ['notif-badge','notif-badge-mobile'].forEach(id=>{
+    const badge = document.getElementById(id);
+    if(!badge) return;
+    if(unread.length > 0){ badge.textContent = unread.length > 9 ? '9+' : unread.length; badge.classList.remove('hidden'); }
+    else{ badge.classList.add('hidden'); }
+  });
+  return list;
+}
+async function openNotifDropdown(){
+  const dd = document.getElementById('notif-dropdown');
+  if(!dd) return;
+  const isOpen = !dd.classList.contains('hidden');
+  if(isOpen){ dd.classList.add('hidden'); return; }
+  const key = icKey(currentUser.ic);
+  const list = (await sGet('notifications', true) || []).slice().reverse();
+  dd.innerHTML = list.length ? list.slice(0,20).map(n=>`
+    <div class="notif-item">
+      <div class="notif-title">${escapeHtml(n.title)}</div>
+      <div class="notif-body">${escapeHtml(n.body)}</div>
+      <div class="notif-time">${new Date(n.createdAt).toLocaleString(LANG==='en'?'en-MY':'ms-MY')}</div>
+    </div>`).join('') : `<div class="notif-empty">${LANG==='en'?'No notifications yet.':'Tiada notifikasi lagi.'}</div>`;
+  dd.classList.remove('hidden');
+  await sSet('notif-read:'+key, {lastSeenAt: new Date().toISOString()}, false);
+  const badge = document.getElementById('notif-badge');
+  if(badge) badge.classList.add('hidden');
+}
+document.addEventListener('click', (e)=>{
+  const dd = document.getElementById('notif-dropdown');
+  const bell = document.getElementById('notif-bell');
+  if(!dd || dd.classList.contains('hidden')) return;
+  if(!dd.contains(e.target) && e.target !== bell && !bell.contains(e.target)){
+    dd.classList.add('hidden');
+  }
+});
+
 function titleCase(s){
   return (s||"").toLowerCase().replace(/\b\w/g, c=>c.toUpperCase());
 }
@@ -828,6 +1212,7 @@ function titleCase(s){
 let currentUser = null;    // {name, ic, dept}
 let isCoordinator = false;
 let activePanel = "intro";
+let currentScreenId = "screen-splash";
 let goPollTimer = null;
 let goAnswered = false;
 let goLastStatus = null;
@@ -842,7 +1227,9 @@ function toast(msg){
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
+  currentScreenId = id;
 }
+applyStaticTranslations();
 
 /* =========================================================
    SPLASH
@@ -874,13 +1261,13 @@ document.getElementById('btn-register').addEventListener('click', async ()=>{
   const errEl = document.getElementById('reg-error');
   errEl.style.display = 'none';
   if(!name || !ic || !dept){
-    errEl.textContent = "Sila lengkapkan semua ruangan.";
+    errEl.textContent = LANG==='en' ? "Please fill in all fields." : "Sila lengkapkan semua ruangan.";
     errEl.style.display = 'block';
     return;
   }
   const key = icKey(ic);
   const btn = document.getElementById('btn-register');
-  btn.disabled = true; btn.textContent = "Mendaftar...";
+  btn.disabled = true; btn.textContent = LANG==='en' ? "Registering..." : "Mendaftar...";
   let list = await sGet('participants', true) || [];
   const existing = list.find(p=>icKey(p.ic)===key);
   let ok = true;
@@ -889,9 +1276,9 @@ document.getElementById('btn-register').addEventListener('click', async ()=>{
     ok = await sSet('participants', list, true);
   }
   ok = (await sSet('profile:'+key, {name, ic, dept}, false)) && ok;
-  btn.disabled = false; btn.textContent = "Daftar & Masuk";
+  btn.disabled = false; btn.textContent = tr('btn_register').replace('&amp;','&');
   if(!ok){
-    errEl.textContent = "Pendaftaran GAGAL disimpan — sambungan ke Google Sheet bermasalah. Sila cuba lagi sekejap, atau maklumkan koordinator.";
+    errEl.textContent = LANG==='en' ? "Registration FAILED to save — there's a problem connecting to Google Sheets. Please try again shortly, or inform the coordinator." : "Pendaftaran GAGAL disimpan — sambungan ke Google Sheet bermasalah. Sila cuba lagi sekejap, atau maklumkan koordinator.";
     errEl.style.display = 'block';
     return;
   }
@@ -907,7 +1294,7 @@ document.getElementById('btn-login').addEventListener('click', async ()=>{
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
   if(!name || !ic){
-    errEl.textContent = "Sila masukkan nama dan No. K/P.";
+    errEl.textContent = LANG==='en' ? "Please enter your name and IC number." : "Sila masukkan nama dan No. K/P.";
     errEl.style.display = 'block';
     return;
   }
@@ -915,7 +1302,7 @@ document.getElementById('btn-login').addEventListener('click', async ()=>{
   const list = await sGet('participants', true) || [];
   const found = list.find(p=>icKey(p.ic)===key && p.name.trim().toLowerCase()===name.toLowerCase());
   if(!found){
-    errEl.textContent = "Rekod tidak dijumpai. Sila semak Nama & No. K/P, atau daftar dahulu.";
+    errEl.textContent = LANG==='en' ? "Record not found. Please check your Name & IC Number, or register first." : "Rekod tidak dijumpai. Sila semak Nama & No. K/P, atau daftar dahulu.";
     errEl.style.display = 'block';
     return;
   }
@@ -930,10 +1317,18 @@ function loginUser(user){
   document.getElementById('topbar-avatar').textContent = (user.name||'?').trim().charAt(0).toUpperCase();
   show('screen-dashboard');
   setActivePanel('intro');
+  refreshNotifBadge();
+  notifPollTimer && clearInterval(notifPollTimer);
+  notifPollTimer = setInterval(refreshNotifBadge, 20000);
 }
+document.getElementById('notif-bell').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  openNotifDropdown();
+});
 
 document.getElementById('btn-logout').addEventListener('click', ()=>{
   stopGoPolling();
+  notifPollTimer && clearInterval(notifPollTimer);
   currentUser = null;
   show('screen-splash');
 });
@@ -945,7 +1340,7 @@ document.getElementById('btn-coord-login').addEventListener('click', ()=>{
   const pass = document.getElementById('coord-pass').value;
   const errEl = document.getElementById('coord-error');
   if(pass !== COORD_PASSWORD){
-    errEl.textContent = "Kata laluan tidak sah.";
+    errEl.textContent = LANG==='en' ? "Invalid password." : "Kata laluan tidak sah.";
     errEl.style.display = 'block';
     return;
   }
@@ -969,25 +1364,117 @@ document.querySelectorAll('.rail-btn').forEach(btn=>{
 function setActivePanel(panel){
   activePanel = panel;
   document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active', b.dataset.panel===panel));
+  syncMobileNavActive(panel);
   if(panel !== 'ipcgo') stopGoPolling();
   renderPanel(panel);
 }
 
+/* =========================================================
+   MOBILE BOTTOM NAV + BOTTOM SHEET
+========================================================= */
+const MNAV_GROUPS = {
+  program: ['objectives','slides','pretest','posttest'],
+  activity: ['attendance','ipcgo','certificate','feedback']
+};
+function mnavGroupOf(panel){
+  if(panel === 'intro') return 'home';
+  if(MNAV_GROUPS.program.includes(panel)) return 'program';
+  if(MNAV_GROUPS.activity.includes(panel)) return 'activity';
+  return 'home';
+}
+function syncMobileNavActive(panel){
+  const group = mnavGroupOf(panel);
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.toggle('active', b.dataset.mnav===group));
+}
+function closeMobileSheet(){
+  const sheet = document.getElementById('mobile-sheet');
+  if(sheet) sheet.classList.add('hidden');
+}
+function openMobileListSheet(panels, title){
+  const sheet = document.getElementById('mobile-sheet');
+  const panelEl = document.getElementById('mobile-sheet-panel');
+  const iconMap = {objectives:'⊙', slides:'▤', pretest:'1', posttest:'2', feedback:'✎', attendance:'✓', ipcgo:'⚡', certificate:'🎓'};
+  const lockMap = {posttest:'lockdot-posttest', feedback:'lockdot-feedback', certificate:'lockdot-certificate'};
+  panelEl.innerHTML = `<h3 style="margin:0 0 10px;font-family:var(--font-display);font-size:16px;">${title}</h3>` +
+    panels.map(p=>`
+      <div class="mobile-sheet-item" data-panel="${p}">
+        <span class="ic">${iconMap[p]||'•'}</span><span>${tr('nav_'+p)}</span>
+        ${lockMap[p] ? `<span class="lockdot" data-mirror="${lockMap[p]}">⚿</span>` : ''}
+      </div>`).join('');
+  // salin status kunci (✓/⚿) dari rail sedia ada supaya konsisten
+  panelEl.querySelectorAll('[data-mirror]').forEach(el=>{
+    const src = document.getElementById(el.dataset.mirror);
+    if(src) el.textContent = src.textContent;
+  });
+  panelEl.querySelectorAll('.mobile-sheet-item').forEach(el=>{
+    el.addEventListener('click', ()=>{ setActivePanel(el.dataset.panel); closeMobileSheet(); });
+  });
+  sheet.classList.remove('hidden');
+}
+async function openMobileNotifSheet(){
+  const sheet = document.getElementById('mobile-sheet');
+  const panelEl = document.getElementById('mobile-sheet-panel');
+  const key = icKey(currentUser.ic);
+  const list = (await sGet('notifications', true) || []).slice().reverse();
+  panelEl.innerHTML = `<h3 style="margin:0 0 10px;font-family:var(--font-display);font-size:16px;">${tr('mnav_notif')}</h3>` +
+    (list.length ? list.slice(0,20).map(n=>`
+      <div class="notif-item">
+        <div class="notif-title">${escapeHtml(n.title)}</div>
+        <div class="notif-body">${escapeHtml(n.body)}</div>
+        <div class="notif-time">${new Date(n.createdAt).toLocaleString(LANG==='en'?'en-MY':'ms-MY')}</div>
+      </div>`).join('') : `<div class="notif-empty">${LANG==='en'?'No notifications yet.':'Tiada notifikasi lagi.'}</div>`);
+  sheet.classList.remove('hidden');
+  await sSet('notif-read:'+key, {lastSeenAt: new Date().toISOString()}, false);
+  ['notif-badge','notif-badge-mobile'].forEach(id=>{ const b = document.getElementById(id); if(b) b.classList.add('hidden'); });
+}
+function openMobileProfileSheet(){
+  const sheet = document.getElementById('mobile-sheet');
+  const panelEl = document.getElementById('mobile-sheet-panel');
+  panelEl.innerHTML = `
+    <div style="text-align:center;padding:6px 0 20px;">
+      <div class="avatar-chip" style="width:56px;height:56px;font-size:22px;margin:0 auto 10px;">${(currentUser.name||'?').trim().charAt(0).toUpperCase()}</div>
+      <div style="font-weight:700;font-size:15px;">${escapeHtml(currentUser.name)}</div>
+      <div style="font-size:12.5px;color:#8A6355;">${escapeHtml(currentUser.dept)}</div>
+    </div>
+    <button class="btn btn-ghost" id="mobile-logout-btn" style="width:100%;border-color:var(--danger);color:var(--danger);">${tr('btn_logout')}</button>
+  `;
+  document.getElementById('mobile-logout-btn').addEventListener('click', ()=>{ document.getElementById('btn-logout').click(); });
+  sheet.classList.remove('hidden');
+}
+document.querySelectorAll('.mnav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const g = btn.dataset.mnav;
+    if(g === 'home'){ setActivePanel('intro'); closeMobileSheet(); }
+    else if(g === 'program'){ openMobileListSheet(MNAV_GROUPS.program, tr('mnav_program')); }
+    else if(g === 'activity'){ openMobileListSheet(MNAV_GROUPS.activity, tr('mnav_activity')); }
+    else if(g === 'notif'){ openMobileNotifSheet(); }
+    else if(g === 'profile'){ openMobileProfileSheet(); }
+    document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.toggle('active', b===btn));
+  });
+});
+document.getElementById('mobile-sheet-backdrop').addEventListener('click', closeMobileSheet);
+
+
 async function renderPanel(panel){
   const main = document.getElementById('dash-main');
-  const coordState = await sGet('coordinator-state', true) || {postTestUnlocked:false, feedbackUnlocked:false};
+  const key = icKey(currentUser.ic);
+  const data = await sGetMultiple([
+    'coordinator-state', 'feedback:'+key, 'pretest:'+key, 'posttest:'+key, 'attendance:'+key
+  ]);
+  const coordState = data['coordinator-state'] || {postTestUnlocked:false, feedbackUnlocked:false};
   updateLockDots(coordState);
-  updateCertificateLockDot();
+  const certDot = document.getElementById('lockdot-certificate');
+  if(certDot) certDot.textContent = data['feedback:'+key] ? '✓' : '⚿';
 
-  if(panel === 'intro') return renderIntro(main);
+  if(panel === 'intro') return renderIntro(main, data);
   if(panel === 'objectives') return renderObjectives(main);
   if(panel === 'slides') return renderSlides(main);
-  if(panel === 'pretest') return renderQuiz(main, 'pretest', true);
-  if(panel === 'posttest') return renderQuiz(main, 'posttest', coordState.postTestUnlocked);
-  if(panel === 'feedback') return renderFeedback(main, coordState.feedbackUnlocked);
-  if(panel === 'attendance') return renderAttendance(main);
+  if(panel === 'pretest') return renderQuiz(main, 'pretest', true, data['pretest:'+key]);
+  if(panel === 'posttest') return renderQuiz(main, 'posttest', coordState.postTestUnlocked, data['posttest:'+key]);
+  if(panel === 'feedback') return renderFeedback(main, coordState.feedbackUnlocked, data['feedback:'+key]);
+  if(panel === 'attendance') return renderAttendance(main, data['attendance:'+key]);
   if(panel === 'ipcgo') return renderIpcGo(main);
-  if(panel === 'certificate') return renderCertificate(main);
+  if(panel === 'certificate') return renderCertificate(main, data['feedback:'+key]);
 }
 
 function updateLockDots(coordState){
@@ -995,14 +1482,6 @@ function updateLockDots(coordState){
   const fb = document.getElementById('lockdot-feedback');
   pt.textContent = coordState.postTestUnlocked ? '✓' : '⚿';
   fb.textContent = coordState.feedbackUnlocked ? '✓' : '⚿';
-}
-
-async function updateCertificateLockDot(){
-  const dot = document.getElementById('lockdot-certificate');
-  if(!dot || !currentUser) return;
-  const key = icKey(currentUser.ic);
-  const fb = await sGet('feedback:'+key, false);
-  dot.textContent = fb ? '✓' : '⚿';
 }
 
 /* Muat turun fail base64 (dari Apps Script) sebagai fail sebenar di browser */
@@ -1020,57 +1499,74 @@ function downloadBase64File(base64, fileName, mime){
 }
 
 /* ---------- INTRO ---------- */
-async function renderIntro(main){
+async function renderIntro(main, preloaded){
   const key = icKey(currentUser.ic);
-  const [preRes, postRes, attendanceList, feedbackRec] = await Promise.all([
-    sGet('pretest:'+key, false),
-    sGet('posttest:'+key, false),
-    sGet('attendance-list', true),
-    sGet('feedback:'+key, false)
-  ]);
-  const attended = (attendanceList||[]).some(a=>icKey(a.ic)===key);
-  const fbDone = !!feedbackRec;
+  const preRes = preloaded['pretest:'+key];
+  const postRes = preloaded['posttest:'+key];
+  const attended = !!preloaded['attendance:'+key];
+  const fbDone = !!preloaded['feedback:'+key];
 
   main.innerHTML = `
     <div class="panel-head">
-      <span class="eyebrow">Pengenalan Program</span>
-      <h2>Apa itu ICAMS?</h2>
-      <p>Infection Control and Antimicrobial Stewardship (ICAMS) — bengkel sehari anjuran Unit Kawalan Infeksi HTPN untuk pegawai perubatan & pegawai perubatan latihan siswazah.</p>
+      <span class="eyebrow">${tr('intro_eyebrow')}</span>
+      <h2>${tr('intro_title')}</h2>
+      <p>${tr('intro_body')}</p>
     </div>
     <div class="card">
-      <h3>📋 Ringkasan Saya</h3>
-      <div class="stat-row" style="margin-top:12px;">
-        <div class="stat-chip"><div class="v">${preRes ? preRes.score+'/'+preRes.total : '—'}</div><div class="l">Markah Pre-Test</div></div>
-        <div class="stat-chip"><div class="v">${postRes ? postRes.score+'/'+postRes.total : '—'}</div><div class="l">Markah Post-Test</div></div>
-        <div class="stat-chip"><div class="v">${attended ? '✓' : '—'}</div><div class="l">Kehadiran</div></div>
-        <div class="stat-chip"><div class="v">${fbDone ? '✓' : '—'}</div><div class="l">Maklum Balas</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="margin:0;">${tr('intro_summary_title')}</h3>
+        <a href="#" id="intro-view-all" style="font-size:12.5px;font-weight:700;color:var(--teal-mid);text-decoration:none;">${LANG==='en'?'View All':'Lihat Semua'} →</a>
       </div>
-      ${fbDone ? `<p style="font-size:13px;color:#8A6355;margin:14px 0 0;">🎓 Sijil penyertaan anda sudah boleh dimuat turun di tab <b>Sijil</b>.</p>` : `<p style="font-size:13px;color:#8A6355;margin:14px 0 0;">Lengkapkan borang <b>Maklum Balas</b> untuk membuka sijil penyertaan anda.</p>`}
+      <div class="stat-row" style="margin-top:12px;">
+        <div class="stat-chip"><div class="v">${preRes ? preRes.score+'/'+preRes.total : '—'}</div><div class="l">${tr('intro_pretest_label')}</div></div>
+        <div class="stat-chip"><div class="v">${postRes ? postRes.score+'/'+postRes.total : '—'}</div><div class="l">${tr('intro_posttest_label')}</div></div>
+        <div class="stat-chip"><div class="v">${attended ? '✓' : '—'}</div><div class="l">${tr('intro_attendance_label')}</div></div>
+        <div class="stat-chip"><div class="v">${fbDone ? '✓' : '—'}</div><div class="l">${tr('intro_feedback_label')}</div></div>
+      </div>
+      <p style="font-size:13px;color:#8A6355;margin:14px 0 0;">${fbDone ? tr('intro_cert_ready') : tr('intro_cert_locked')}</p>
+    </div>
+    <div class="quick-shortcuts-wrap">
+      <h3 style="font-family:var(--font-display);font-size:15px;margin:20px 0 10px;">${LANG==='en'?'Quick Shortcuts':'Pintasan Pantas'}</h3>
+      <div class="quick-shortcuts">
+        <button class="qshortcut-btn" data-panel="attendance"><span class="ic">✓</span><span>${tr('nav_attendance')}</span></button>
+        <button class="qshortcut-btn" data-panel="ipcgo"><span class="ic">⚡</span><span>${tr('nav_ipcgo')}</span></button>
+        <button class="qshortcut-btn" data-panel="certificate"><span class="ic">🎓</span><span>${tr('nav_certificate')}</span></button>
+        <button class="qshortcut-btn" data-panel="feedback"><span class="ic">✎</span><span>${tr('nav_feedback')}</span></button>
+      </div>
     </div>
     <div class="card">
-      <h3>Latar Belakang</h3>
-      <p style="font-size:14px;line-height:1.7;color:#5C3A2E;">
-      Jangkitan berkaitan penjagaan kesihatan (Healthcare-Associated Infections) dan rintangan antimikrob (Antimicrobial Resistance) merupakan cabaran utama dalam penjagaan pesakit hari ini. Bengkel ICAMS 2026 direka khusus untuk membekalkan pengetahuan asas serta kemahiran praktikal kepada peserta bagi mencegah jangkitan seperti CLABSI, SSI, dan mempromosikan penggunaan antibiotik yang berhemah di wad.
-      </p>
+      <h3>${tr('intro_bg_title')}</h3>
+      <p style="font-size:14px;line-height:1.7;color:#5C3A2E;">${tr('intro_bg_body')}</p>
     </div>
     <div class="stat-row">
-      <div class="stat-chip"><div class="v">5</div><div class="l">Topik Utama</div></div>
-      <div class="stat-chip"><div class="v">4</div><div class="l">Stesen Praktikal</div></div>
-      <div class="stat-chip"><div class="v">9 Jam</div><div class="l">Tempoh Bengkel</div></div>
+      <div class="stat-chip"><div class="v">5</div><div class="l">${tr('stat_topics')}</div></div>
+      <div class="stat-chip"><div class="v">4</div><div class="l">${tr('stat_stations')}</div></div>
+      <div class="stat-chip"><div class="v">9 ${LANG==='en'?'Hours':'Jam'}</div><div class="l">${tr('stat_duration')}</div></div>
     </div>
     <div class="card">
-      <h3>Tempat & Tarikh</h3>
-      <p style="font-size:14px;color:#5C3A2E;margin:0;">Dewan Akasia, Aras 5, WCC, HTPN &nbsp;·&nbsp; 27 Ogos 2026 &nbsp;·&nbsp; 8.00 Pagi – 5.00 Petang</p>
+      <h3>${tr('intro_venue_title')}</h3>
+      <p style="font-size:14px;color:#5C3A2E;margin:0;">Dewan Akasia, Aras 5, WCC, HTPN &nbsp;·&nbsp; 27 ${LANG==='en'?'August 2026':'Ogos 2026'} &nbsp;·&nbsp; 8.00 ${LANG==='en'?'AM – 5.00 PM':'Pagi – 5.00 Petang'}</p>
     </div>
   `;
+  main.querySelectorAll('.qshortcut-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> setActivePanel(btn.dataset.panel));
+  });
+  const viewAll = document.getElementById('intro-view-all');
+  if(viewAll){
+    viewAll.addEventListener('click', (e)=>{
+      e.preventDefault();
+      if(window.innerWidth <= 760){ openMobileListSheet(MNAV_GROUPS.activity, tr('mnav_activity')); }
+      else { setActivePanel('attendance'); }
+    });
+  }
 }
 
 /* ---------- OBJECTIVES & SCHEDULE ---------- */
 function renderObjectives(main){
   main.innerHTML = `
     <div class="panel-head">
-      <span class="eyebrow">Objektif & Jadual</span>
-      <h2>Objektif Bengkel</h2>
+      <span class="eyebrow">${tr('objectives_eyebrow')}</span>
+      <h2>${tr('objectives_title')}</h2>
     </div>
     <div class="card">
       <ul class="obj-list">
@@ -1078,11 +1574,11 @@ function renderObjectives(main){
       </ul>
     </div>
     <div class="panel-head" style="margin-top:26px;">
-      <h2 style="font-size:20px;">Jadual Program</h2>
+      <h2 style="font-size:20px;">${tr('schedule_title')}</h2>
     </div>
     <div class="card" style="padding:14px 18px;">
       <table class="sched-table">
-        <thead><tr><th>Masa</th><th>Topik</th><th>Fasilitator</th></tr></thead>
+        <thead><tr><th>${LANG==='en'?'Time':'Masa'}</th><th>${LANG==='en'?'Topic':'Topik'}</th><th>${LANG==='en'?'Facilitator':'Fasilitator'}</th></tr></thead>
         <tbody>
           ${SCHEDULE.map(s=>`<tr><td class="sched-time">${s.time}</td><td>${s.topic}</td><td class="sched-speaker">${s.speaker||'—'}</td></tr>`).join('')}
         </tbody>
@@ -1096,9 +1592,9 @@ async function renderSlides(main){
   const slides = await sGet('slides', true) || [];
   main.innerHTML = `
     <div class="panel-head">
-      <span class="eyebrow">Bahan Bengkel</span>
-      <h2>Slaid & Bahan Rujukan</h2>
-      <p>Pautan slaid akan dimuat naik oleh koordinator sepanjang program.</p>
+      <span class="eyebrow">${tr('slides_eyebrow')}</span>
+      <h2>${tr('slides_title')}</h2>
+      <p>${LANG==='en' ? 'Slide links will be uploaded by the coordinator throughout the programme.' : 'Pautan slaid akan dimuat naik oleh koordinator sepanjang program.'}</p>
     </div>
     <div class="card">
       ${slides.length ? slides.map(s=>`
@@ -1114,30 +1610,30 @@ async function renderSlides(main){
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 /* ---------- ATTENDANCE ---------- */
-async function renderAttendance(main){
+async function renderAttendance(main, preloadedRecord){
   const key = icKey(currentUser.ic);
-  const record = await sGet('attendance:'+key, false);
+  const record = preloadedRecord;
   main.innerHTML = `
     <div class="panel-head">
-      <span class="eyebrow">Kehadiran</span>
-      <h2>Tandakan Kehadiran</h2>
-      <p>Tandakan kehadiran anda sebaik sahaja tiba di Dewan Akasia.</p>
+      <span class="eyebrow">${tr('attendance_eyebrow')}</span>
+      <h2>${tr('attendance_title')}</h2>
+      <p>${tr('attendance_desc')}</p>
     </div>
     <div class="att-status ${record?'marked':''}" id="att-status">
       <div class="dot"></div>
       <div class="txt">
-        <div class="t">${record ? 'Kehadiran Direkodkan' : 'Kehadiran Belum Direkodkan'}</div>
-        <div class="s">${record ? new Date(record.timestamp).toLocaleString('ms-MY') : currentUser.name+' · '+currentUser.dept}</div>
+        <div class="t">${record ? tr('attendance_done') : (LANG==='en'?'Attendance Not Yet Recorded':'Kehadiran Belum Direkodkan')}</div>
+        <div class="s">${record ? new Date(record.timestamp).toLocaleString(LANG==='en'?'en-MY':'ms-MY') : currentUser.name+' · '+currentUser.dept}</div>
       </div>
     </div>
     <button class="btn btn-primary" id="btn-mark-att" ${record?'disabled':''} style="max-width:260px;">
-      ${record ? 'Kehadiran Sudah Ditandakan' : 'Tandakan Kehadiran Saya'}
+      ${record ? (LANG==='en'?'Attendance Already Marked':'Kehadiran Sudah Ditandakan') : tr('attendance_btn')}
     </button>
   `;
   const btn = document.getElementById('btn-mark-att');
   if(btn && !record){
     btn.addEventListener('click', async ()=>{
-      btn.disabled = true; btn.textContent = "Merekod...";
+      btn.disabled = true; btn.textContent = LANG==='en' ? "Recording..." : "Merekod...";
       const rec = {name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, timestamp:new Date().toISOString()};
       await sSet('attendance:'+key, rec, false);
       let all = await sGet('attendance-list', true) || [];
@@ -1145,27 +1641,27 @@ async function renderAttendance(main){
         all.push(rec);
         await sSet('attendance-list', all, true);
       }
-      toast("Kehadiran berjaya direkodkan!");
-      renderAttendance(main);
+      toast(LANG==='en' ? "Attendance recorded successfully!" : "Kehadiran berjaya direkodkan!");
+      renderAttendance(main, rec);
     });
   }
 }
 
 /* ---------- PRE/POST TEST ---------- */
-async function renderQuiz(main, kind, unlocked){
-  const label = kind==='pretest' ? 'Pre-Test' : 'Post-Test';
+async function renderQuiz(main, kind, unlocked, preloadedSaved){
+  const label = kind==='pretest' ? tr('quiz_pretest_title') : tr('quiz_posttest_title');
   if(!unlocked){
     main.innerHTML = `
-      <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>${label}</h2></div>
+      <div class="panel-head"><span class="eyebrow">${tr('quiz_pretest_eyebrow')}</span><h2>${label}</h2></div>
       <div class="card locked-card">
         <div class="lock-ic">⚿</div>
-        <h3>${label} Belum Dibuka</h3>
-        <p>Koordinator belum membuka ${label} lagi. Sila tunggu pengumuman semasa sesi.</p>
+        <h3>${label} ${tr('quiz_locked_title')}</h3>
+        <p>${tr('quiz_locked_body')}</p>
       </div>`;
     return;
   }
   const key = icKey(currentUser.ic);
-  const saved = await sGet(kind+':'+key, false);
+  const saved = preloadedSaved;
   if(saved){
     return renderQuizResult(main, kind, saved);
   }
@@ -1173,7 +1669,7 @@ async function renderQuiz(main, kind, unlocked){
   const answers = new Array(QUESTIONS.length).fill(null);
 
   main.innerHTML = `
-    <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>${label}</h2><p>Jawab semua ${QUESTIONS.length} soalan. Jawapan akan disimpan secara automatik.</p></div>
+    <div class="panel-head"><span class="eyebrow">${tr('quiz_pretest_eyebrow')}</span><h2>${label}</h2><p>${LANG==='en' ? `Answer all ${QUESTIONS.length} questions. Your answers are saved automatically.` : `Jawab semua ${QUESTIONS.length} soalan. Jawapan akan disimpan secara automatik.`}</p></div>
     <div class="card">
       <div class="q-progress">
         <div class="q-progress-bar"><div class="q-progress-fill" id="qp-fill" style="width:${100/QUESTIONS.length}%;"></div></div>
@@ -1193,10 +1689,10 @@ async function renderQuiz(main, kind, unlocked){
           </button>`).join('')}
       </div>
       <div class="q-nav">
-        <button class="btn btn-ghost" data-nav="prev" data-qi="${qi}" ${qi===0?'style="visibility:hidden;"':''}>← Sebelum</button>
+        <button class="btn btn-ghost" data-nav="prev" data-qi="${qi}" ${qi===0?'style="visibility:hidden;"':''}>← ${LANG==='en'?'Back':'Sebelum'}</button>
         ${qi === QUESTIONS.length-1
-          ? `<button class="btn btn-primary" id="btn-submit-quiz" style="width:auto;" disabled>Hantar Jawapan</button>`
-          : `<button class="btn btn-primary" style="width:auto;" data-nav="next" data-qi="${qi}" disabled>Seterusnya →</button>`}
+          ? `<button class="btn btn-primary" id="btn-submit-quiz" style="width:auto;" disabled>${tr('quiz_submit')}</button>`
+          : `<button class="btn btn-primary" style="width:auto;" data-nav="next" data-qi="${qi}" disabled>${tr('quiz_next')}</button>`}
       </div>
     </div>
   `).join('');
@@ -1227,7 +1723,7 @@ async function renderQuiz(main, kind, unlocked){
       QUESTIONS.forEach((q,qi)=>{ if(answers[qi]===q.correct) score++; });
       const result = {answers, score, total:QUESTIONS.length, submittedAt:new Date().toISOString()};
       const btn = e.target;
-      btn.disabled = true; btn.textContent = "Menghantar...";
+      btn.disabled = true; btn.textContent = LANG==='en' ? "Submitting..." : "Menghantar...";
       await sSet(kind+':'+key, result, false);
       let allResults = await sGet(kind+'-results', true) || [];
       allResults = allResults.filter(r=>icKey(r.ic)!==key);
@@ -1237,25 +1733,25 @@ async function renderQuiz(main, kind, unlocked){
   }, {once:true});
 }
 function renderQuizResult(main, kind, result){
-  const label = kind==='pretest' ? 'Pre-Test' : 'Post-Test';
+  const label = kind==='pretest' ? tr('quiz_pretest_title') : tr('quiz_posttest_title');
   main.innerHTML = `
-    <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>${label}</h2></div>
+    <div class="panel-head"><span class="eyebrow">${tr('quiz_pretest_eyebrow')}</span><h2>${label}</h2></div>
     <div class="card">
       <div class="result-score">
         <div class="num">${result.score}<span style="font-size:24px;color:#A6857A;">/${result.total}</span></div>
-        <div class="of">Jawapan anda telah dihantar pada ${new Date(result.submittedAt).toLocaleString('ms-MY')}</div>
+        <div class="of">${LANG==='en' ? 'Your answers were submitted on' : 'Jawapan anda telah dihantar pada'} ${new Date(result.submittedAt).toLocaleString(LANG==='en'?'en-MY':'ms-MY')}</div>
       </div>
     </div>
     <div class="card">
-      <h3>Semakan Jawapan</h3>
+      <h3>${LANG==='en' ? 'Answer Review' : 'Semakan Jawapan'}</h3>
       ${QUESTIONS.map((q,qi)=>{
         const correct = result.answers[qi]===q.correct;
         return `<div style="padding:10px 0;border-bottom:1px solid #F6EAE1;">
           <div style="font-size:13.5px;font-weight:600;margin-bottom:4px;">${qi+1}. ${q.q}</div>
           <div style="font-size:12.5px;color:${correct?'#2F9E68':'#D64545'};">
-            Jawapan anda: ${result.answers[qi]!=null ? q.opts[result.answers[qi]] : '—'} ${correct?'✓':'✗'}
+            ${LANG==='en'?'Your answer':'Jawapan anda'}: ${result.answers[qi]!=null ? q.opts[result.answers[qi]] : '—'} ${correct?'✓':'✗'}
           </div>
-          ${!correct ? `<div style="font-size:12.5px;color:#8A6355;">Jawapan betul: ${q.opts[q.correct]}</div>` : ''}
+          ${!correct ? `<div style="font-size:12.5px;color:#8A6355;">${LANG==='en'?'Correct answer':'Jawapan betul'}: ${q.opts[q.correct]}</div>` : ''}
         </div>`;
       }).join('')}
     </div>
@@ -1263,57 +1759,57 @@ function renderQuizResult(main, kind, result){
 }
 
 /* ---------- FEEDBACK ---------- */
-async function renderFeedback(main, unlocked){
+async function renderFeedback(main, unlocked, preloadedSaved){
   if(!unlocked){
     main.innerHTML = `
-      <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>Maklum Balas</h2></div>
+      <div class="panel-head"><span class="eyebrow">${tr('feedback_eyebrow')}</span><h2>${tr('feedback_title')}</h2></div>
       <div class="card locked-card">
         <div class="lock-ic">⚿</div>
-        <h3>Maklum Balas Belum Dibuka</h3>
-        <p>Borang maklum balas akan dibuka oleh koordinator selepas Post-Test.</p>
+        <h3>${tr('feedback_title')} ${tr('quiz_locked_title')}</h3>
+        <p>${tr('feedback_locked_body')}</p>
       </div>`;
     return;
   }
   const key = icKey(currentUser.ic);
-  const saved = await sGet('feedback:'+key, false);
+  const saved = preloadedSaved;
   if(saved){
     main.innerHTML = `
-      <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>Maklum Balas</h2></div>
+      <div class="panel-head"><span class="eyebrow">${tr('feedback_eyebrow')}</span><h2>${tr('feedback_title')}</h2></div>
       <div class="card locked-card">
         <div class="lock-ic" style="background:#EAF8F0;color:var(--success);">✓</div>
-        <h3>Terima Kasih!</h3>
-        <p>Maklum balas anda telah dihantar. Kami menghargai pandangan anda.</p>
+        <h3>${tr('feedback_thanks_title')}</h3>
+        <p>${tr('feedback_thanks_body')}</p>
       </div>`;
     return;
   }
   main.innerHTML = `
-    <div class="panel-head"><span class="eyebrow">Penilaian</span><h2>Maklum Balas Bengkel</h2><p>Pandangan anda membantu kami menambah baik program akan datang.</p></div>
+    <div class="panel-head"><span class="eyebrow">${tr('feedback_eyebrow')}</span><h2>${tr('feedback_title')}</h2><p>${LANG==='en' ? 'Your feedback helps us improve future programmes.' : 'Pandangan anda membantu kami menambah baik program akan datang.'}</p></div>
     <div class="card">
-      <h3>Kepuasan keseluruhan bengkel</h3>
+      <h3>${tr('feedback_overall')}</h3>
       <div class="rating-row" id="fb-overall">
         ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
       </div>
-      <div class="hint" style="margin-bottom:0;font-size:11.5px;color:#A6857A;">1 = Tidak Memuaskan &nbsp;·&nbsp; 5 = Sangat Memuaskan</div>
+      <div class="hint" style="margin-bottom:0;font-size:11.5px;color:#A6857A;">${LANG==='en' ? '1 = Unsatisfactory · 5 = Excellent' : '1 = Tidak Memuaskan &nbsp;·&nbsp; 5 = Sangat Memuaskan'}</div>
     </div>
     <div class="card">
-      <h3>Kualiti penyampaian fasilitator</h3>
+      <h3>${tr('feedback_facilitator')}</h3>
       <div class="rating-row" id="fb-facilitator">
         ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
       </div>
     </div>
     <div class="card">
-      <h3>Sesi praktikal (4 Stesen)</h3>
+      <h3>${tr('feedback_practical')}</h3>
       <div class="rating-row" id="fb-practical">
         ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
       </div>
     </div>
     <div class="card">
-      <h3>Cadangan / Komen</h3>
+      <h3>${tr('feedback_comment_label')}</h3>
       <div class="field" style="margin-bottom:0;">
-        <textarea id="fb-comment" rows="4" placeholder="Kongsikan pandangan anda mengenai bengkel ini..."></textarea>
+        <textarea id="fb-comment" rows="4" placeholder="${tr('feedback_comment_ph')}"></textarea>
       </div>
     </div>
-    <button class="btn btn-primary" id="btn-submit-fb" style="max-width:260px;">Hantar Maklum Balas</button>
+    <button class="btn btn-primary" id="btn-submit-fb" style="max-width:260px;">${tr('feedback_submit')}</button>
   `;
   const ratings = {overall:null, facilitator:null, practical:null};
   [['overall','fb-overall'],['facilitator','fb-facilitator'],['practical','fb-practical']].forEach(([k,id])=>{
@@ -1327,7 +1823,7 @@ async function renderFeedback(main, unlocked){
   });
   document.getElementById('btn-submit-fb').addEventListener('click', async ()=>{
     if(!ratings.overall || !ratings.facilitator || !ratings.practical){
-      toast("Sila lengkapkan semua penilaian rating.");
+      toast(LANG==='en' ? "Please complete all ratings." : "Sila lengkapkan semua penilaian rating.");
       return;
     }
     const fb = {...ratings, comment: document.getElementById('fb-comment').value.trim(), submittedAt:new Date().toISOString()};
@@ -1336,42 +1832,43 @@ async function renderFeedback(main, unlocked){
     all = all.filter(f=>icKey(f.ic)!==key);
     all.push({name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, ...ratings, comment:fb.comment});
     await sSet('feedback-list', all, true);
-    renderFeedback(main, true);
-    updateCertificateLockDot();
-    toast("Maklum balas dihantar. Terima kasih! Sijil anda kini boleh dimuat turun.");
+    renderFeedback(main, true, fb);
+    const certDot = document.getElementById('lockdot-certificate');
+    if(certDot) certDot.textContent = '✓';
+    toast(LANG==='en' ? "Feedback submitted. Thank you! Your certificate can now be downloaded." : "Maklum balas dihantar. Terima kasih! Sijil anda kini boleh dimuat turun.");
   });
 }
 
 /* =========================================================
    SIJIL PENYERTAAN (participant side)
 ========================================================= */
-async function renderCertificate(main){
+async function renderCertificate(main, preloadedFb){
   const key = icKey(currentUser.ic);
-  const fb = await sGet('feedback:'+key, false);
+  const fb = preloadedFb;
   if(!fb){
     main.innerHTML = `
-      <div class="panel-head"><span class="eyebrow">Sijil</span><h2>Sijil Penyertaan</h2></div>
+      <div class="panel-head"><span class="eyebrow">${tr('cert_eyebrow')}</span><h2>${tr('cert_title')}</h2></div>
       <div class="card locked-card">
         <div class="lock-ic">⚿</div>
-        <h3>Sijil Belum Tersedia</h3>
-        <p>Lengkapkan borang Maklum Balas terlebih dahulu untuk membuka sijil penyertaan anda.</p>
+        <h3>${tr('cert_locked_title')}</h3>
+        <p>${tr('cert_locked_body')}</p>
       </div>`;
     return;
   }
   main.innerHTML = `
-    <div class="panel-head"><span class="eyebrow">Sijil</span><h2>Sijil Penyertaan</h2><p>Terima kasih kerana melengkapkan maklum balas. Sijil penyertaan ${escapeHtml(COURSE_INFO.namaKursus)} anda sedia untuk dimuat turun.</p></div>
+    <div class="panel-head"><span class="eyebrow">${tr('cert_eyebrow')}</span><h2>${tr('cert_title')}</h2><p>${tr('cert_ready_desc')}</p></div>
     <div class="card locked-card">
       <div class="lock-ic" style="background:#EAF8F0;color:var(--success);">🎓</div>
       <h3>${escapeHtml(currentUser.name)}</h3>
       <p>${escapeHtml(currentUser.dept)}</p>
-      <button class="btn btn-primary" id="btn-dl-cert" style="width:auto;margin-top:14px;">⬇ Muat Turun Sijil (PDF)</button>
+      <button class="btn btn-primary" id="btn-dl-cert" style="width:auto;margin-top:14px;">${tr('cert_download_btn')}</button>
       <div id="cert-status" style="font-size:12.5px;color:#8A6355;margin-top:10px;"></div>
     </div>`;
   document.getElementById('btn-dl-cert').addEventListener('click', async ()=>{
     const btn = document.getElementById('btn-dl-cert');
     const statusEl = document.getElementById('cert-status');
-    btn.disabled = true; btn.textContent = "Menjana sijil...";
-    statusEl.textContent = "Sila tunggu sebentar...";
+    btn.disabled = true; btn.textContent = LANG==='en' ? "Generating certificate..." : "Menjana sijil...";
+    statusEl.textContent = LANG==='en' ? "Please wait a moment..." : "Sila tunggu sebentar...";
     try{
       const result = await gsRun('generateCertificatePdf', {
         name: currentUser.name,
@@ -1379,12 +1876,12 @@ async function renderCertificate(main){
         ...COURSE_INFO
       });
       downloadBase64File(result.base64, result.fileName, 'application/pdf');
-      statusEl.textContent = "Sijil berjaya dimuat turun.";
+      statusEl.textContent = LANG==='en' ? "Certificate downloaded successfully." : "Sijil berjaya dimuat turun.";
     }catch(err){
       console.error(err);
-      statusEl.textContent = "Gagal jana sijil: " + (err && err.message ? err.message : err);
+      statusEl.textContent = (LANG==='en' ? "Failed to generate certificate: " : "Gagal jana sijil: ") + (err && err.message ? err.message : err);
     }
-    btn.disabled = false; btn.textContent = "⬇ Muat Turun Sijil (PDF)";
+    btn.disabled = false; btn.textContent = tr('cert_download_btn');
   });
 }
 
@@ -1429,26 +1926,26 @@ async function renderIpcGo(main){
   }
   main.innerHTML = `
     <div class="go-hero">
-      <h2>⚡ IPC GO!</h2>
-      <p>Permainan kuiz langsung — jawab pantas, kumpul mata paling banyak, kuasai Infection Control &amp; AMS!</p>
+      <h2>${tr('go_hero_title')}</h2>
+      <p>${tr('go_hero_desc')}</p>
     </div>
-    <div id="go-content"><div class="empty-note">Menyambung ke permainan...</div></div>
+    <div id="go-content"><div class="empty-note">${LANG==='en'?'Connecting to the game...':'Menyambung ke permainan...'}</div></div>
   `;
   goPollTimer && clearInterval(goPollTimer);
-  goPollTimer = setInterval(pollIpcGo, 1500);
+  goPollTimer = setInterval(pollIpcGo, 2000);
   pollIpcGo();
 }
 function renderGoCharacterPicker(main, existingPlayers){
   main.innerHTML = `
     <div class="go-hero">
-      <h2>⚡ IPC GO!</h2>
-      <p>Nama sebenar anda TIDAK dipaparkan pada papan pendahulu — hanya avatar &amp; nickname di bawah.</p>
+      <h2>${tr('go_hero_title')}</h2>
+      <p>${tr('go_picker_desc')}</p>
     </div>
     <div class="card" style="margin-bottom:16px;">
-      <label style="font-size:12.5px;font-weight:600;color:#8A6355;display:block;margin-bottom:6px;">Nickname (pilihan — kosongkan untuk guna nama avatar sahaja)</label>
-      <input type="text" id="go-nickname-input" maxlength="20" placeholder="Contoh: Ali IPC, Ward5Hero..." style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-body);font-size:14px;">
+      <label style="font-size:12.5px;font-weight:600;color:#8A6355;display:block;margin-bottom:6px;">${tr('go_nickname_label')}</label>
+      <input type="text" id="go-nickname-input" maxlength="20" placeholder="${tr('go_nickname_ph')}" style="width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-body);font-size:14px;">
     </div>
-    <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 10px;">Pilih avatar untuk masuk permainan:</p>
+    <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 10px;">${tr('go_pick_avatar')}</p>
     <div class="go-avatar-grid">
       ${GO_CHARACTERS.map((c,i)=>`
         <button class="go-avatar-btn" data-i="${i}">
@@ -1486,12 +1983,33 @@ function stopGoPolling(){
   if(goPollTimer){ clearInterval(goPollTimer); goPollTimer = null; }
   if(goTimerInterval){ clearInterval(goTimerInterval); goTimerInterval = null; }
 }
+let goLastQIndexGuess = -1;
+/* Ambil state + players + jawapan (untuk 1 soalan) dalam SATU round-trip.
+   qIndexGuess = andaian qIndex semasa (dari poll sebelumnya) — kalau meleset
+   sikit (baru je tukar soalan), kita panggil sekali lagi dengan qIndex betul;
+   ini jarang berlaku (hanya sekali setiap soalan bertukar, bukan setiap poll). */
+async function fetchGoSnapshot(qIndexGuess){
+  const parseMap = (raw) => {
+    const out = {};
+    Object.keys(raw||{}).forEach(k=>{ try{ out[k] = JSON.parse(raw[k]); }catch(e){} });
+    return out;
+  };
+  let snap = await gsRun('getGoSnapshot', qIndexGuess);
+  let state = snap.state ? JSON.parse(snap.state) : {status:'lobby', qIndex:-1, startedAt:null};
+  if(state.status === 'results' && state.qIndex !== qIndexGuess){
+    snap = await gsRun('getGoSnapshot', state.qIndex);
+  }
+  return { state, players: parseMap(snap.players), answers: parseMap(snap.answers) };
+}
+
 async function pollIpcGo(){
   if(activePanel !== 'ipcgo' || !currentUser) return;
-  const state = await sGet('ipcgo-state', true) || {status:'lobby', qIndex:-1, startedAt:null};
   const content = document.getElementById('go-content');
   if(!content) return;
   const key = icKey(currentUser.ic);
+
+  const { state, players, answers } = await fetchGoSnapshot(goLastQIndexGuess);
+  goLastQIndexGuess = state.qIndex;
 
   if(state.status !== goLastStatus || state.qIndex !== state._lastRenderedQ){
     goAnswered = false;
@@ -1499,15 +2017,14 @@ async function pollIpcGo(){
 
   if(state.status === 'lobby' || state.status === 'ended'){
     if(state.status === 'ended'){
-      const players = await fetchGoPlayers();
       const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
-      content.innerHTML = renderLeaderboardHtml(list, key, "🏁 Permainan Tamat");
+      content.innerHTML = renderLeaderboardHtml(list, key, LANG==='en'?"🏁 Game Over":"🏁 Permainan Tamat");
     } else {
       content.innerHTML = `
         <div class="card go-lobby-wait">
           <div class="pulse-dot"></div>
-          <h3 style="font-family:var(--font-display);margin:0 0 6px;">Menunggu Koordinator Memulakan Permainan</h3>
-          <p style="color:#8A6355;font-size:13.5px;">Anda sudah berjaya menyertai IPC GO!. Kekal di skrin ini.</p>
+          <h3 style="font-family:var(--font-display);margin:0 0 6px;">${tr('go_waiting_title')}</h3>
+          <p style="color:#8A6355;font-size:13.5px;">${LANG==='en' ? "You've successfully joined IPC GO!. Stay on this screen." : "Anda sudah berjaya menyertai IPC GO!. Kekal di skrin ini."}</p>
         </div>`;
     }
     goLastStatus = state.status;
@@ -1541,11 +2058,11 @@ async function pollIpcGo(){
           const oi = +btn.dataset.oi;
           const timeTaken = Date.now() - state.startedAt;
           await saveGoAnswer(qi, key, {oi, timeTaken, name:currentUser.name});
-          content.innerHTML = `<div class="card go-waiting-answer"><div class="pulse-dot"></div><h3 style="font-family:var(--font-display);">Jawapan Dihantar!</h3><p style="color:#8A6355;font-size:13.5px;">Menunggu peserta lain & keputusan koordinator...</p></div>`;
+          content.innerHTML = `<div class="card go-waiting-answer"><div class="pulse-dot"></div><h3 style="font-family:var(--font-display);">${tr('go_answered_title')}</h3><p style="color:#8A6355;font-size:13.5px;">${tr('go_answered_body')}</p></div>`;
         });
       });
       if(remaining <= 0 && !goAnswered){
-        content.innerHTML = `<div class="card go-waiting-answer"><h3 style="font-family:var(--font-display);">Masa Tamat!</h3><p style="color:#8A6355;font-size:13.5px;">Menunggu keputusan koordinator...</p></div>`;
+        content.innerHTML = `<div class="card go-waiting-answer"><h3 style="font-family:var(--font-display);">${LANG==='en'?"Time's Up!":"Masa Tamat!"}</h3><p style="color:#8A6355;font-size:13.5px;">${LANG==='en'?"Waiting for the coordinator's results...":"Menunggu keputusan koordinator..."}</p></div>`;
       }
     }
     state._lastRenderedQ = qi;
@@ -1556,18 +2073,16 @@ async function pollIpcGo(){
   if(state.status === 'results'){
     const qi = state.qIndex;
     const q = QUESTIONS[qi % QUESTIONS.length];
-    const answers = await fetchGoAnswers(qi);
     const mine = answers[key];
     const correct = mine && mine.oi === q.correct;
-    const players = await fetchGoPlayers();
     const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
     content.innerHTML = `
       <div class="go-result-flag ${correct?'correct':'wrong'}">
-        <div class="big">${mine ? (correct ? '✓ Betul!' : '✗ Kurang Tepat') : '— Tiada Jawapan —'}</div>
-        <div style="font-size:12.5px;margin-top:4px;">Jawapan betul: ${q.opts[q.correct]}</div>
+        <div class="big">${mine ? (correct ? (LANG==='en'?'✓ Correct!':'✓ Betul!') : (LANG==='en'?'✗ Not Quite':'✗ Kurang Tepat')) : (LANG==='en'?'— No Answer —':'— Tiada Jawapan —')}</div>
+        <div style="font-size:12.5px;margin-top:4px;">${LANG==='en'?'Correct answer':'Jawapan betul'}: ${q.opts[q.correct]}</div>
       </div>
       <div class="card">
-        <h3>Papan Pendahulu</h3>
+        <h3>${LANG==='en'?'Leaderboard':'Papan Pendahulu'}</h3>
         <ul class="leaderboard">
           ${list.slice(0,10).map((p,i)=>`
             <li class="${p.key===key?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${p.avatarEmoji?p.avatarEmoji+' ':''}${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
@@ -1585,7 +2100,7 @@ function renderLeaderboardHtml(list, myKey, title){
       <ul class="leaderboard">
         ${list.map((p,i)=>`
           <li class="${p.key===myKey?'me':''}"><span class="lb-rank">${i+1}</span><span class="lb-name">${p.avatarEmoji?p.avatarEmoji+' ':''}${escapeHtml(p.name)}</span><span class="lb-score">${p.score}</span></li>
-        `).join('') || '<div class="empty-note">Tiada peserta lagi.</div>'}
+        `).join('') || `<div class="empty-note">${LANG==='en'?'No participants yet.':'Tiada peserta lagi.'}</div>`}
       </ul>
     </div>`;
 }
@@ -1735,6 +2250,9 @@ async function renderCoordinator(){
     await sSet('coordinator-state', cs, true);
     e.target.classList.toggle('on', cs.postTestUnlocked);
     toast(cs.postTestUnlocked ? "Post-Test dibuka." : "Post-Test ditutup.");
+    if(cs.postTestUnlocked){
+      await pushNotification("Post-Test kini dibuka", "Sila lengkapkan Post-Test dalam dashboard anda.", "posttest");
+    }
   });
   document.getElementById('toggle-feedback').addEventListener('click', async (e)=>{
     const cs = await sGet('coordinator-state', true) || {postTestUnlocked:false, feedbackUnlocked:false};
@@ -1742,6 +2260,9 @@ async function renderCoordinator(){
     await sSet('coordinator-state', cs, true);
     e.target.classList.toggle('on', cs.feedbackUnlocked);
     toast(cs.feedbackUnlocked ? "Maklum Balas dibuka." : "Maklum Balas ditutup.");
+    if(cs.feedbackUnlocked){
+      await pushNotification("Borang Maklum Balas kini dibuka", "Lengkapkan Maklum Balas untuk membuka sijil penyertaan anda.", "feedback");
+    }
   });
   document.getElementById('btn-add-slide').addEventListener('click', async ()=>{
     const title = document.getElementById('slide-title').value.trim();
@@ -1752,6 +2273,7 @@ async function renderCoordinator(){
     list.push({title, url, note});
     await sSet('slides', list, true);
     toast("Slaid ditambah.");
+    await pushNotification("Slaid baharu ditambah", title, "slides");
     renderCoordinator();
   });
   body.querySelectorAll('[data-remove-slide]').forEach(btn=>{
@@ -1859,11 +2381,12 @@ async function generateAndDownloadReport(info, statusEl){
   downloadBase64File(result.base64, result.fileName, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   statusEl.textContent = "Laporan berjaya dimuat turun: " + result.fileName;
 }
+let coordGoQIndexGuess = -1;
 async function renderCoordGoPanel(){
   const panel = document.getElementById('coord-go-panel');
   if(!panel || !isCoordinator) return;
-  const state = await sGet('ipcgo-state', true) || {status:'lobby', qIndex:-1, startedAt:null};
-  const players = await fetchGoPlayers();
+  const { state, players, answers } = await fetchGoSnapshot(coordGoQIndexGuess);
+  coordGoQIndexGuess = state.qIndex;
   const playerCount = Object.keys(players).length;
 
   if(state.status === 'lobby'){
@@ -1879,7 +2402,6 @@ async function renderCoordGoPanel(){
 
   if(state.status === 'question'){
     const q = QUESTIONS[state.qIndex % QUESTIONS.length];
-    const answers = await fetchGoAnswers(state.qIndex);
     const answeredCount = Object.keys(answers).length;
     const elapsed = (Date.now()-state.startedAt)/1000;
     const remaining = Math.max(0, GO_TIME_LIMIT-elapsed);
@@ -1900,7 +2422,6 @@ async function renderCoordGoPanel(){
 
   if(state.status === 'results'){
     const q = QUESTIONS[state.qIndex % QUESTIONS.length];
-    const answers = await fetchGoAnswers(state.qIndex);
     const counts = [0,0,0,0];
     Object.values(answers).forEach(a=>{ if(counts[a.oi]!=null) counts[a.oi]++; });
     const total = Object.keys(answers).length || 1;
@@ -1949,6 +2470,9 @@ async function renderCoordGoPanel(){
 
 async function startGoQuestion(qIndex){
   await sSet('ipcgo-state', {status:'question', qIndex, startedAt: Date.now()}, true);
+  if(qIndex === 0){
+    await pushNotification("IPC GO! sudah bermula!", "Buka tab IPC GO! sekarang untuk sertai kuiz langsung.", "ipcgo");
+  }
   renderCoordGoPanel();
 }
 async function revealGoResults(qIndex){
