@@ -1254,8 +1254,11 @@ document.addEventListener('click', (e)=>{
   }
 });
 
+/* NOTA: fungsi ni sekarang buat ALL CAPS (bukan Title Case) — nama
+   dikekalkan "titleCase" supaya semua panggilan sedia ada (register,
+   login) tak perlu diubah, cuma tukar logik dalaman sahaja. */
 function titleCase(s){
-  return (s||"").toLowerCase().replace(/\b\w/g, c=>c.toUpperCase());
+  return (s||"").toUpperCase();
 }
 ['reg-name','login-name'].forEach(id=>{
   const el = document.getElementById(id);
@@ -1533,7 +1536,7 @@ function patchPanelCache(patch){
 async function renderPanel(panel){
   const main = document.getElementById('dash-main');
   const key = icKey(currentUser.ic);
-  const keys = ['coordinator-state', 'feedback:'+key, 'pretest:'+key, 'posttest:'+key, 'attendance:'+key];
+  const keys = ['coordinator-state', 'feedback:'+key, 'pretest:'+key, 'posttest:'+key, 'attendance:'+key, 'slides'];
 
   let data;
   const fresh = panelDataCache.data && (Date.now() - panelDataCache.fetchedAt) < PANEL_CACHE_TTL_MS;
@@ -1551,7 +1554,7 @@ async function renderPanel(panel){
 
   if(panel === 'intro') return renderIntro(main, data);
   if(panel === 'objectives') return renderObjectives(main);
-  if(panel === 'slides') return renderSlides(main);
+  if(panel === 'slides') return renderSlides(main, data['slides']);
   if(panel === 'pretest') return renderQuiz(main, 'pretest', true, data['pretest:'+key]);
   if(panel === 'posttest') return renderQuiz(main, 'posttest', coordState.postTestUnlocked, data['posttest:'+key]);
   if(panel === 'feedback') return renderFeedback(main, coordState.feedbackUnlocked, data['feedback:'+key]);
@@ -1696,8 +1699,8 @@ function renderObjectives(main){
 }
 
 /* ---------- SLIDES ---------- */
-async function renderSlides(main){
-  const slides = await sGet('slides', true) || [];
+async function renderSlides(main, preloadedSlides){
+  const slides = preloadedSlides || [];
   main.innerHTML = `
     <div class="panel-head">
       <span class="eyebrow">${tr('slides_eyebrow')}</span>
@@ -2609,9 +2612,14 @@ async function endGoGame(){
   renderCoordGoPanel();
 }
 async function resetGoGame(){
+  const msg = LANG==='en'
+    ? "This will PERMANENTLY delete ALL players' avatars & scores from this session, and reset the game to the lobby. Continue?"
+    : "Ini akan PADAM SEPENUHNYA semua avatar & markah peserta sesi ini, dan set semula permainan ke lobi. Teruskan?";
+  if(!confirm(msg)) return;
   await sSet('ipcgo-state', {status:'lobby', qIndex:-1, startedAt:null}, true);
   await gsRun('kvDeleteByPrefix', 'ipcgo-players:');
   await gsRun('kvDeleteByPrefix', 'ipcgo-answers:');
+  toast(LANG==='en' ? "Game reset — ready for a new round." : "Permainan disetel semula — sedia untuk pusingan baharu.");
   renderCoordGoPanel();
 }
 </script>
