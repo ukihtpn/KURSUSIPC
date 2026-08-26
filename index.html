@@ -408,6 +408,10 @@ a{color:inherit;}
   font-size:13px;font-weight:600;color:#8A6355;
 }
 .rating-pill.selected{background:var(--amber);border-color:var(--amber);color:var(--ink);}
+.fb-session-row{padding:10px 0;border-bottom:1px solid #F6EAE1;}
+.fb-session-row:last-child{border-bottom:none;}
+.fb-session-label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.4;}
+.rating-row-compact .rating-pill{padding:7px 6px;font-size:12.5px;border-radius:8px;}
 
 /* slides list */
 .slide-item{
@@ -1023,6 +1027,9 @@ const I18N = {
     feedback_practical: "Penilaian Sesi Praktikal", feedback_comment_label: "Komen / Cadangan (pilihan)",
     feedback_comment_ph: "Kongsikan pandangan anda tentang bengkel ini...",
     feedback_submit: "Hantar Maklum Balas",
+    feedback_talks_group: "Penilaian Setiap Ceramah / Penceramah",
+    feedback_practical_group: "Penilaian Setiap Stesen Praktikal",
+    feedback_incomplete: "Sila lengkapkan semua penilaian (setiap ceramah & stesen praktikal).",
     feedback_thanks_title: "Terima Kasih!", feedback_thanks_body: "Maklum balas anda telah direkodkan.",
     attendance_eyebrow: "Aktiviti", attendance_title: "Kehadiran",
     attendance_desc: "Tekan butang di bawah untuk merekod kehadiran anda pada hari bengkel.",
@@ -1108,6 +1115,9 @@ const I18N = {
     feedback_practical: "Practical Session Rating", feedback_comment_label: "Comments / Suggestions (optional)",
     feedback_comment_ph: "Share your thoughts about this workshop...",
     feedback_submit: "Submit Feedback",
+    feedback_talks_group: "Rate Each Talk / Speaker",
+    feedback_practical_group: "Rate Each Practical Station",
+    feedback_incomplete: "Please complete every rating (each talk & practical station).",
     feedback_thanks_title: "Thank You!", feedback_thanks_body: "Your feedback has been recorded.",
     attendance_eyebrow: "Activity", attendance_title: "Attendance",
     attendance_desc: "Press the button below to record your attendance on the workshop day.",
@@ -1243,6 +1253,37 @@ const OBJECTIVES_EN = [
   "Guide officers in the judicious use of antibiotic guidelines (antimicrobial stewardship) to contain antimicrobial resistance (AMR)."
 ];
 let OBJECTIVES = OBJECTIVES_BM;
+
+// Senarai sesi/penceramah/stesen praktikal untuk maklum balas terperinci (satu rating per item)
+const FEEDBACK_SESSIONS = [
+  {id:'intro_amr', group:'talk',
+   bm:"Pengenalan ICAMS, AMR & Asas Kawalan Infeksi — Dr Siti Saihah Selamat",
+   en:"Intro to ICAMS, AMR & Infection Control Basics — Dr Siti Saihah Selamat"},
+  {id:'bsi', group:'talk',
+   bm:"Pencegahan Bloodstream Infection (BSI) — Dr Aneesa Tharek",
+   en:"Bloodstream Infection (BSI) Prevention — Dr Aneesa Tharek"},
+  {id:'blood_culture', group:'talk',
+   bm:"Blood Culture: Do's and Don'ts — Dr Gunasundari",
+   en:"Taking a Blood Culture: Do's and Don'ts — Dr Gunasundari"},
+  {id:'ssi', group:'talk',
+   bm:"Pencegahan Surgical Site Infection (SSI) — Dr Siti Saihah Selamat",
+   en:"Surgical Site Infection (SSI) Prevention — Dr Siti Saihah Selamat"},
+  {id:'ams', group:'talk',
+   bm:"Pengenalan Antimicrobial Stewardship (AMS) — Ms Ong Ann Gie",
+   en:"Introduction to Antimicrobial Stewardship (AMS) — Ms Ong Ann Gie"},
+  {id:'station1', group:'practical',
+   bm:"Praktikal Stesen 1 — Culture Taking",
+   en:"Practical Station 1 — Culture Taking"},
+  {id:'station2', group:'practical',
+   bm:"Praktikal Stesen 2 — Dressing Don'ts",
+   en:"Practical Station 2 — Dressing Don'ts"},
+  {id:'station3', group:'practical',
+   bm:"Praktikal Stesen 3 — Infection Prevention & Control",
+   en:"Practical Station 3 — Infection Prevention & Control"},
+  {id:'station4', group:'practical',
+   bm:"Praktikal Stesen 4 — AMS (Case Example & NAG)",
+   en:"Practical Station 4 — AMS (Case Example & NAG)"}
+];
 
 const GO_TILE_CLASSES = ["go-tile-1","go-tile-2","go-tile-3","go-tile-4"];
 const GO_TILE_SHAPES = ["◆","●","▲","■"];
@@ -2020,8 +2061,12 @@ async function renderQuiz(main, kind, unlocked, preloadedSaved){
       await sSet(kind+'-results', allResults, true);
       patchPanelCache({[kind+':'+key]: result});
       renderQuizResult(main, kind, result);
+      if(kind === 'posttest'){
+        window.open(CERTIFICATE_FORM_URL, '_blank');
+      }
   }, {once:true});
 }
+const CERTIFICATE_FORM_URL = "https://forms.gle/bXNdxPppaSbzeq2r8";
 function renderQuizResult(main, kind, result){
   const label = kind==='pretest' ? tr('quiz_pretest_title') : tr('quiz_posttest_title');
   main.innerHTML = `
@@ -2032,6 +2077,12 @@ function renderQuizResult(main, kind, result){
         <div class="of">${LANG==='en' ? 'Your answers were submitted on' : 'Jawapan anda telah dihantar pada'} ${new Date(result.submittedAt).toLocaleString(LANG==='en'?'en-MY':'ms-MY')}</div>
       </div>
     </div>
+    ${kind==='posttest' ? `
+    <div class="card" style="background:var(--aqua-tint);border-color:var(--teal-mid);">
+      <h3 style="margin-top:0;">${LANG==='en' ? '🎓 Get Your Certificate' : '🎓 Dapatkan Sijil Anda'}</h3>
+      <p style="font-size:13.5px;color:#8A6355;margin-bottom:14px;">${LANG==='en' ? 'Please fill in the form below to receive your attendance certificate.' : 'Sila isi borang di bawah untuk menerima sijil kehadiran anda.'}</p>
+      <a class="btn btn-primary" style="width:auto;text-decoration:none;display:inline-flex;" href="${CERTIFICATE_FORM_URL}" target="_blank" rel="noopener">${LANG==='en' ? 'Fill Certificate Form →' : 'Isi Borang Sijil →'}</a>
+    </div>` : ''}
     <div class="card">
       <h3>${LANG==='en' ? 'Answer Review' : 'Semakan Jawapan'}</h3>
       ${QUESTIONS.map((q,qi)=>{
@@ -2072,6 +2123,17 @@ async function renderFeedback(main, unlocked, preloadedSaved){
       </div>`;
     return;
   }
+  const talkSessions = FEEDBACK_SESSIONS.filter(s=>s.group==='talk');
+  const practicalSessions = FEEDBACK_SESSIONS.filter(s=>s.group==='practical');
+
+  const sessionRow = (s)=>`
+    <div class="fb-session-row" data-session-id="${s.id}">
+      <div class="fb-session-label">${LANG==='en' ? s.en : s.bm}</div>
+      <div class="rating-row rating-row-compact" id="fb-session-${s.id}">
+        ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
+      </div>
+    </div>`;
+
   main.innerHTML = `
     <div class="panel-head"><span class="eyebrow">${tr('feedback_eyebrow')}</span><h2>${tr('feedback_title')}</h2><p>${LANG==='en' ? 'Your feedback helps us improve future programmes.' : 'Pandangan anda membantu kami menambah baik program akan datang.'}</p></div>
     <div class="card">
@@ -2082,16 +2144,12 @@ async function renderFeedback(main, unlocked, preloadedSaved){
       <div class="hint" style="margin-bottom:0;font-size:11.5px;color:#A6857A;">${LANG==='en' ? '1 = Unsatisfactory · 5 = Excellent' : '1 = Tidak Memuaskan &nbsp;·&nbsp; 5 = Sangat Memuaskan'}</div>
     </div>
     <div class="card">
-      <h3>${tr('feedback_facilitator')}</h3>
-      <div class="rating-row" id="fb-facilitator">
-        ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
-      </div>
+      <h3>${tr('feedback_talks_group')}</h3>
+      ${talkSessions.map(sessionRow).join('')}
     </div>
     <div class="card">
-      <h3>${tr('feedback_practical')}</h3>
-      <div class="rating-row" id="fb-practical">
-        ${[1,2,3,4,5].map(n=>`<button class="rating-pill" data-val="${n}">${n}</button>`).join('')}
-      </div>
+      <h3>${tr('feedback_practical_group')}</h3>
+      ${practicalSessions.map(sessionRow).join('')}
     </div>
     <div class="card">
       <h3>${tr('feedback_comment_label')}</h3>
@@ -2101,26 +2159,52 @@ async function renderFeedback(main, unlocked, preloadedSaved){
     </div>
     <button class="btn btn-primary" id="btn-submit-fb" style="max-width:260px;">${tr('feedback_submit')}</button>
   `;
-  const ratings = {overall:null, facilitator:null, practical:null};
-  [['overall','fb-overall'],['facilitator','fb-facilitator'],['practical','fb-practical']].forEach(([k,id])=>{
+
+  const ratings = {overall:null};
+  const sessionRatings = {};
+  FEEDBACK_SESSIONS.forEach(s=>{ sessionRatings[s.id] = null; });
+
+  const wireRatingRow = (id, onPick)=>{
     document.getElementById(id).querySelectorAll('.rating-pill').forEach(p=>{
       p.addEventListener('click', ()=>{
         document.getElementById(id).querySelectorAll('.rating-pill').forEach(x=>x.classList.remove('selected'));
         p.classList.add('selected');
-        ratings[k] = +p.dataset.val;
+        onPick(+p.dataset.val);
       });
     });
+  };
+  wireRatingRow('fb-overall', v=>{ ratings.overall = v; });
+  FEEDBACK_SESSIONS.forEach(s=>{
+    wireRatingRow('fb-session-'+s.id, v=>{ sessionRatings[s.id] = v; });
   });
+
   document.getElementById('btn-submit-fb').addEventListener('click', async ()=>{
-    if(!ratings.overall || !ratings.facilitator || !ratings.practical){
-      toast(LANG==='en' ? "Please complete all ratings." : "Sila lengkapkan semua penilaian rating.");
+    const allSessionsFilled = FEEDBACK_SESSIONS.every(s=>sessionRatings[s.id]!=null);
+    if(!ratings.overall || !allSessionsFilled){
+      toast(tr('feedback_incomplete'));
       return;
     }
-    const fb = {...ratings, comment: document.getElementById('fb-comment').value.trim(), submittedAt:new Date().toISOString()};
+    // Kekalkan medan 'facilitator' & 'practical' (purata) supaya sheet/laporan sedia ada tetap berfungsi
+    const talkVals = talkSessions.map(s=>sessionRatings[s.id]);
+    const practicalVals = practicalSessions.map(s=>sessionRatings[s.id]);
+    const avg = arr => Math.round((arr.reduce((a,b)=>a+b,0)/arr.length)*10)/10;
+    const facilitatorAvg = avg(talkVals);
+    const practicalAvg = avg(practicalVals);
+
+    const fb = {
+      overall: ratings.overall,
+      facilitator: facilitatorAvg,
+      practical: practicalAvg,
+      sessions: {...sessionRatings},
+      comment: document.getElementById('fb-comment').value.trim(),
+      submittedAt: new Date().toISOString()
+    };
     await sSet('feedback:'+key, fb, false);
     let all = await sGet('feedback-list', true) || [];
     all = all.filter(f=>icKey(f.ic)!==key);
-    all.push({name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, ...ratings, comment:fb.comment});
+    all.push({name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept,
+      overall: fb.overall, facilitator: fb.facilitator, practical: fb.practical,
+      sessions: fb.sessions, comment: fb.comment});
     await sSet('feedback-list', all, true);
     patchPanelCache({['feedback:'+key]: fb});
     renderFeedback(main, true, fb);
@@ -2549,10 +2633,20 @@ async function renderCoordinator(){
       <div class="card">
         <h3>Maklum Balas (${feedbackList.length})</h3>
         <div class="scroll-box">
-          ${feedbackList.map(f=>`
+          ${feedbackList.map((f,fi)=>`
             <div style="padding:10px 0;border-bottom:1px solid #F6EAE1;">
               <div style="font-size:13px;font-weight:600;">${escapeHtml(f.name)} — Keseluruhan: ${f.overall}/5</div>
-              <div style="font-size:12px;color:#8A6355;">Fasilitator: ${f.facilitator}/5 · Praktikal: ${f.practical}/5</div>
+              <div style="font-size:12px;color:#8A6355;">Purata Ceramah: ${f.facilitator}/5 · Purata Praktikal: ${f.practical}/5
+                ${f.sessions ? `<button class="btn-ghost" style="width:auto;padding:2px 8px;font-size:11px;margin-left:6px;" data-fb-toggle="${fi}">Lihat butiran ▾</button>` : ''}
+              </div>
+              ${f.sessions ? `
+              <div class="fb-detail-box hidden" id="fb-detail-${fi}" style="margin-top:8px;background:#FCF6F1;border-radius:8px;padding:10px 12px;">
+                ${FEEDBACK_SESSIONS.map(s=>`
+                  <div style="display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:3px 0;color:#5C3A2E;">
+                    <span>${LANG==='en' ? s.en : s.bm}</span>
+                    <span style="font-weight:600;white-space:nowrap;">${f.sessions[s.id] ?? '—'}/5</span>
+                  </div>`).join('')}
+              </div>` : ''}
               ${f.comment ? `<div style="font-size:12.5px;margin-top:4px;color:#5C3A2E;">"${escapeHtml(f.comment)}"</div>` : ''}
             </div>`).join('') || '<div class="empty-note">Tiada maklum balas lagi.</div>'}
         </div>
@@ -2624,6 +2718,15 @@ async function renderCoordinator(){
       list.splice(+btn.dataset.removeSlide, 1);
       await sSet('slides', list, true);
       renderCoordinator();
+    });
+  });
+
+  body.querySelectorAll('[data-fb-toggle]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const box = document.getElementById('fb-detail-'+btn.dataset.fbToggle);
+      if(!box) return;
+      const nowHidden = box.classList.toggle('hidden');
+      btn.textContent = nowHidden ? 'Lihat butiran ▾' : 'Sorok butiran ▴';
     });
   });
 
