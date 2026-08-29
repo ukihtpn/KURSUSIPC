@@ -873,6 +873,7 @@ table.plist th:first-child, table.plist td:first-child{white-space:normal;min-wi
     <h2 data-i18n="reg_heading">Daftar Kehadiran</h2>
     <p class="desc" data-i18n="reg_desc">Isikan maklumat penuh anda. Gunakan Nama &amp; No. K/P yang sama untuk log masuk kali seterusnya.</p>
     <div class="form-error" id="reg-error"></div>
+    <div id="reg-fields">
     <div class="field">
       <label data-i18n="field_name">Nama Penuh</label>
       <input type="text" id="reg-name" data-i18n-placeholder="ph_name" placeholder="Cth: ahmad bin ali" autocomplete="name">
@@ -904,6 +905,7 @@ table.plist th:first-child, table.plist td:first-child{white-space:normal;min-wi
     <div class="field hidden" id="reg-dept-other-wrap">
       <label data-i18n="field_dept_other">Nyatakan Jabatan</label>
       <input type="text" id="reg-dept-other" placeholder="Cth: Jabatan Farmasi Klinikal">
+    </div>
     </div>
     <button class="btn btn-primary" id="btn-register" data-i18n="btn_register">Daftar &amp; Masuk</button>
     <div class="auth-switch" data-i18n-html="already_registered">Sudah berdaftar? <a id="link-to-login">Log Masuk</a></div>
@@ -1172,6 +1174,7 @@ const I18N = {
     co_notif_clear: "🗑 Kosongkan Semua Notifikasi",
     co_notif_confirm: "Kosongkan SEMUA notifikasi untuk semua staff?\n\nTindakan ni tak boleh dibatalkan.",
     co_notif_cleared: "Semua notifikasi dikosongkan.",
+    btn_register_closed: "Pendaftaran Ditutup",
     co_open_reg: "Benarkan Pendaftaran Baharu",
     co_open_reg_s: "Tutup selepas kursus tamat supaya orang luar tidak boleh mendaftar",
     co_reg_opened: "Pendaftaran dibuka.",
@@ -1379,6 +1382,7 @@ const I18N = {
     co_notif_clear: "🗑 Clear All Notifications",
     co_notif_confirm: "Clear ALL notifications for every staff member?\n\nThis can't be undone.",
     co_notif_cleared: "All notifications cleared.",
+    btn_register_closed: "Registration Closed",
     co_open_reg: "Allow New Registrations",
     co_open_reg_s: "Turn off after the course so outsiders can\u2019t register",
     co_reg_opened: "Registration opened.",
@@ -2295,7 +2299,37 @@ function goToLogin(){ show('screen-login'); prefillLoginFields(); }
    NAV LINKS
 ========================================================= */
 document.getElementById('link-to-login').onclick = ()=>{ show('screen-login'); prefillLoginFields(); };
-document.getElementById('link-to-register').onclick = ()=>show('screen-register');
+document.getElementById('link-to-register').onclick = ()=>{ show('screen-register'); checkRegistrationOpen(); };
+/* Semak status pendaftaran sebaik skrin dibuka, supaya peserta nampak ia
+   sudah ditutup SEBELUM mengisi borang — bukan selepas menekan Daftar.
+   Semakan sebenar tetap berlaku di server semasa hantar; ini hanya untuk
+   memberitahu pengguna lebih awal. */
+async function checkRegistrationOpen(){
+  const btn = document.getElementById('btn-register');
+  const errEl = document.getElementById('reg-error');
+  const form = document.getElementById('reg-fields');
+  if(!btn) return;
+
+  // Anggap dibuka sementara menunggu jawapan — elak butang berkelip
+  // "ditutup" untuk sepersekian saat pada sambungan perlahan.
+  btn.disabled = false;
+  errEl.style.display = 'none';
+  if(form) form.style.display = '';
+
+  let state;
+  try{
+    state = await sGet('coordinator-state', true);
+  }catch(e){
+    return;   // gagal semak — biar server yang tentukan semasa hantar
+  }
+  if(state && state.registrationOpen === false){
+    btn.disabled = true;
+    btn.textContent = tr('btn_register_closed');
+    if(form) form.style.display = 'none';
+    errEl.textContent = tr('reg_closed');
+    errEl.style.display = 'block';
+  }
+}
 document.getElementById('link-to-coord-from-reg').onclick = ()=>{ show('screen-coord-login'); prefillCoordFields(); };
 document.getElementById('link-to-coord-from-login').onclick = ()=>{ show('screen-coord-login'); prefillCoordFields(); };
 document.getElementById('link-to-login-from-coord').onclick = ()=>{ show('screen-login'); prefillLoginFields(); };
