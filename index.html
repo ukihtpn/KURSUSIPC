@@ -1154,8 +1154,10 @@ const I18N = {
     co_repair_desc: "Jika peserta kata sudah jawab tetapi markahnya tidak muncul di sini, penghantaran mereka mungkin separuh gagal. Butang ini mengimbas semua rekod peserta dan memulihkan markah yang tercicir.",
     co_repair_pre: "\u2695 Pulihkan Markah Pre-Test",
     co_repair_post: "\u2695 Pulihkan Markah Post-Test",
-    co_repair_done: "markah dipulihkan.",
-    co_repair_none: "Tiada markah tercicir dijumpai \u2014 semua sudah selaras.",
+    co_repair_recovered: "markah dipulihkan",
+    co_repair_corrected: "markah dibetulkan",
+    co_repair_removed: "entri hantu dibuang",
+    co_repair_none: "Tiada masalah dijumpai \u2014 semua sudah selaras.",
     co_refresh: "Muat semula data sekarang",
     co_updated_at: "Data dikemas kini pada",
     co_edit_score: "Edit markah",
@@ -1170,6 +1172,11 @@ const I18N = {
     co_notif_clear: "🗑 Kosongkan Semua Notifikasi",
     co_notif_confirm: "Kosongkan SEMUA notifikasi untuk semua staff?\n\nTindakan ni tak boleh dibatalkan.",
     co_notif_cleared: "Semua notifikasi dikosongkan.",
+    co_open_reg: "Benarkan Pendaftaran Baharu",
+    co_open_reg_s: "Tutup selepas kursus tamat supaya orang luar tidak boleh mendaftar",
+    co_reg_opened: "Pendaftaran dibuka.",
+    co_reg_closed: "Pendaftaran ditutup.",
+    reg_closed: "Pendaftaran ditutup. Sila hubungi koordinator jika anda sepatutnya berdaftar.",
     co_summary: "Ringkasan",
     co_registered: "Berdaftar", co_attended: "Hadir",
     co_pre_done: "Pre-Test Selesai", co_post_done: "Post-Test Selesai",
@@ -1354,8 +1361,10 @@ const I18N = {
     co_repair_desc: "If a participant says they answered but their score isn\u2019t here, their submission may have half-failed. This scans every participant record and recovers scores that went missing.",
     co_repair_pre: "\u2695 Recover Pre-Test Scores",
     co_repair_post: "\u2695 Recover Post-Test Scores",
-    co_repair_done: "scores recovered.",
-    co_repair_none: "No missing scores found \u2014 everything is in sync.",
+    co_repair_recovered: "scores recovered",
+    co_repair_corrected: "scores corrected",
+    co_repair_removed: "stale entries removed",
+    co_repair_none: "Nothing to fix \u2014 everything is in sync.",
     co_refresh: "Refresh data now",
     co_updated_at: "Data updated at",
     co_edit_score: "Edit score",
@@ -1370,6 +1379,11 @@ const I18N = {
     co_notif_clear: "🗑 Clear All Notifications",
     co_notif_confirm: "Clear ALL notifications for every staff member?\n\nThis can't be undone.",
     co_notif_cleared: "All notifications cleared.",
+    co_open_reg: "Allow New Registrations",
+    co_open_reg_s: "Turn off after the course so outsiders can\u2019t register",
+    co_reg_opened: "Registration opened.",
+    co_reg_closed: "Registration closed.",
+    reg_closed: "Registration is closed. Please contact the coordinator if you should be registered.",
     co_summary: "Summary",
     co_registered: "Registered", co_attended: "Attended",
     co_pre_done: "Pre-Test Done", co_post_done: "Post-Test Done",
@@ -1818,6 +1832,7 @@ async function gsRun(action, ...args){
   else if(action === 'importPhones'){ /* tiada parameter */ }
   else if(action === 'resetQuiz'){ payload.ic = args[0]; payload.kind = args[1]; }
   else if(action === 'findParticipant') payload.ic = args[0];
+  else if(action === 'registerParticipant'){ payload.name = args[0]; payload.ic = args[1]; payload.dept = args[2]; }
   else if(action === 'submitQuizResult'){ payload.ic = args[0]; payload.kind = args[1]; payload.result = args[2]; payload.name = args[3]; payload.dept = args[4]; }
   else if(action === 'repairQuizResults') payload.kind = args[0];
   else if(action === 'revealGoResults'){ payload.qIndex = args[0]; payload.correctOi = args[1]; payload.timeLimit = args[2]; }
@@ -2307,12 +2322,19 @@ document.getElementById('btn-register').addEventListener('click', async ()=>{
   const key = icKey(ic);
   const btn = document.getElementById('btn-register');
   btn.disabled = true; btn.textContent = LANG==='en' ? "Registering..." : "Mendaftar...";
-  const appendResult = await sAppendUnique('participants', {name, ic, dept, registeredAt: new Date().toISOString()}, 'ic');
-  let ok = appendResult !== null;
-  ok = (await sSet('profile:'+key, {name, ic, dept}, false)) && ok;
-  btn.disabled = false; btn.textContent = tr('btn_register');
-  if(!ok){
+  let res;
+  try{
+    res = await gsRun('registerParticipant', name, ic, dept);
+  }catch(err){
+    console.error('register failed', err);
+    btn.disabled = false; btn.textContent = tr('btn_register');
     errEl.textContent = LANG==='en' ? "Registration FAILED to save — there's a problem connecting to Google Sheets. Please try again shortly, or inform the coordinator." : "Pendaftaran GAGAL disimpan — sambungan ke Google Sheet bermasalah. Sila cuba lagi sekejap, atau maklumkan koordinator.";
+    errEl.style.display = 'block';
+    return;
+  }
+  btn.disabled = false; btn.textContent = tr('btn_register');
+  if(res && res.ok === false){
+    errEl.textContent = tr('reg_closed');
     errEl.style.display = 'block';
     return;
   }
@@ -3753,6 +3775,10 @@ async function renderCoordinator(){
           <div><div class="t">${tr('co_open_ipcgo')}</div><div class="s">${tr('co_open_ipcgo_s')}</div></div>
           <button class="switch ${coordState.ipcgoEnabled?'on':''}" id="toggle-ipcgo"></button>
         </div>
+        <div class="toggle-row">
+          <div><div class="t">${tr('co_open_reg')}</div><div class="s">${tr('co_open_reg_s')}</div></div>
+          <button class="switch ${coordState.registrationOpen !== false ?'on':''}" id="toggle-reg"></button>
+        </div>
       </div>
 
       <div class="card">
@@ -3953,7 +3979,7 @@ async function renderCoordinator(){
       cs[fieldName] = newVal;
       const ok = await sSet('coordinator-state', cs, true);
       if(!ok) throw new Error('save failed');
-      if(newVal) await pushNotification(notifTitle, notifBody, notifType);
+      if(newVal && notifTitle) await pushNotification(notifTitle, notifBody, notifType);
     }catch(err){
       btn.classList.toggle('on', !newVal);
       toast(LANG==='en' ? "Failed to save — connection issue. Please try again." : "Gagal simpan — masalah sambungan. Sila cuba lagi.");
@@ -3970,6 +3996,11 @@ async function renderCoordinator(){
     handleCoordToggle(e.target, 'feedbackUnlocked',
       "notif_feedback_t", "notif_feedback_b", "feedback",
       "Maklum Balas dibuka.", "Maklum Balas ditutup.");
+  });
+  document.getElementById('toggle-reg').addEventListener('click', (e)=>{
+    handleCoordToggle(e.target, 'registrationOpen',
+      null, null, null,
+      tr('co_reg_opened'), tr('co_reg_closed'));
   });
   document.getElementById('toggle-ipcgo').addEventListener('click', (e)=>{
     handleCoordToggle(e.target, 'ipcgoEnabled',
@@ -4260,10 +4291,19 @@ async function renderCoordinator(){
       const orig = b.textContent;
       b.disabled = true; b.textContent = tr('co_import_phone_busy');
       try{
-        const res = await gsRun('repairQuizResults', kind);
-        const n = (res && res.recovered) || 0;
-        toast(n ? `${n} ${tr('co_repair_done')}` : tr('co_repair_none'));
-        if(n){ refreshCoordData(); return; }
+        const res = await gsRun('repairQuizResults', kind) || {};
+        const rec = res.recovered || 0, cor = res.corrected || 0, rem = res.removed || 0;
+        const changed = rec + cor + rem;
+        if(changed){
+          const parts = [];
+          if(rec) parts.push(`${rec} ${tr('co_repair_recovered')}`);
+          if(cor) parts.push(`${cor} ${tr('co_repair_corrected')}`);
+          if(rem) parts.push(`${rem} ${tr('co_repair_removed')}`);
+          toast(parts.join(', ') + '.');
+          refreshCoordData();
+          return;
+        }
+        toast(tr('co_repair_none'));
       }catch(err){
         console.error(err);
         toast(tr('co_t_save_fail'));
