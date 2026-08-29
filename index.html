@@ -1126,6 +1126,18 @@ const I18N = {
     co_open_posttest: "Buka Post-Test", co_open_posttest_s: "Membenarkan peserta menjawab Post-Test",
     co_open_feedback: "Buka Maklum Balas", co_open_feedback_s: "Membenarkan peserta menghantar maklum balas",
     co_open_ipcgo: "Buka IPC GO!", co_open_ipcgo_s: "Membenarkan peserta daftar nama/avatar & masuk lobi IPC GO!",
+    notif_posttest_t: "Post-Test kini dibuka",
+    notif_posttest_b: "Sila lengkapkan Post-Test dalam dashboard anda.",
+    notif_feedback_t: "Borang Maklum Balas kini dibuka",
+    notif_feedback_b: "Lengkapkan Maklum Balas untuk membuka sijil penyertaan anda.",
+    notif_ipcgo_t: "IPC GO! kini dibuka!",
+    notif_ipcgo_b: "Buka tab IPC GO! sekarang untuk daftar nama/avatar dan sertai lobi.",
+    notif_gostart_t: "IPC GO! sudah bermula!",
+    notif_gostart_b: "Buka tab IPC GO! sekarang untuk sertai kuiz langsung.",
+    notif_slide_t: "Slaid baharu ditambah",
+    notif_slide_b: "Slaid baharu",
+    notif_ref_t: "Bahan rujukan baharu ditambah",
+    notif_ref_b: "Rujukan baharu",
     co_notif: "Notifikasi",
     co_notif_desc: "Senarai notifikasi dikongsi semua staff. Kosongkan bila senarai dah terlalu panjang.",
     co_notif_count: "notifikasi tersimpan",
@@ -1281,6 +1293,18 @@ const I18N = {
     co_open_posttest: "Open Post-Test", co_open_posttest_s: "Allow participants to answer the Post-Test",
     co_open_feedback: "Open Feedback", co_open_feedback_s: "Allow participants to submit feedback",
     co_open_ipcgo: "Open IPC GO!", co_open_ipcgo_s: "Allow participants to register a name/avatar & enter the IPC GO! lobby",
+    notif_posttest_t: "The Post-Test is now open",
+    notif_posttest_b: "Please complete the Post-Test in your dashboard.",
+    notif_feedback_t: "The Feedback form is now open",
+    notif_feedback_b: "Complete the Feedback form to unlock your certificate of participation.",
+    notif_ipcgo_t: "IPC GO! is now open!",
+    notif_ipcgo_b: "Open the IPC GO! tab now to register a name/avatar and join the lobby.",
+    notif_gostart_t: "IPC GO! has started!",
+    notif_gostart_b: "Open the IPC GO! tab now to join the live quiz.",
+    notif_slide_t: "New slide added",
+    notif_slide_b: "New slide",
+    notif_ref_t: "New reference material added",
+    notif_ref_b: "New reference",
     co_notif: "Notifications",
     co_notif_desc: "The notification list is shared by all staff. Clear it when it gets too long.",
     co_notif_count: "notifications stored",
@@ -1599,15 +1623,27 @@ function fileToBase64(file){
 /* =========================================================
    NOTIFIKASI — dihantar oleh koordinator, dibaca semua peserta
 ========================================================= */
-async function pushNotification(title, body, type){
+/* Simpan KUNCI terjemahan (titleKey/bodyKey), bukan teks siap — supaya
+   notifikasi lama ikut toggle bahasa semasa dipapar, bukan bahasa masa ia
+   dihantar. 'extra' untuk teks dinamik (cth: tajuk slaid) yang memang tak
+   diterjemah. Notifikasi LAMA yang masih simpan title/body mentah tetap
+   dipapar seadanya (lihat notifText() di bawah). */
+async function pushNotification(titleKey, bodyKey, type, extra){
   let list = await sGet('notifications', true) || [];
   list.push({
     id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
-    title, body, type: type || 'info',
+    titleKey, bodyKey, extra: extra || '', type: type || 'info',
     createdAt: new Date().toISOString()
   });
   if(list.length > 25) list = list.slice(-25); // simpan 25 terkini sahaja — elak senarai jadi terlalu panjang
   await sSet('notifications', list, true);
+}
+/* Pulangkan teks notifikasi dalam bahasa SEMASA. Serasi ke belakang:
+   rekod lama guna n.title/n.body mentah. */
+function notifText(n, which){
+  const key = which === 'title' ? n.titleKey : n.bodyKey;
+  if(key) return tr(key);
+  return (which === 'title' ? n.title : n.body) || '';
 }
 let notifPollTimer = null;
 async function refreshNotifBadge(){
@@ -1646,8 +1682,8 @@ async function renderNotifDropdownContent(){
     <div id="notif-list-body">
       ${list.length ? list.slice(0,20).map(n=>`
         <div class="notif-item">
-          <div class="notif-title">${escapeHtml(n.title)}</div>
-          <div class="notif-body">${escapeHtml(n.body)}</div>
+          <div class="notif-title">${escapeHtml(notifText(n,'title'))}</div>
+          <div class="notif-body">${escapeHtml(notifText(n,'body'))}${n.extra?': '+escapeHtml(n.extra):''}</div>
           <div class="notif-time">${new Date(n.createdAt).toLocaleString(LANG==='en'?'en-MY':'ms-MY')}</div>
         </div>`).join('') : `<div class="notif-empty">${LANG==='en'?'No notifications yet.':'Tiada notifikasi lagi.'}</div>`}
     </div>
@@ -2044,8 +2080,8 @@ async function openMobileNotifSheet(){
   panelEl.innerHTML = `<h3 style="margin:0 0 10px;font-family:var(--font-display);font-size:16px;">${tr('mnav_notif')}</h3>` +
     (list.length ? list.slice(0,20).map(n=>`
       <div class="notif-item">
-        <div class="notif-title">${escapeHtml(n.title)}</div>
-        <div class="notif-body">${escapeHtml(n.body)}</div>
+        <div class="notif-title">${escapeHtml(notifText(n,'title'))}</div>
+        <div class="notif-body">${escapeHtml(notifText(n,'body'))}${n.extra?': '+escapeHtml(n.extra):''}</div>
         <div class="notif-time">${new Date(n.createdAt).toLocaleString(LANG==='en'?'en-MY':'ms-MY')}</div>
       </div>`).join('') : `<div class="notif-empty">${LANG==='en'?'No notifications yet.':'Tiada notifikasi lagi.'}</div>`);
   sheet.classList.remove('hidden');
@@ -3318,17 +3354,17 @@ async function renderCoordinator(){
   }
   document.getElementById('toggle-posttest').addEventListener('click', (e)=>{
     handleCoordToggle(e.target, 'postTestUnlocked',
-      "Post-Test kini dibuka", "Sila lengkapkan Post-Test dalam dashboard anda.", "posttest",
+      "notif_posttest_t", "notif_posttest_b", "posttest",
       "Post-Test dibuka.", "Post-Test ditutup.");
   });
   document.getElementById('toggle-feedback').addEventListener('click', (e)=>{
     handleCoordToggle(e.target, 'feedbackUnlocked',
-      "Borang Maklum Balas kini dibuka", "Lengkapkan Maklum Balas untuk membuka sijil penyertaan anda.", "feedback",
+      "notif_feedback_t", "notif_feedback_b", "feedback",
       "Maklum Balas dibuka.", "Maklum Balas ditutup.");
   });
   document.getElementById('toggle-ipcgo').addEventListener('click', (e)=>{
     handleCoordToggle(e.target, 'ipcgoEnabled',
-      "IPC GO! kini dibuka!", "Buka tab IPC GO! sekarang untuk daftar nama/avatar dan sertai lobi.", "ipcgo",
+      "notif_ipcgo_t", "notif_ipcgo_b", "ipcgo",
       "IPC GO! dibuka — staff boleh daftar.", "IPC GO! ditutup.");
   });
   document.getElementById('btn-add-slide').addEventListener('click', async ()=>{
@@ -3340,7 +3376,7 @@ async function renderCoordinator(){
     list.push({title, url, note});
     await sSet('slides', list, true);
     toast("Slaid ditambah.");
-    await pushNotification("Slaid baharu ditambah", title, "slides");
+    await pushNotification("notif_slide_t", "notif_slide_b", "slides", title);
     renderCoordinator();
   });
   body.querySelectorAll('[data-remove-slide]').forEach(btn=>{
@@ -3362,7 +3398,7 @@ async function renderCoordinator(){
     list.push({title, url, note, type});
     await sSet('references', list, true);
     toast("Rujukan ditambah.");
-    await pushNotification("Bahan rujukan baharu ditambah", title, "reference");
+    await pushNotification("notif_ref_t", "notif_ref_b", "reference", title);
     renderCoordinator();
   });
   body.querySelectorAll('[data-remove-ref]').forEach(btn=>{
@@ -3804,7 +3840,7 @@ async function renderCoordGoPanel(){
 async function startGoQuestion(qIndex){
   await sSet('ipcgo-state', {status:'question', qIndex, startedAt: Date.now()}, true);
   if(qIndex === 0){
-    await pushNotification("IPC GO! sudah bermula!", "Buka tab IPC GO! sekarang untuk sertai kuiz langsung.", "ipcgo");
+    await pushNotification("notif_gostart_t", "notif_gostart_b", "ipcgo");
   }
   renderCoordGoPanel();
 }
