@@ -618,7 +618,9 @@ a{color:inherit;}
 table.plist{width:100%;min-width:640px;border-collapse:collapse;font-size:12.5px;}
 table.plist th{text-align:left;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;color:#A6857A;padding:7px 10px;border-bottom:1.5px solid var(--line);white-space:nowrap;}
 table.plist td{padding:9px 10px;border-bottom:1px solid #F6EAE1;white-space:nowrap;}
-table.plist td:first-child{white-space:normal;max-width:150px;}
+/* Lajur Nama satu-satunya yang boleh wrap, jadi browser picit dia habis bila
+   ruang sempit (nama jadi satu huruf sebaris). min-width halang picitan tu. */
+table.plist th:first-child, table.plist td:first-child{white-space:normal;min-width:175px;max-width:240px;overflow-wrap:break-word;}
 .scroll-box{max-height:280px;overflow-y:auto;overflow-x:auto;}
 .go-host-question{font-family:var(--font-display);font-size:19px;font-weight:600;margin:10px 0 14px;}
 .go-host-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;}
@@ -1102,6 +1104,62 @@ const I18N = {
     go_pick_avatar: "Pilih avatar untuk masuk permainan:",
     go_waiting_title: "Menunggu Koordinator", go_waiting_body: "Permainan akan bermula sebentar lagi...",
     go_answered_title: "Jawapan Dihantar!", go_answered_body: "Menunggu peserta lain & keputusan koordinator...",
+
+    /* ---- PANEL KOORDINATOR ---- */
+    co_access: "Kawalan Akses",
+    co_open_posttest: "Buka Post-Test", co_open_posttest_s: "Membenarkan peserta menjawab Post-Test",
+    co_open_feedback: "Buka Maklum Balas", co_open_feedback_s: "Membenarkan peserta menghantar maklum balas",
+    co_open_ipcgo: "Buka IPC GO!", co_open_ipcgo_s: "Membenarkan peserta daftar nama/avatar & masuk lobi IPC GO!",
+    co_summary: "Ringkasan",
+    co_registered: "Berdaftar", co_attended: "Hadir",
+    co_pre_done: "Pre-Test Selesai", co_post_done: "Post-Test Selesai",
+    co_up_slides: "Muat Naik Slaid",
+    co_slide_title: "Tajuk Slaid", co_slide_title_ph: "Cth: Introduction to ICAMS",
+    co_link_slide: "Pautan (Google Drive / SlideShare / dsb)",
+    co_note_opt: "Nota (pilihan)", co_note_slide_ph: "Cth: Dr Siti Saihah Selamat",
+    co_add_slide: "+ Tambah Slaid", co_no_slides: "Belum ada slaid.",
+    co_remove: "Buang",
+    co_up_ref: "Muat Naik Bahan Rujukan",
+    co_up_ref_desc: "Guidelines/dokumen (pautan Google Drive) ATAU video (Google Drive video / pautan YouTube — akan main terus dalam app).",
+    co_type: "Jenis", co_type_doc: "📄 Dokumen (buka pautan)", co_type_video: "▶️ Video (main dalam app)",
+    co_ref_title: "Tajuk", co_ref_title_ph: "Cth: Garis Panduan Pencegahan BSI",
+    co_link_ref: "Pautan (Google Drive / YouTube)",
+    co_note_ref_ph: "Cth: KKM 2023",
+    co_add_ref: "+ Tambah Rujukan", co_no_ref: "Belum ada rujukan.",
+    co_gallery: "Galeri Gambar",
+    co_gallery_desc: "Pilih gambar terus dari telefon/komputer (akan disimpan automatik ke Google Drive), ATAU tampal pautan Drive sedia ada.",
+    co_or: "\u2014 atau \u2014",
+    co_caption_ph: "Cth: Sesi Praktikal \u2014 Stesen 2",
+    co_pick_images: "Pilih Gambar (dari peranti) — boleh pilih beberapa sekali gus",
+    co_drive_link: "Pautan Google Drive (kalau bukan upload terus)",
+    co_caption_opt: "Kapsyen (pilihan)",
+    co_add_image: "+ Tambah Gambar", co_no_images: "Belum ada gambar.",
+    co_course_cat: "Kategori Kursus",
+    co_cat_functional: "Fungsional", co_cat_technical: "Teknikal",
+    co_cat_management: "Pengurusan", co_cat_clinical: "Klinikal",
+    co_course_date: "Tarikh Kursus", co_course_venue: "Tempat Kursus",
+    co_organiser: "Anjuran Jabatan/Unit", co_prepared_by: "Disediakan oleh",
+    co_report: "Jana Laporan Kursus (.docx)",
+    co_report_desc: "Laporan akan diisi automatik guna data pendaftaran, jadual & keputusan pre/post-test. Lengkapkan medan di bawah untuk bahagian yang tiada dalam sistem.",
+    co_dl_word: "\u2b07 Muat Turun (Word)", co_dl_pdf: "\u2b07 Muat Turun (PDF)",
+    co_feedback: "Maklum Balas", co_overall: "Keseluruhan",
+    co_no_feedback: "Tiada maklum balas lagi.",
+    co_participants: "Peserta Berdaftar",
+    co_th_name: "Nama", co_th_ic: "No. K/P", co_th_phone: "Telefon",
+    co_th_attend: "Hadir", co_th_posttest: "Post-Test",
+    co_th_feedback: "Maklum Balas", co_th_cert: "Sijil", co_th_action: "Aksi",
+    co_no_participants: "Tiada peserta lagi.",
+    co_results: "Keputusan Pre / Post-Test",
+    co_th_pre: "Pre", co_th_post: "Post", co_no_data: "Tiada data lagi.",
+    co_go_control: "Kawalan IPC GO!", co_fullscreen: "\U0001F5A5 Skrin Penuh (Projektor)",
+    co_save: "Simpan",
+    co_t_need_title_url: "Sila isi tajuk & pautan.",
+    co_t_deleted: "Peserta dibuang.",
+    co_t_delete_fail: "Gagal buang peserta \u2014 sila cuba lagi.",
+    co_t_name_ic_empty: "Nama & IC tak boleh kosong.",
+    co_t_save_fail: "Gagal simpan \u2014 sila cuba lagi.",
+    co_t_pick_or_link: "Sila pilih gambar ATAU isi pautan Drive.",
+    co_loading: "Memuatkan panel...",
   },
   en: {
     splash_eyebrow: "Infection Control Unit · HTPN Kajang",
@@ -1190,6 +1248,62 @@ const I18N = {
     go_pick_avatar: "Choose an avatar to join the game:",
     go_waiting_title: "Waiting for Coordinator", go_waiting_body: "The game will start shortly...",
     go_answered_title: "Answer Submitted!", go_answered_body: "Waiting for other players & the coordinator's results...",
+
+    /* ---- COORDINATOR PANEL ---- */
+    co_access: "Access Control",
+    co_open_posttest: "Open Post-Test", co_open_posttest_s: "Allow participants to answer the Post-Test",
+    co_open_feedback: "Open Feedback", co_open_feedback_s: "Allow participants to submit feedback",
+    co_open_ipcgo: "Open IPC GO!", co_open_ipcgo_s: "Allow participants to register a name/avatar & enter the IPC GO! lobby",
+    co_summary: "Summary",
+    co_registered: "Registered", co_attended: "Attended",
+    co_pre_done: "Pre-Test Done", co_post_done: "Post-Test Done",
+    co_up_slides: "Upload Slides",
+    co_slide_title: "Slide Title", co_slide_title_ph: "e.g: Introduction to ICAMS",
+    co_link_slide: "Link (Google Drive / SlideShare / etc.)",
+    co_note_opt: "Note (optional)", co_note_slide_ph: "e.g: Dr Siti Saihah Selamat",
+    co_add_slide: "+ Add Slide", co_no_slides: "No slides yet.",
+    co_remove: "Remove",
+    co_up_ref: "Upload Reference Material",
+    co_up_ref_desc: "Guidelines/documents (Google Drive link) OR video (Google Drive video / YouTube link — plays directly in the app).",
+    co_type: "Type", co_type_doc: "📄 Document (open link)", co_type_video: "▶️ Video (play in app)",
+    co_ref_title: "Title", co_ref_title_ph: "e.g: BSI Prevention Guidelines",
+    co_link_ref: "Link (Google Drive / YouTube)",
+    co_note_ref_ph: "e.g: MOH 2023",
+    co_add_ref: "+ Add Reference", co_no_ref: "No references yet.",
+    co_gallery: "Photo Gallery",
+    co_gallery_desc: "Pick images straight from your phone/computer (saved automatically to Google Drive), OR paste an existing Drive link.",
+    co_or: "\u2014 or \u2014",
+    co_caption_ph: "e.g: Practical Session \u2014 Station 2",
+    co_pick_images: "Choose Images (from device) — you can select several at once",
+    co_drive_link: "Google Drive link (if not uploading directly)",
+    co_caption_opt: "Caption (optional)",
+    co_add_image: "+ Add Image", co_no_images: "No images yet.",
+    co_course_cat: "Course Category",
+    co_cat_functional: "Functional", co_cat_technical: "Technical",
+    co_cat_management: "Management", co_cat_clinical: "Clinical",
+    co_course_date: "Course Date", co_course_venue: "Course Venue",
+    co_organiser: "Organising Department/Unit", co_prepared_by: "Prepared by",
+    co_report: "Generate Course Report (.docx)",
+    co_report_desc: "The report is filled in automatically from registration data, the schedule & pre/post-test results. Complete the fields below for parts not held in the system.",
+    co_dl_word: "\u2b07 Download (Word)", co_dl_pdf: "\u2b07 Download (PDF)",
+    co_feedback: "Feedback", co_overall: "Overall",
+    co_no_feedback: "No feedback yet.",
+    co_participants: "Registered Participants",
+    co_th_name: "Name", co_th_ic: "IC No.", co_th_phone: "Phone",
+    co_th_attend: "Attended", co_th_posttest: "Post-Test",
+    co_th_feedback: "Feedback", co_th_cert: "Certificate", co_th_action: "Action",
+    co_no_participants: "No participants yet.",
+    co_results: "Pre / Post-Test Results",
+    co_th_pre: "Pre", co_th_post: "Post", co_no_data: "No data yet.",
+    co_go_control: "IPC GO! Control", co_fullscreen: "\U0001F5A5 Fullscreen (Projector)",
+    co_save: "Save",
+    co_t_need_title_url: "Please fill in the title & link.",
+    co_t_deleted: "Participant removed.",
+    co_t_delete_fail: "Couldn't remove participant \u2014 please try again.",
+    co_t_name_ic_empty: "Name & IC can't be empty.",
+    co_t_save_fail: "Couldn't save \u2014 please try again.",
+    co_t_pick_or_link: "Please choose an image OR enter a Drive link.",
+    co_loading: "Loading panel...",
   }
 };
 let LANG = localStorage.getItem('icams_lang') || 'bm';
@@ -1381,6 +1495,9 @@ async function gsRun(action, ...args){
   else if(action === 'generateReportDocx') payload.reportData = args[0];
   else if(action === 'generateReportPdf') payload.reportData = args[0];
   else if(action === 'generateCertificatePdf') payload.info = args[0];
+  else if(action === 'uploadDriveFile'){ payload.base64 = args[0]; payload.mimeType = args[1]; payload.fileName = args[2]; payload.folderName = args[3]; }
+  else if(action === 'updateParticipant'){ payload.oldIc = args[0]; payload.newName = args[1]; payload.newIc = args[2]; payload.newPhone = args[3]; }
+  else if(action === 'deleteParticipant') payload.ic = args[0];
 
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -2908,7 +3025,7 @@ function renderLeaderboardHtml(list, myKey, title){
 let coordParticipantsCache = []; // simpan senarai terkini untuk mod Edit baris jadual
 async function renderCoordinator(){
   const body = document.getElementById('coord-body');
-  body.innerHTML = `<div class="empty-note">Memuatkan panel...</div>`;
+  body.innerHTML = `<div class="empty-note">${tr('co_loading')}</div>`;
 
   // SATU panggilan sahaja (bukan 6 berasingan) — punca sebenar lag toggle
   // bahasa/maklum balas sebelum ni, sebab kedua-duanya panggil semula
@@ -2940,78 +3057,78 @@ async function renderCoordinator(){
   body.innerHTML = `
     <div class="coord-grid">
       <div class="card">
-        <h3>Kawalan Akses</h3>
+        <h3>${tr('co_access')}</h3>
         <div class="toggle-row">
-          <div><div class="t">Buka Post-Test</div><div class="s">Membenarkan peserta menjawab Post-Test</div></div>
+          <div><div class="t">${tr('co_open_posttest')}</div><div class="s">${tr('co_open_posttest_s')}</div></div>
           <button class="switch ${coordState.postTestUnlocked?'on':''}" id="toggle-posttest"></button>
         </div>
         <div class="toggle-row">
-          <div><div class="t">Buka Maklum Balas</div><div class="s">Membenarkan peserta menghantar maklum balas</div></div>
+          <div><div class="t">${tr('co_open_feedback')}</div><div class="s">${tr('co_open_feedback_s')}</div></div>
           <button class="switch ${coordState.feedbackUnlocked?'on':''}" id="toggle-feedback"></button>
         </div>
         <div class="toggle-row">
-          <div><div class="t">Buka IPC GO!</div><div class="s">Membenarkan peserta daftar nama/avatar & masuk lobi IPC GO!</div></div>
+          <div><div class="t">${tr('co_open_ipcgo')}</div><div class="s">${tr('co_open_ipcgo_s')}</div></div>
           <button class="switch ${coordState.ipcgoEnabled?'on':''}" id="toggle-ipcgo"></button>
         </div>
       </div>
 
       <div class="card">
-        <h3>Ringkasan</h3>
+        <h3>${tr('co_summary')}</h3>
         <div class="stat-row">
-          <div class="stat-chip"><div class="v">${participants.length}</div><div class="l">Berdaftar</div></div>
-          <div class="stat-chip"><div class="v">${attendance.length}</div><div class="l">Hadir</div></div>
+          <div class="stat-chip"><div class="v">${participants.length}</div><div class="l">${tr('co_registered')}</div></div>
+          <div class="stat-chip"><div class="v">${attendance.length}</div><div class="l">${tr('co_attended')}</div></div>
         </div>
         <div class="stat-row" style="margin-top:12px;">
-          <div class="stat-chip"><div class="v">${preResults.length}</div><div class="l">Pre-Test Selesai</div></div>
-          <div class="stat-chip"><div class="v">${postResults.length}</div><div class="l">Post-Test Selesai</div></div>
+          <div class="stat-chip"><div class="v">${preResults.length}</div><div class="l">${tr('co_pre_done')}</div></div>
+          <div class="stat-chip"><div class="v">${postResults.length}</div><div class="l">${tr('co_post_done')}</div></div>
         </div>
       </div>
 
       <div class="card">
-        <h3>Muat Naik Slaid</h3>
-        <div class="field"><label>Tajuk Slaid</label><input type="text" id="slide-title" placeholder="Cth: Introduction to ICAMS"></div>
-        <div class="field"><label>Pautan (Google Drive / SlideShare / dsb)</label><input type="text" id="slide-url" placeholder="https://..."></div>
-        <div class="field"><label>Nota (pilihan)</label><input type="text" id="slide-note" placeholder="Cth: Dr Siti Saihah Selamat"></div>
-        <button class="btn btn-primary" id="btn-add-slide" style="width:auto;">+ Tambah Slaid</button>
+        <h3>${tr('co_up_slides')}</h3>
+        <div class="field"><label>${tr('co_slide_title')}</label><input type="text" id="slide-title" placeholder="${tr('co_slide_title_ph')}"></div>
+        <div class="field"><label>${tr('co_link_slide')}</label><input type="text" id="slide-url" placeholder="https://..."></div>
+        <div class="field"><label>${tr('co_note_opt')}</label><input type="text" id="slide-note" placeholder="${tr('co_note_slide_ph')}"></div>
+        <button class="btn btn-primary" id="btn-add-slide" style="width:auto;">${tr('co_add_slide')}</button>
         <div style="margin-top:14px;">${slides.map((s,i)=>`
           <div class="slide-item">
             <div class="slide-ic">▤</div>
             <div class="slide-meta"><div class="t">${escapeHtml(s.title)}</div><div class="s">${escapeHtml(s.note||'')}</div></div>
-            <button class="slide-open" data-remove-slide="${i}" style="color:var(--danger);">Buang</button>
-          </div>`).join('') || '<div class="empty-note">Belum ada slaid.</div>'}
+            <button class="slide-open" data-remove-slide="${i}" style="color:var(--danger);">${tr('co_remove')}</button>
+          </div>`).join('') || `<div class="empty-note">${tr('co_no_slides')}</div>`}
         </div>
       </div>
 
       <div class="card">
-        <h3>📎 Muat Naik Bahan Rujukan</h3>
-        <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 14px;">Guidelines/dokumen (pautan Google Drive) ATAU video (Google Drive video / pautan YouTube — akan main terus dalam app).</p>
-        <div class="field"><label>Jenis</label>
+        <h3>📎 ${tr('co_up_ref')}</h3>
+        <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 14px;">${tr('co_up_ref_desc')}</p>
+        <div class="field"><label>${tr('co_type')}</label>
           <select id="ref-type">
-            <option value="doc">📄 Dokumen (buka pautan)</option>
-            <option value="video">▶️ Video (main terus dalam app)</option>
+            <option value="doc">${tr('co_type_doc')}</option>
+            <option value="video">${tr('co_type_video')}</option>
           </select>
         </div>
-        <div class="field"><label>Tajuk</label><input type="text" id="ref-title" placeholder="Cth: Garis Panduan Pencegahan BSI"></div>
-        <div class="field"><label>Pautan (Google Drive / YouTube)</label><input type="text" id="ref-url" placeholder="https://drive.google.com/... atau https://youtube.com/..."></div>
-        <div class="field"><label>Nota (pilihan)</label><input type="text" id="ref-note" placeholder="Cth: KKM 2023"></div>
-        <button class="btn btn-primary" id="btn-add-ref" style="width:auto;">+ Tambah Rujukan</button>
+        <div class="field"><label>${tr('co_ref_title')}</label><input type="text" id="ref-title" placeholder="${tr('co_ref_title_ph')}"></div>
+        <div class="field"><label>${tr('co_link_ref')}</label><input type="text" id="ref-url" placeholder="https://drive.google.com/... atau https://youtube.com/..."></div>
+        <div class="field"><label>${tr('co_note_opt')}</label><input type="text" id="ref-note" placeholder="${tr('co_note_ref_ph')}"></div>
+        <button class="btn btn-primary" id="btn-add-ref" style="width:auto;">${tr('co_add_ref')}</button>
         <div style="margin-top:14px;">${references.map((r,i)=>`
           <div class="slide-item">
             <div class="slide-ic">${r.type==='video'?'▶️':'📎'}</div>
             <div class="slide-meta"><div class="t">${escapeHtml(r.title)}</div><div class="s">${escapeHtml(r.note||'')}</div></div>
-            <button class="slide-open" data-remove-ref="${i}" style="color:var(--danger);">Buang</button>
-          </div>`).join('') || '<div class="empty-note">Belum ada rujukan.</div>'}
+            <button class="slide-open" data-remove-ref="${i}" style="color:var(--danger);">${tr('co_remove')}</button>
+          </div>`).join('') || `<div class="empty-note">${tr('co_no_ref')}</div>`}
         </div>
       </div>
 
       <div class="card">
-        <h3>📷 Muat Naik Gambar Kursus (Galeri)</h3>
-        <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 14px;">Pilih gambar terus dari telefon/komputer (akan disimpan automatik ke Google Drive), ATAU tampal pautan Drive sedia ada.</p>
-        <div class="field"><label>Pilih Gambar (dari peranti) — boleh pilih beberapa sekali gus</label><input type="file" id="gallery-file" accept="image/*" multiple></div>
-        <div style="text-align:center;font-size:11.5px;color:#A6857A;margin:6px 0;">— atau —</div>
-        <div class="field"><label>Pautan Google Drive (kalau bukan upload terus)</label><input type="text" id="gallery-url" placeholder="https://drive.google.com/file/d/..."></div>
-        <div class="field"><label>Kapsyen (pilihan)</label><input type="text" id="gallery-caption" placeholder="Cth: Sesi Praktikal — Stesen 2"></div>
-        <button class="btn btn-primary" id="btn-add-gallery" style="width:auto;">+ Tambah Gambar</button>
+        <h3>📷 ${tr('co_gallery')}</h3>
+        <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 14px;">${tr('co_gallery_desc')}</p>
+        <div class="field"><label>${tr('co_pick_images')}</label><input type="file" id="gallery-file" accept="image/*" multiple></div>
+        <div style="text-align:center;font-size:11.5px;color:#A6857A;margin:6px 0;">${tr('co_or')}</div>
+        <div class="field"><label>${tr('co_drive_link')}</label><input type="text" id="gallery-url" placeholder="https://drive.google.com/file/d/..."></div>
+        <div class="field"><label>${tr('co_caption_opt')}</label><input type="text" id="gallery-caption" placeholder="${tr('co_caption_ph')}"></div>
+        <button class="btn btn-primary" id="btn-add-gallery" style="width:auto;">${tr('co_add_image')}</button>
         <div style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;">
           ${gallery.map((g,i)=>{
             const t = driveThumbUrl(g.url, 200);
@@ -3020,73 +3137,73 @@ async function renderCoordinator(){
               ${t ? `<img src="${escapeHtml(t)}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line);" onerror="this.style.background='var(--aqua-tint)';this.src='';">` : `<div style="width:100%;aspect-ratio:1;border-radius:8px;background:var(--aqua-tint);"></div>`}
               <button data-remove-gallery="${i}" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;">✕</button>
             </div>`;
-          }).join('') || '<div class="empty-note">Belum ada gambar.</div>'}
+          }).join('') || `<div class="empty-note">${tr('co_no_images')}</div>`}
         </div>
       </div>
 
       <div class="card" id="report-card">
-        <h3>📄 Jana Laporan Kursus (.docx)</h3>
-        <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 14px;">Laporan akan diisi automatik guna data pendaftaran, jadual &amp; keputusan pre/post-test. Lengkapkan medan di bawah untuk bahagian yang tiada dalam sistem.</p>
-        <div class="field"><label>Kategori Kursus</label>
+        <h3>📄 ${tr('co_report')}</h3>
+        <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 14px;">${tr('co_report_desc')}</p>
+        <div class="field"><label>${tr('co_course_cat')}</label>
           <select id="rpt-kategori">
-            <option value="Fungsional">Fungsional</option>
-            <option value="Teknikal">Teknikal</option>
-            <option value="Pengurusan">Pengurusan</option>
-            <option value="Klinikal">Klinikal</option>
+            <option value="Fungsional">${tr('co_cat_functional')}</option>
+            <option value="Teknikal">${tr('co_cat_technical')}</option>
+            <option value="Pengurusan">${tr('co_cat_management')}</option>
+            <option value="Klinikal">${tr('co_cat_clinical')}</option>
           </select>
         </div>
-        <div class="field"><label>Tarikh Kursus</label><input type="text" id="rpt-tarikh" value="27 Ogos 2026"></div>
-        <div class="field"><label>Tempat Kursus</label><input type="text" id="rpt-tempat" value="Dewan Akasia, Aras 5, WCC, HTPN"></div>
-        <div class="field"><label>Anjuran Jabatan/Unit</label><input type="text" id="rpt-anjuran" value="Unit Kawalan Infeksi Hospital Tengku Permaisuri Norashikin Kajang"></div>
-        <div class="field"><label>Disediakan oleh</label><input type="text" id="rpt-penyedia" placeholder="Cth: DR ANEESA BINTI THAREK, Unit Pencegahan Kawalan Infeksi, HTPN Kajang." value=""></div>
-        <button class="btn btn-primary" id="btn-gen-report-docx" style="width:auto;">⬇ Muat Turun (Word)</button>
-        <button class="btn btn-ghost" id="btn-gen-report-pdf" style="width:auto;margin-left:8px;">⬇ Muat Turun (PDF)</button>
+        <div class="field"><label>${tr('co_course_date')}</label><input type="text" id="rpt-tarikh" value="27 Ogos 2026"></div>
+        <div class="field"><label>${tr('co_course_venue')}</label><input type="text" id="rpt-tempat" value="Dewan Akasia, Aras 5, WCC, HTPN"></div>
+        <div class="field"><label>${tr('co_organiser')}</label><input type="text" id="rpt-anjuran" value="Unit Kawalan Infeksi Hospital Tengku Permaisuri Norashikin Kajang"></div>
+        <div class="field"><label>${tr('co_prepared_by')}</label><input type="text" id="rpt-penyedia" placeholder="Cth: DR ANEESA BINTI THAREK, Unit Pencegahan Kawalan Infeksi, HTPN Kajang." value=""></div>
+        <button class="btn btn-primary" id="btn-gen-report-docx" style="width:auto;">${tr('co_dl_word')}</button>
+        <button class="btn btn-ghost" id="btn-gen-report-pdf" style="width:auto;margin-left:8px;">${tr('co_dl_pdf')}</button>
         <div id="report-status" style="font-size:12.5px;color:#8A6355;margin-top:10px;"></div>
       </div>
 
       <div class="card">
-        <h3>Peserta Berdaftar (${participants.length})</h3>
+        <h3>${tr('co_participants')} (${participants.length})</h3>
         <div class="scroll-box">
           <table class="plist">
-            <thead><tr><th>Nama</th><th>No. K/P</th><th>Telefon</th><th>Hadir</th><th>Post-Test</th><th>Maklum Balas</th><th>Sijil</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>${tr('co_th_name')}</th><th>${tr('co_th_ic')}</th><th>${tr('co_th_phone')}</th><th>${tr('co_th_attend')}</th><th>${tr('co_th_posttest')}</th><th>${tr('co_th_feedback')}</th><th>${tr('co_th_cert')}</th><th>${tr('co_th_action')}</th></tr></thead>
             <tbody id="plist-body">
-              ${participants.map(p=>renderParticipantRow(p, attendance, postResults, feedbackList, certIssued)).join('') || '<tr><td colspan="8">Tiada peserta lagi.</td></tr>'}
+              ${participants.map(p=>renderParticipantRow(p, attendance, postResults, feedbackList, certIssued)).join('') || `<tr><td colspan="8">${tr('co_no_participants')}</td></tr>`}
             </tbody>
           </table>
         </div>
       </div>
 
       <div class="card">
-        <h3>Keputusan Pre / Post-Test</h3>
+        <h3>${tr('co_results')}</h3>
         <div class="scroll-box">
           <table class="plist">
-            <thead><tr><th>Nama</th><th>Pre</th><th>Post</th></tr></thead>
+            <thead><tr><th>${tr('co_th_name')}</th><th>${tr('co_th_pre')}</th><th>${tr('co_th_post')}</th></tr></thead>
             <tbody>
               ${participants.map(p=>{
                 const pre = preResults.find(r=>icKey(r.ic)===icKey(p.ic));
                 const post = postResults.find(r=>icKey(r.ic)===icKey(p.ic));
                 return `<tr><td>${escapeHtml(p.name)}</td><td>${pre?pre.score+'/'+pre.total:'—'}</td><td>${post?post.score+'/'+post.total:'—'}</td></tr>`;
-              }).join('') || '<tr><td colspan="3">Tiada data lagi.</td></tr>'}
+              }).join('') || `<tr><td colspan="3">${tr('co_no_data')}</td></tr>`}
             </tbody>
           </table>
         </div>
       </div>
 
       <div class="card">
-        <h3>Maklum Balas (${feedbackList.length})</h3>
+        <h3>${tr('co_feedback')} (${feedbackList.length})</h3>
         <div class="scroll-box">
           ${feedbackList.map(f=>`
             <div style="padding:10px 0;border-bottom:1px solid #F6EAE1;">
-              <div style="font-size:13px;font-weight:600;">${escapeHtml(f.name)} — Keseluruhan: ${f.overall}/5</div>
+              <div style="font-size:13px;font-weight:600;">${escapeHtml(f.name)} — ${tr('co_overall')}: ${f.overall}/5</div>
               <div style="font-size:12px;color:#8A6355;">${(f.topicLabels||FEEDBACK_TOPICS_BM).map((lbl,i)=>`${escapeHtml(lbl)}: ${(f.topics&&f.topics[i])||'—'}/5`).join(' · ')}</div>
               ${f.comment ? `<div style="font-size:12.5px;margin-top:4px;color:#5C3A2E;">"${escapeHtml(f.comment)}"</div>` : ''}
-            </div>`).join('') || '<div class="empty-note">Tiada maklum balas lagi.</div>'}
+            </div>`).join('') || `<div class="empty-note">${tr('co_no_feedback')}</div>`}
         </div>
       </div>
     </div>
 
     <div class="card" id="go-panel-card" style="margin-top:16px;">
-      <h3>⚡ Kawalan IPC GO! <button class="btn btn-ghost" id="go-fullscreen-btn" style="width:auto;float:right;font-size:12px;padding:6px 12px;">🖥 Skrin Penuh (Projektor)</button></h3>
+      <h3>⚡ ${tr('co_go_control')} <button class="btn btn-ghost" id="go-fullscreen-btn" style="width:auto;float:right;font-size:12px;padding:6px 12px;">${tr('co_fullscreen')}</button></h3>
       <div id="coord-go-panel"></div>
     </div>
   `;
@@ -3143,7 +3260,7 @@ async function renderCoordinator(){
     const title = document.getElementById('slide-title').value.trim();
     const url = document.getElementById('slide-url').value.trim();
     const note = document.getElementById('slide-note').value.trim();
-    if(!title || !url){ toast("Sila isi tajuk & pautan."); return; }
+    if(!title || !url){ toast(tr('co_t_need_title_url')); return; }
     let list = await sGet('slides', true) || [];
     list.push({title, url, note});
     await sSet('slides', list, true);
@@ -3164,7 +3281,7 @@ async function renderCoordinator(){
     const title = document.getElementById('ref-title').value.trim();
     const url = document.getElementById('ref-url').value.trim();
     const note = document.getElementById('ref-note').value.trim();
-    if(!title || !url){ toast("Sila isi tajuk & pautan."); return; }
+    if(!title || !url){ toast(tr('co_t_need_title_url')); return; }
     if(type === 'video' && !videoEmbedUrl(url)){ toast("Pautan video tak dikenali — guna pautan YouTube atau Google Drive (fail video)."); return; }
     let list = await sGet('references', true) || [];
     list.push({title, url, note, type});
@@ -3201,10 +3318,10 @@ async function renderCoordinator(){
         deleteBtn.disabled = true;
         try{
           await gsRun('deleteParticipant', ic);
-          toast("Peserta dibuang.");
+          toast(tr('co_t_deleted'));
           renderCoordinator();
         }catch(err){
-          toast("Gagal buang peserta — sila cuba lagi.");
+          toast(tr('co_t_delete_fail'));
           deleteBtn.disabled = false;
         }
         return;
@@ -3226,15 +3343,15 @@ async function renderCoordinator(){
         const newName = tr.querySelector('#edit-name').value.trim();
         const newIc = tr.querySelector('#edit-ic').value.trim();
         const newPhone = tr.querySelector('#edit-phone').value.trim();
-        if(!newName || !newIc){ toast("Nama & IC tak boleh kosong."); return; }
+        if(!newName || !newIc){ toast(tr('co_t_name_ic_empty')); return; }
         saveBtn.disabled = true; saveBtn.textContent = "Menyimpan...";
         try{
           await gsRun('updateParticipant', oldIc, newName, newIc, newPhone);
           toast("Maklumat peserta dikemaskini.");
           renderCoordinator();
         }catch(err){
-          toast("Gagal simpan — sila cuba lagi.");
-          saveBtn.disabled = false; saveBtn.textContent = "Simpan";
+          toast(tr('co_t_save_fail'));
+          saveBtn.disabled = false; saveBtn.textContent = tr('co_save');
         }
         return;
       }
@@ -3278,7 +3395,7 @@ async function renderCoordinator(){
           toast(`Gagal muat naik gambar "${file.name}". Meneruskan yang lain...`);
         }
       }
-      addBtn.disabled = false; addBtn.textContent = "+ Tambah Gambar";
+      addBtn.disabled = false; addBtn.textContent = tr('co_add_image');
       if(uploadedCount){
         toast(uploadedCount === files.length ? `${uploadedCount} gambar ditambah ke galeri.` : `${uploadedCount} daripada ${files.length} gambar berjaya ditambah.`);
         renderCoordinator();
@@ -3286,7 +3403,7 @@ async function renderCoordinator(){
       return;
     }
     let url = urlInput;
-    if(!url){ toast("Sila pilih gambar ATAU isi pautan Drive."); return; }
+    if(!url){ toast(tr('co_t_pick_or_link')); return; }
     if(!extractDriveFileId(url)){ toast("Pautan tak dikenali — guna pautan Google Drive (share > salin pautan)."); return; }
     await sAppendUnique('gallery', {url, caption, addedAt: new Date().toISOString(), id: 'g'+Date.now()+Math.random().toString(36).slice(2,6)}, 'id');
     toast("Gambar ditambah ke galeri.");
