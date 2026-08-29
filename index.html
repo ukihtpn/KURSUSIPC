@@ -1152,6 +1152,11 @@ const I18N = {
     co_results: "Keputusan Pre / Post-Test",
     co_th_pre: "Pre", co_th_post: "Post", co_no_data: "Tiada data lagi.",
     co_go_control: "Kawalan IPC GO!", co_fullscreen: "\U0001F5A5 Skrin Penuh (Projektor)",
+    co_edit_pre_prompt: "Markah PRE-TEST untuk",
+    co_edit_post_prompt: "Markah POST-TEST untuk",
+    co_blank_keep: "kosongkan = tak ubah",
+    co_invalid_score: "Markah mesti nombor bulat antara",
+    co_score_saved: "Markah dikemas kini.",
     co_save: "Simpan",
     co_t_need_title_url: "Sila isi tajuk & pautan.",
     co_t_deleted: "Peserta dibuang.",
@@ -1296,6 +1301,11 @@ const I18N = {
     co_results: "Pre / Post-Test Results",
     co_th_pre: "Pre", co_th_post: "Post", co_no_data: "No data yet.",
     co_go_control: "IPC GO! Control", co_fullscreen: "\U0001F5A5 Fullscreen (Projector)",
+    co_edit_pre_prompt: "PRE-TEST score for",
+    co_edit_post_prompt: "POST-TEST score for",
+    co_blank_keep: "leave blank = no change",
+    co_invalid_score: "Score must be a whole number between",
+    co_score_saved: "Score updated.",
     co_save: "Save",
     co_t_need_title_url: "Please fill in the title & link.",
     co_t_deleted: "Participant removed.",
@@ -3177,13 +3187,21 @@ async function renderCoordinator(){
         <h3>${tr('co_results')}</h3>
         <div class="scroll-box">
           <table class="plist">
-            <thead><tr><th>${tr('co_th_name')}</th><th>${tr('co_th_pre')}</th><th>${tr('co_th_post')}</th></tr></thead>
+            <thead><tr><th>${tr('co_th_name')}</th><th>${tr('co_th_pre')}</th><th>${tr('co_th_post')}</th><th>${tr('co_th_action')}</th></tr></thead>
             <tbody>
               ${participants.map(p=>{
                 const pre = preResults.find(r=>icKey(r.ic)===icKey(p.ic));
                 const post = postResults.find(r=>icKey(r.ic)===icKey(p.ic));
-                return `<tr><td>${escapeHtml(p.name)}</td><td>${pre?pre.score+'/'+pre.total:'—'}</td><td>${post?post.score+'/'+post.total:'—'}</td></tr>`;
-              }).join('') || `<tr><td colspan="3">${tr('co_no_data')}</td></tr>`}
+                const ic = escapeHtml(p.ic);
+                return `<tr>
+                  <td>${escapeHtml(p.name)}</td>
+                  <td>${pre?pre.score+'/'+pre.total:'—'}</td>
+                  <td>${post?post.score+'/'+post.total:'—'}</td>
+                  <td><button class="slide-open" data-edit-score-ic="${ic}" data-edit-score-name="${escapeHtml(p.name)}"
+                        data-pre="${pre?pre.score:''}" data-post="${post?post.score:''}"
+                        style="color:var(--teal-deep);">✏️</button></td>
+                </tr>`;
+              }).join('') || `<tr><td colspan="4">${tr('co_no_data')}</td></tr>`}
             </tbody>
           </table>
         </div>
@@ -3434,6 +3452,61 @@ async function renderCoordinator(){
         toast("Gagal jana sijil: " + (err && err.message ? err.message : err));
       }
       btn.textContent = originalText; btn.disabled = false;
+    });
+  });
+
+  // Koordinator edit markah pre/post-test seorang peserta (contoh: staff
+  // jawab atas kertas, atau perlu pembetulan manual). Kita kemas kini KEDUA-DUA
+  // tempat simpanan: rekod individu (pretest:IC) DAN senarai ringkasan
+  // (pretest-results) supaya jadual, laporan & sijil semuanya konsisten.
+  body.querySelectorAll('[data-edit-score-ic]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ic = btn.dataset.editScoreIc;
+      const name = btn.dataset.editScoreName;
+      const total = QUESTIONS.length;
+      const curPre = btn.dataset.pre, curPost = btn.dataset.post;
+
+      const preIn = prompt(`${tr('co_edit_pre_prompt')} ${name}\n(0-${total}, ${tr('co_blank_keep')})`, curPre);
+      if(preIn === null) return;
+      const postIn = prompt(`${tr('co_edit_post_prompt')} ${name}\n(0-${total}, ${tr('co_blank_keep')})`, curPost);
+      if(postIn === null) return;
+
+      const parse = (v)=>{
+        const t = String(v).trim();
+        if(t === '') return null;
+        const n = Number(t);
+        if(!Number.isInteger(n) || n < 0 || n > total) return NaN;
+        return n;
+      };
+      const preVal = parse(preIn), postVal = parse(postIn);
+      if(Number.isNaN(preVal) || Number.isNaN(postVal)){
+        toast(`${tr('co_invalid_score')} 0-${total}.`);
+        return;
+      }
+
+      btn.disabled = true; btn.textContent = '⏳';
+      try{
+        const key = icKey(ic);
+        const p = (coordParticipantsCache||[]).find(x=>icKey(x.ic)===key) || {name, ic, dept:''};
+        for(const [kind, val] of [['pretest', preVal], ['posttest', postVal]]){
+          if(val === null) continue;
+          const existing = await sGet(kind+':'+key, false);
+          // Kekalkan jawapan asal kalau ada — kita cuma pinda markah.
+          const rec = Object.assign({answers:[], submittedAt:new Date().toISOString()}, existing||{}, {
+            score: val, total, editedByCoordinator: true, editedAt: new Date().toISOString()
+          });
+          await sSet(kind+':'+key, rec, false);
+          await sAppendUnique(kind+'-results',
+            {name:p.name, ic:p.ic, dept:p.dept||'', score:val, total}, 'ic', true);
+        }
+        toast(tr('co_score_saved'));
+        panelDataCache = { fetchedAt: 0, data: null };
+        renderCoordinator();
+      }catch(err){
+        console.error(err);
+        toast(tr('co_t_save_fail'));
+        btn.disabled = false; btn.textContent = '✏️';
+      }
     });
   });
 
