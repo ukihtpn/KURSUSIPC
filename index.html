@@ -1143,6 +1143,12 @@ const I18N = {
     co_import_phone_busy: "Mengambil...",
     co_import_phone_ok: "no. telefon dikemas kini.",
     co_import_phone_none: "Tiada no. telefon baharu dijumpai dalam Sheet.",
+    co_edit_score: "Edit markah",
+    co_reset_pre: "Kosongkan pre-test (peserta boleh jawab semula)",
+    co_reset_post: "Kosongkan post-test (peserta boleh jawab semula)",
+    co_reset_confirm: "Kosongkan keputusan ini untuk",
+    co_reset_done: "dikosongkan \u2014 peserta boleh jawab semula.",
+    co_reset_desc: "Klik \u21ba Pre atau \u21ba Post pada mana-mana baris untuk kosongkan keputusan itu supaya peserta boleh jawab semula. Kehadiran, maklum balas dan sijil tidak terjejas.",
     co_notif: "Notifikasi",
     co_notif_desc: "Senarai notifikasi dikongsi semua staff. Kosongkan bila senarai dah terlalu panjang.",
     co_notif_count: "notifikasi tersimpan",
@@ -1315,6 +1321,12 @@ const I18N = {
     co_import_phone_busy: "Importing...",
     co_import_phone_ok: "phone numbers updated.",
     co_import_phone_none: "No new phone numbers found in the Sheet.",
+    co_edit_score: "Edit score",
+    co_reset_pre: "Clear pre-test (lets the participant retake it)",
+    co_reset_post: "Clear post-test (lets the participant retake it)",
+    co_reset_confirm: "Clear this result for",
+    co_reset_done: "cleared \u2014 the participant can retake it.",
+    co_reset_desc: "Click \u21ba Pre or \u21ba Post on any row to clear that result so the participant can retake it. Attendance, feedback and certificates are unaffected.",
     co_notif: "Notifications",
     co_notif_desc: "The notification list is shared by all staff. Clear it when it gets too long.",
     co_notif_count: "notifications stored",
@@ -1447,21 +1459,21 @@ const QUESTIONS_BM = [
   {q:"Antara berikut, yang manakah definisi paling tepat bagi Antimicrobial Resistance (AMR)?",
    opts:["Keupayaan mikroorganisma untuk bertahan terhadap ubat antimikrob yang sepatutnya membunuh/menghalangnya","Alahan pesakit terhadap penisilin","Kegagalan peralatan perubatan disterilkan","Kesan sampingan antibiotik terhadap pesakit"],correct:0},
   {q:"Apakah salah satu langkah utama pencegahan Bloodstream Infection (BSI) berkaitan CLABSI?",
-   opts:["Membiarkan dressing central line lembap untuk selesa pesakit","Menukar central line setiap hari tanpa indikasi klinikal","Mengelakkan hand hygiene sebelum akses line untuk jimat masa","Amalan aseptic non-touch technique (ANTT) semasa insertion dan maintenance central line"],correct:3},
+   opts:["Amalan aseptic non-touch technique (ANTT) semasa insertion dan maintenance central line","Membiarkan dressing central line lembap untuk selesa pesakit","Menukar central line setiap hari tanpa indikasi klinikal","Mengelakkan hand hygiene sebelum akses line untuk jimat masa"],correct:0},
   {q:"Bilakah masa paling sesuai untuk mengeluarkan central venous catheter (CVC) bagi mengurangkan risiko BSI?",
-   opts:["Tidak perlu dikeluarkan selagi masih berfungsi","Hanya selepas 30 hari digunakan","Sebaik sahaja ia tidak lagi diperlukan secara klinikal","Hanya apabila pesakit demam"],correct:2},
+   opts:["Sebaik sahaja ia tidak lagi diperlukan secara klinikal","Tidak perlu dikeluarkan selagi masih berfungsi","Hanya selepas 30 hari digunakan","Hanya apabila pesakit demam"],correct:0},
   {q:"Apakah amalan yang BETUL semasa mengambil blood culture untuk mengelakkan kontaminasi?",
-   opts:["Menyentuh semula tapak selepas dibersihkan","Membersihkan kulit dengan antiseptik dan membiarkan ia kering sepenuhnya sebelum venepuncture","Menggunakan botol kultur yang sama untuk dua pesakit berbeza","Mengambil sampel dari IV line sedia ada tanpa persediaan tambahan"],correct:1},
+   opts:["Membersihkan kulit dengan antiseptik dan membiarkan ia kering sepenuhnya sebelum venepuncture","Menyentuh semula tapak selepas dibersihkan","Menggunakan botol kultur yang sama untuk dua pesakit berbeza","Mengambil sampel dari IV line sedia ada tanpa persediaan tambahan"],correct:0},
   {q:"Apakah kesilapan (DON'T) yang sering berlaku semasa pengambilan blood culture di wad?",
-   opts:["Menggunakan teknik aseptik yang betul","Menghantar sampel ke makmal dalam masa yang ditetapkan","Mengambil volume darah yang tidak mencukupi untuk botol kultur","Melabel botol dengan nama dan nombor pesakit yang betul"],correct:2},
+   opts:["Mengambil volume darah yang tidak mencukupi untuk botol kultur","Menggunakan teknik aseptik yang betul","Menghantar sampel ke makmal dalam masa yang ditetapkan","Melabel botol dengan nama dan nombor pesakit yang betul"],correct:0},
   {q:"Antara berikut, yang manakah langkah pencegahan SSI sebelum pembedahan (pre-operative)?",
-   opts:["Mengelakkan mandi sebelum pembedahan","Surgical antibiotic prophylaxis diberikan dalam 60 minit sebelum insisi","Memberikan antibiotik selepas insisi dibuat","Mencukur kawasan pembedahan sehari sebelum operasi"],correct:1},
+   opts:["Surgical antibiotic prophylaxis diberikan dalam 60 minit sebelum insisi","Mengelakkan mandi sebelum pembedahan","Memberikan antibiotik selepas insisi dibuat","Mencukur kawasan pembedahan sehari sebelum operasi"],correct:0},
   {q:"Apakah kaedah yang disyorkan untuk penyediaan kulit sebelum pembedahan bagi mengurangkan risiko SSI?",
-   opts:["Mencukur kawasan pembedahan sejam sebelum operasi","Tidak membersihkan kulit langsung sebelum insisi","Menggunakan antiseptik berasaskan alkohol (cth: chlorhexidine-alcohol)","Menggunakan air paip sahaja"],correct:2},
+   opts:["Menggunakan antiseptik berasaskan alkohol (cth: chlorhexidine-alcohol)","Mencukur kawasan pembedahan sejam sebelum operasi","Tidak membersihkan kulit langsung sebelum insisi","Menggunakan air paip sahaja"],correct:0},
   {q:"Manakah antara berikut adalah faktor risiko pesakit (patient-related) untuk SSI?",
-   opts:["Ventilasi bilik pembedahan yang baik","Penggunaan sarung tangan steril oleh pembedah","Tempoh pembedahan yang singkat","Diabetes mellitus tidak terkawal, obesiti, dan status pemakanan lemah"],correct:3},
+   opts:["Diabetes mellitus tidak terkawal, obesiti, dan status pemakanan lemah","Ventilasi bilik pembedahan yang baik","Penggunaan sarung tangan steril oleh pembedah","Tempoh pembedahan yang singkat"],correct:0},
   {q:"Apakah matlamat utama program Antimicrobial Stewardship (AMS)?",
-   opts:["Menggantikan tugas Infection Control Doctor sepenuhnya","Meningkatkan penggunaan antibiotik spektrum luas bagi semua kes","Memanjangkan tempoh terapi antibiotik untuk semua pesakit","Memastikan penggunaan antibiotik yang optimum bagi hasil rawatan terbaik & membendung AMR"],correct:3}
+   opts:["Memastikan penggunaan antibiotik yang optimum bagi hasil rawatan terbaik & membendung AMR","Menggantikan tugas Infection Control Doctor sepenuhnya","Meningkatkan penggunaan antibiotik spektrum luas bagi semua kes","Memanjangkan tempoh terapi antibiotik untuk semua pesakit"],correct:0}
 ];
 
 const QUESTIONS_EN = [
@@ -1470,21 +1482,21 @@ const QUESTIONS_EN = [
   {q:"Which of the following is the most accurate definition of Antimicrobial Resistance (AMR)?",
    opts:["The ability of microorganisms to survive antimicrobial drugs that would normally kill or inhibit them","Patient allergy to penicillin","Failure to sterilise medical equipment","Side effects of antibiotics on patients"],correct:0},
   {q:"What is one of the key steps in preventing CLABSI-related Bloodstream Infection (BSI)?",
-   opts:["Leaving central line dressing damp for patient comfort","Changing the central line daily without clinical indication","Skipping hand hygiene before line access to save time","Practising aseptic non-touch technique (ANTT) during central line insertion and maintenance"],correct:3},
+   opts:["Practising aseptic non-touch technique (ANTT) during central line insertion and maintenance","Leaving central line dressing damp for patient comfort","Changing the central line daily without clinical indication","Skipping hand hygiene before line access to save time"],correct:0},
   {q:"When is the most appropriate time to remove a central venous catheter (CVC) to reduce BSI risk?",
-   opts:["It does not need to be removed as long as it is functioning","Only after 30 days of use","As soon as it is no longer clinically required","Only when the patient develops fever"],correct:2},
+   opts:["As soon as it is no longer clinically required","It does not need to be removed as long as it is functioning","Only after 30 days of use","Only when the patient develops fever"],correct:0},
   {q:"What is the CORRECT practice when taking a blood culture to avoid contamination?",
-   opts:["Re-touching the site after it has been cleaned","Cleaning the skin with antiseptic and allowing it to dry completely before venepuncture","Using the same culture bottle for two different patients","Drawing the sample from an existing IV line without extra preparation"],correct:1},
+   opts:["Cleaning the skin with antiseptic and allowing it to dry completely before venepuncture","Re-touching the site after it has been cleaned","Using the same culture bottle for two different patients","Drawing the sample from an existing IV line without extra preparation"],correct:0},
   {q:"What mistake (DON'T) commonly occurs during blood culture collection on the ward?",
-   opts:["Using proper aseptic technique","Sending the sample to the lab within the required time","Drawing an insufficient blood volume for the culture bottle","Labelling the bottle with the correct patient name and number"],correct:2},
+   opts:["Drawing an insufficient blood volume for the culture bottle","Using proper aseptic technique","Sending the sample to the lab within the required time","Labelling the bottle with the correct patient name and number"],correct:0},
   {q:"Which of the following is a pre-operative step for SSI prevention?",
-   opts:["Avoiding a shower before surgery","Surgical antibiotic prophylaxis given within 60 minutes before incision","Giving antibiotics after the incision is made","Shaving the surgical site a day before the operation"],correct:1},
+   opts:["Surgical antibiotic prophylaxis given within 60 minutes before incision","Avoiding a shower before surgery","Giving antibiotics after the incision is made","Shaving the surgical site a day before the operation"],correct:0},
   {q:"What is the recommended method for skin preparation before surgery to reduce SSI risk?",
-   opts:["Shaving the surgical site an hour before the operation","Not cleaning the skin at all before incision","Using an alcohol-based antiseptic (e.g. chlorhexidine-alcohol)","Using tap water only"],correct:2},
+   opts:["Using an alcohol-based antiseptic (e.g. chlorhexidine-alcohol)","Shaving the surgical site an hour before the operation","Not cleaning the skin at all before incision","Using tap water only"],correct:0},
   {q:"Which of the following is a patient-related risk factor for SSI?",
-   opts:["Good operating theatre ventilation","Use of sterile gloves by the surgeon","Short duration of surgery","Uncontrolled diabetes mellitus, obesity, and poor nutritional status"],correct:3},
+   opts:["Uncontrolled diabetes mellitus, obesity, and poor nutritional status","Good operating theatre ventilation","Use of sterile gloves by the surgeon","Short duration of surgery"],correct:0},
   {q:"What is the main goal of the Antimicrobial Stewardship (AMS) programme?",
-   opts:["Fully replacing the role of the Infection Control Doctor","Increasing broad-spectrum antibiotic use for all cases","Extending antibiotic therapy duration for all patients","Ensuring optimal antibiotic use for the best treatment outcomes & containing AMR"],correct:3}
+   opts:["Ensuring optimal antibiotic use for the best treatment outcomes & containing AMR","Fully replacing the role of the Infection Control Doctor","Increasing broad-spectrum antibiotic use for all cases","Extending antibiotic therapy duration for all patients"],correct:0}
 ];
 let QUESTIONS = QUESTIONS_BM;
 
@@ -1503,19 +1515,19 @@ let QUESTIONS = QUESTIONS_BM;
 ========================================================= */
 const POSTTEST_QUESTIONS_BM = [
   {q:"Pesakit di wad terbuka disahkan CRE positif. Tindakan mana yang PALING terus memutuskan mode of transmission dalam Chain of Infection?",
-   opts:["Menghadkan lawatan keluarga sahaja","Memberi antibiotik profilaksis kepada pesakit sekatil","Memantau CRP pesakit setiap hari","Contact precautions dengan peralatan dedicated untuk pesakit itu"],correct:3},
+   opts:["Contact precautions dengan peralatan dedicated untuk pesakit itu","Menghadkan lawatan keluarga sahaja","Memberi antibiotik profilaksis kepada pesakit sekatil","Memantau CRP pesakit setiap hari"],correct:0},
 
   {q:"Doktor tanggalkan sarung tangan selepas pasang CBD, terus pakai sarung tangan baharu untuk ambil blood culture pesakit lain. Apa kesilapan KRITIKAL di sini?",
-   opts:["Sarung tangan sepatutnya dipakai dua lapis","Tiada kesilapan — sarung tangan baharu sudah memadai","CBD sepatutnya dipasang selepas blood culture diambil dulu","Tiada hand hygiene antara tanggal sarung tangan lama dan pakai yang baharu"],correct:3},
+   opts:["Tiada hand hygiene antara tanggal sarung tangan lama dan pakai yang baharu","Sarung tangan sepatutnya dipakai dua lapis","Tiada kesilapan — sarung tangan baharu sudah memadai","CBD sepatutnya dipasang selepas blood culture diambil dulu"],correct:0},
 
   {q:"Berapa ml darah diperlukan untuk SETIAP botol supaya hasil blood culture tepat pada pesakit dewasa?",
    opts:["10 ml","6 ml","5 ml","20 ml"],correct:0},
 
   {q:"Dua set blood culture diambil. Selepas 4 hari, HANYA satu botol dari satu set tumbuh coagulase-negative Staphylococcus. Pesakit stabil, tiada demam. Apa tafsiran PALING munasabah?",
-   opts:["Tanda endocarditis — rujuk untuk pembedahan segera","Berkemungkinan besar kontaminan — nilai semula secara klinikal, jangan terus mula vancomycin","Bakteremia sebenar — mula vancomycin serta-merta","Kegagalan makmal — abaikan keputusan sepenuhnya"],correct:1},
+   opts:["Berkemungkinan besar kontaminan — nilai semula secara klinikal, jangan terus mula vancomycin","Tanda endocarditis — rujuk untuk pembedahan segera","Bakteremia sebenar — mula vancomycin serta-merta","Kegagalan makmal — abaikan keputusan sepenuhnya"],correct:0},
 
   {q:"Pesakit ada CVC selama 8 hari, tiba-tiba demam tanpa sumber lain yang jelas. Apa tindakan PALING tepat sebelum mula antibiotik?",
-   opts:["Tukar dressing CVC sahaja dan pantau 48 jam","Tanggalkan CVC serta-merta pada semua pesakit demam","Tukar CVC secara rutin melalui guidewire tanpa kultur","Ambil paired blood cultures (dari CVC DAN vena periferal) sebelum dos antibiotik pertama diberi"],correct:3},
+   opts:["Ambil paired blood cultures (dari CVC DAN vena periferal) sebelum dos antibiotik pertama diberi","Tukar dressing CVC sahaja dan pantau 48 jam","Tanggalkan CVC serta-merta pada semua pesakit demam","Tukar CVC secara rutin melalui guidewire tanpa kultur"],correct:0},
 
   {q:"Ikut bukti terkini, kenyataan mana yang BETUL tentang peripheral IV catheter (PIVC)?",
    opts:["Ditukar bila ada indikasi klinikal, bukan ikut jadual rutin","PIVC tidak pernah menyebabkan bloodstream infection","Dressing telus wajib ditukar setiap hari walaupun bersih dan melekat","Wajib ditukar setiap 48 jam tanpa mengira keadaan"],correct:0},
@@ -1524,30 +1536,30 @@ const POSTTEST_QUESTIONS_BM = [
    opts:["Dalam tempoh 60 minit sebelum insisi","12 jam sebelum pembedahan pada malam sebelumnya","Serta-merta selepas insisi dibuat","Selepas pembedahan selesai, sebelum pesakit ke wad"],correct:0},
 
   {q:"Antara elemen bundle ini, yang mana ada bukti PALING kukuh kurangkan Surgical Site Infection?",
-   opts:["Sambung antibiotik profilaksis sampai 5 hari selepas pembedahan","Pasang wound drain secara rutin pada semua kes","Kekalkan normothermia perioperatif","Cukur tapak pembedahan guna pisau cukur malam sebelumnya"],correct:2},
+   opts:["Kekalkan normothermia perioperatif","Sambung antibiotik profilaksis sampai 5 hari selepas pembedahan","Pasang wound drain secara rutin pada semua kes","Cukur tapak pembedahan guna pisau cukur malam sebelumnya"],correct:0},
 
   {q:"Pesakit atas piperacillin-tazobactam empirik. Hari ke-3, kultur tumbuh E. coli sensitif co-amoxiclav dan pesakit makin baik. Apa tindakan AMS PALING sesuai?",
-   opts:["Teruskan piperacillin-tazobactam sehingga 14 hari","Hentikan semua antibiotik serta-merta pada hari ke-3","De-escalate ke co-amoxiclav dan tetapkan tempoh rawatan yang jelas","Tambah vancomycin sebagai perlindungan tambahan"],correct:2},
+   opts:["De-escalate ke co-amoxiclav dan tetapkan tempoh rawatan yang jelas","Teruskan piperacillin-tazobactam sehingga 14 hari","Hentikan semua antibiotik serta-merta pada hari ke-3","Tambah vancomycin sebagai perlindungan tambahan"],correct:0},
 
   {q:"Pesakit nak disediakan untuk pembedahan dan bulu di kawasan insisi kena dibuang. Alat mana yang PATUT digunakan untuk elak SSI?",
-   opts:["Scissor","Clipper","Shaver (pisau cukur)","Strapping tape"],correct:1}
+   opts:["Clipper","Scissor","Shaver (pisau cukur)","Strapping tape"],correct:0}
 ];
 
 const POSTTEST_QUESTIONS_EN = [
   {q:"A patient in an open ward is confirmed to carry Carbapenem-Resistant Enterobacterales (CRE). Which action MOST directly breaks the 'mode of transmission' link in the Chain of Infection?",
-   opts:["Restricting family visits only","Giving prophylactic antibiotics to the patient in the next bed","Monitoring the patient's CRP daily","Contact precautions with dedicated equipment for that patient"],correct:3},
+   opts:["Contact precautions with dedicated equipment for that patient","Restricting family visits only","Giving prophylactic antibiotics to the patient in the next bed","Monitoring the patient's CRP daily"],correct:0},
 
   {q:"A doctor removes gloves after inserting a CBD (Continuous Bladder Drainage), then immediately puts on new gloves to take a blood culture from another patient. What is the CRITICAL omission here?",
-   opts:["Gloves should have been double-layered","There is no omission — new gloves are sufficient","The CBD should have been inserted after the blood culture was taken","No hand hygiene between removing the old gloves and donning the new ones"],correct:3},
+   opts:["No hand hygiene between removing the old gloves and donning the new ones","Gloves should have been double-layered","There is no omission — new gloves are sufficient","The CBD should have been inserted after the blood culture was taken"],correct:0},
 
   {q:"How much blood is required in EACH bottle to obtain an accurate blood culture result in an adult patient?",
    opts:["10 ml","6 ml","5 ml","20 ml"],correct:0},
 
   {q:"Two blood culture sets are taken. After 4 days, only ONE bottle from one set grows coagulase-negative Staphylococcus. The patient is stable and afebrile. What is the MOST reasonable interpretation?",
-   opts:["A sign of endocarditis — refer for urgent surgery","Likely a contaminant — reassess clinically rather than starting vancomycin automatically","True bacteraemia — start vancomycin immediately","Laboratory failure — disregard the result entirely"],correct:1},
+   opts:["Likely a contaminant — reassess clinically rather than starting vancomycin automatically","A sign of endocarditis — refer for urgent surgery","True bacteraemia — start vancomycin immediately","Laboratory failure — disregard the result entirely"],correct:0},
 
   {q:"A patient with a CVC in situ for 8 days develops a new fever with no other obvious source. What is the MOST appropriate action before starting antibiotics?",
-   opts:["Change the CVC dressing only and observe for 48 hours","Remove the CVC immediately in every febrile patient","Routinely exchange the CVC over a guidewire without cultures","Take paired blood cultures (from the CVC AND a peripheral vein) before the first antibiotic dose"],correct:3},
+   opts:["Take paired blood cultures (from the CVC AND a peripheral vein) before the first antibiotic dose","Change the CVC dressing only and observe for 48 hours","Remove the CVC immediately in every febrile patient","Routinely exchange the CVC over a guidewire without cultures"],correct:0},
 
   {q:"Based on current evidence, which statement about peripheral IV catheters (PIVC) is CORRECT?",
    opts:["They are replaced when clinically indicated, rather than on a fixed routine schedule","PIVCs never cause bloodstream infection","Transparent dressings must be changed daily even when clean and intact","They must be replaced every 48 hours regardless of condition"],correct:0},
@@ -1556,13 +1568,13 @@ const POSTTEST_QUESTIONS_EN = [
    opts:["Within 60 minutes before incision","12 hours before surgery, the night before","Immediately after the incision is made","After surgery is completed, before the patient returns to the ward"],correct:0},
 
   {q:"Which bundle element has the STRONGEST evidence for reducing Surgical Site Infection?",
-   opts:["Continuing prophylactic antibiotics for 5 days after surgery","Routinely inserting a wound drain in all cases","Maintaining perioperative normothermia","Shaving the surgical site with a razor the night before"],correct:2},
+   opts:["Maintaining perioperative normothermia","Continuing prophylactic antibiotics for 5 days after surgery","Routinely inserting a wound drain in all cases","Shaving the surgical site with a razor the night before"],correct:0},
 
   {q:"A patient is on empirical piperacillin-tazobactam. On day 3, cultures grow E. coli sensitive to co-amoxiclav and the patient is improving clinically. What is the MOST appropriate AMS action?",
-   opts:["Continue piperacillin-tazobactam for a full 14 days","Stop all antibiotics immediately on day 3","De-escalate to co-amoxiclav and set a defined treatment duration","Add vancomycin for additional cover"],correct:2},
+   opts:["De-escalate to co-amoxiclav and set a defined treatment duration","Continue piperacillin-tazobactam for a full 14 days","Stop all antibiotics immediately on day 3","Add vancomycin for additional cover"],correct:0},
 
   {q:"A patient must be prepared for surgery and hair at the incision site needs to be removed. Which instrument SHOULD be used to prevent SSI?",
-   opts:["Scissors","Clipper","Shaver (razor)","Strapping tape"],correct:1}
+   opts:["Clipper","Scissors","Shaver (razor)","Strapping tape"],correct:0}
 ];
 let POSTTEST_QUESTIONS = POSTTEST_QUESTIONS_BM;
 
@@ -1738,6 +1750,7 @@ async function gsRun(action, ...args){
   else if(action === 'updateParticipant'){ payload.oldIc = args[0]; payload.newName = args[1]; payload.newIc = args[2]; payload.newPhone = args[3]; }
   else if(action === 'deleteParticipant') payload.ic = args[0];
   else if(action === 'importPhones'){ /* tiada parameter */ }
+  else if(action === 'resetQuiz'){ payload.ic = args[0]; payload.kind = args[1]; }
 
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -2804,6 +2817,15 @@ async function renderAttendance(main, preloadedRecord){
    jadi setiap toggle bahasa memulakan semula kuiz dari soalan 1.
    Selamat kerana susunan pilihan BM & EN adalah identik. */
 let quizDraft = { pretest: null, posttest: null };
+/* Susunan rawak [0..n-1] untuk memaparkan pilihan jawapan. */
+function shuffledOrder(n){
+  const a = Array.from({length:n}, (_,i)=>i);
+  for(let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 async function renderQuiz(main, kind, unlocked, preloadedSaved){
   const QSET = quizSet(kind);
   const label = kind==='pretest' ? tr('quiz_pretest_title') : tr('quiz_posttest_title');
@@ -2823,9 +2845,19 @@ async function renderQuiz(main, kind, unlocked, preloadedSaved){
     return renderQuizResult(main, kind, saved);
   }
   if(!quizDraft[kind] || quizDraft[kind].answers.length !== QSET.length){
-    quizDraft[kind] = { answers: new Array(QSET.length).fill(null), idx: 0 };
+    // Susunan PAPARAN pilihan diacak sekali setiap kali kuiz dimulakan, dan
+    // disimpan dalam draf supaya ia kekal sama walaupun peserta tukar bahasa.
+    // PENTING: nombor yang DISIMPAN sentiasa indeks kanonik (ikut susunan
+    // dalam array soalan), bukan kedudukan di skrin. Jadi mengubah susunan
+    // paparan TIDAK akan merosakkan rekod jawapan yang sudah tersimpan.
+    quizDraft[kind] = {
+      answers: new Array(QSET.length).fill(null),
+      idx: 0,
+      order: QSET.map(q => shuffledOrder(q.opts.length))
+    };
   }
   const answers = quizDraft[kind].answers;
+  const order = quizDraft[kind].order;
   let idx = quizDraft[kind].idx;
 
   main.innerHTML = `
@@ -2843,9 +2875,9 @@ async function renderQuiz(main, kind, unlocked, preloadedSaved){
     <div class="q-block ${qi===idx?'active':''}" data-qi="${qi}">
       <p class="q-text">${qi+1}. ${q.q}</p>
       <div class="opt-list">
-        ${q.opts.map((o,oi)=>`
-          <button class="opt-btn" data-qi="${qi}" data-oi="${oi}">
-            <span class="opt-let">${String.fromCharCode(65+oi)}</span><span>${o}</span>
+        ${order[qi].map((ci,pos)=>`
+          <button class="opt-btn" data-qi="${qi}" data-oi="${ci}">
+            <span class="opt-let">${String.fromCharCode(65+pos)}</span><span>${q.opts[ci]}</span>
           </button>`).join('')}
       </div>
       <div class="q-nav">
@@ -3497,14 +3529,21 @@ async function renderCoordinator(){
                   <td>${escapeHtml(p.name)}</td>
                   <td>${pre?pre.score+'/'+pre.total:'—'}</td>
                   <td>${post?post.score+'/'+post.total:'—'}</td>
-                  <td><button class="slide-open" data-edit-score-ic="${ic}" data-edit-score-name="${escapeHtml(p.name)}"
-                        data-pre="${pre?pre.score:''}" data-post="${post?post.score:''}"
-                        style="color:var(--teal-deep);">✏️</button></td>
+                  <td style="white-space:nowrap;">
+                    <button class="slide-open" data-edit-score-ic="${ic}" data-edit-score-name="${escapeHtml(p.name)}"
+                      data-pre="${pre?pre.score:''}" data-post="${post?post.score:''}"
+                      title="${tr('co_edit_score')}" style="color:var(--teal-deep);">✏️</button>
+                    ${pre ? `<button class="slide-open" data-reset-ic="${ic}" data-reset-kind="pretest" data-reset-name="${escapeHtml(p.name)}"
+                      title="${tr('co_reset_pre')}" style="color:var(--danger);">↺ Pre</button>` : ''}
+                    ${post ? `<button class="slide-open" data-reset-ic="${ic}" data-reset-kind="posttest" data-reset-name="${escapeHtml(p.name)}"
+                      title="${tr('co_reset_post')}" style="color:var(--danger);">↺ Post</button>` : ''}
+                  </td>
                 </tr>`;
               }).join('') || `<tr><td colspan="4">${tr('co_no_data')}</td></tr>`}
             </tbody>
           </table>
         </div>
+        <p style="font-size:12.5px;color:#8A6355;margin:12px 0 0;">${tr('co_reset_desc')}</p>
       </div>
 
       <div class="card">
@@ -3817,6 +3856,30 @@ async function renderCoordinator(){
   // Ini perlu sebab import automatik hanya berlaku bila senarai peserta berubah
   // (contoh ada pendaftaran baharu) — kalau koordinator cuma taip telefon dalam
   // Sheet, tiada apa yang mencetuskannya.
+  // Kosongkan post-test seorang peserta supaya dia boleh jawab SEMULA.
+  // Data lain (kehadiran, maklum balas, sijil) tidak disentuh.
+  body.querySelectorAll('[data-reset-ic]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ic = btn.dataset.resetIc;
+      const kind = btn.dataset.resetKind;
+      const name = btn.dataset.resetName;
+      const label = kind === 'pretest' ? 'Pre-Test' : 'Post-Test';
+      if(!confirm(`${tr('co_reset_confirm')} ${label} \u2014 ${name}?`)) return;
+      const orig = btn.textContent;
+      btn.disabled = true; btn.textContent = '\u23f3';
+      try{
+        await gsRun('resetQuiz', ic, kind);
+        toast(`${label} ${tr('co_reset_done')}`);
+        panelDataCache = { fetchedAt: 0, data: null };
+        renderCoordinator();
+      }catch(err){
+        console.error(err);
+        toast(tr('co_t_save_fail'));
+        btn.disabled = false; btn.textContent = orig;
+      }
+    });
+  });
+
   const importPhonesBtn = document.getElementById('btn-import-phones');
   if(importPhonesBtn) importPhonesBtn.addEventListener('click', async ()=>{
     const orig = importPhonesBtn.textContent;
