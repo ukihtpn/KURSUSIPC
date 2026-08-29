@@ -1138,6 +1138,11 @@ const I18N = {
     notif_slide_b: "Slaid baharu",
     notif_ref_t: "Bahan rujukan baharu ditambah",
     notif_ref_b: "Rujukan baharu",
+    co_import_phone: "\u21bb Ambil No. Telefon dari Google Sheet",
+    co_import_phone_desc: "Taip no. telefon dalam lajur Telefon pada tab \"Peserta\" di Google Sheet, kemudian tekan butang di bawah untuk masukkannya ke dalam app.",
+    co_import_phone_busy: "Mengambil...",
+    co_import_phone_ok: "no. telefon dikemas kini.",
+    co_import_phone_none: "Tiada no. telefon baharu dijumpai dalam Sheet.",
     co_notif: "Notifikasi",
     co_notif_desc: "Senarai notifikasi dikongsi semua staff. Kosongkan bila senarai dah terlalu panjang.",
     co_notif_count: "notifikasi tersimpan",
@@ -1305,6 +1310,11 @@ const I18N = {
     notif_slide_b: "New slide",
     notif_ref_t: "New reference material added",
     notif_ref_b: "New reference",
+    co_import_phone: "\u21bb Import Phone Numbers from Google Sheet",
+    co_import_phone_desc: "Type phone numbers into the Telefon column on the \"Peserta\" tab in Google Sheets, then press the button below to pull them into the app.",
+    co_import_phone_busy: "Importing...",
+    co_import_phone_ok: "phone numbers updated.",
+    co_import_phone_none: "No new phone numbers found in the Sheet.",
     co_notif: "Notifications",
     co_notif_desc: "The notification list is shared by all staff. Clear it when it gets too long.",
     co_notif_count: "notifications stored",
@@ -1560,6 +1570,7 @@ async function gsRun(action, ...args){
   else if(action === 'uploadDriveFile'){ payload.base64 = args[0]; payload.mimeType = args[1]; payload.fileName = args[2]; payload.folderName = args[3]; }
   else if(action === 'updateParticipant'){ payload.oldIc = args[0]; payload.newName = args[1]; payload.newIc = args[2]; payload.newPhone = args[3]; }
   else if(action === 'deleteParticipant') payload.ic = args[0];
+  else if(action === 'importPhones'){ /* tiada parameter */ }
 
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -3266,6 +3277,8 @@ async function renderCoordinator(){
 
       <div class="card">
         <h3>${tr('co_participants')} (${participants.length})</h3>
+        <p style="font-size:12.5px;color:#8A6355;margin:-4px 0 10px;">${tr('co_import_phone_desc')}</p>
+        <button class="btn btn-ghost" id="btn-import-phones" style="width:auto;margin-bottom:14px;">${tr('co_import_phone')}</button>
         <div class="scroll-box">
           <table class="plist">
             <thead><tr><th>${tr('co_th_name')}</th><th>${tr('co_th_ic')}</th><th>${tr('co_th_phone')}</th><th>${tr('co_th_attend')}</th><th>${tr('co_th_posttest')}</th><th>${tr('co_th_feedback')}</th><th>${tr('co_th_cert')}</th><th>${tr('co_th_action')}</th></tr></thead>
@@ -3605,6 +3618,30 @@ async function renderCoordinator(){
 
   // Kosongkan notifikasi. Senarai ni DIKONGSI semua staff, jadi hanya
   // koordinator boleh buat — kesan nya nampak pada semua peranti.
+  // Tarik nombor telefon dari tab "Peserta" dalam Google Sheet ke dalam sistem.
+  // Ini perlu sebab import automatik hanya berlaku bila senarai peserta berubah
+  // (contoh ada pendaftaran baharu) — kalau koordinator cuma taip telefon dalam
+  // Sheet, tiada apa yang mencetuskannya.
+  const importPhonesBtn = document.getElementById('btn-import-phones');
+  if(importPhonesBtn) importPhonesBtn.addEventListener('click', async ()=>{
+    const orig = importPhonesBtn.textContent;
+    importPhonesBtn.disabled = true;
+    importPhonesBtn.textContent = tr('co_import_phone_busy');
+    try{
+      const res = await gsRun('importPhones');
+      toast(res && res.changed
+        ? `${res.imported} ${tr('co_import_phone_ok')}`
+        : tr('co_import_phone_none'));
+      panelDataCache = { fetchedAt: 0, data: null };
+      renderCoordinator();
+    }catch(err){
+      console.error(err);
+      toast(tr('co_t_save_fail'));
+      importPhonesBtn.disabled = false;
+      importPhonesBtn.textContent = orig;
+    }
+  });
+
   const clearNotifBtn = document.getElementById('btn-clear-notif');
   if(clearNotifBtn) clearNotifBtn.addEventListener('click', async ()=>{
     if(!confirm(tr('co_notif_confirm'))) return;
