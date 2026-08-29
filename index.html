@@ -1390,6 +1390,8 @@ function setLang(lang){
   LANG = lang;
   localStorage.setItem('icams_lang', lang);
   QUESTIONS = LANG === 'en' ? QUESTIONS_EN : QUESTIONS_BM;
+  POSTTEST_QUESTIONS = LANG === 'en' ? POSTTEST_QUESTIONS_EN : POSTTEST_QUESTIONS_BM;
+  GO_QUESTIONS = LANG === 'en' ? GO_QUESTIONS_EN : GO_QUESTIONS_BM;
   OBJECTIVES = LANG === 'en' ? OBJECTIVES_EN : OBJECTIVES_BM;
   FEEDBACK_TOPICS = LANG === 'en' ? FEEDBACK_TOPICS_EN : FEEDBACK_TOPICS_BM;
   applyStaticTranslations();
@@ -1397,10 +1399,20 @@ function setLang(lang){
     // IPC GO! yang sedang live (dah join & polling aktif) tak perlu render
     // penuh semula -- itu punca skrin "hilang"/flash setiap toggle bahasa.
     // Cukup biar poll seterusnya (2 saat) papar teks bahasa baharu.
-    if(activePanel === 'ipcgo' && goPollTimer){ return; }
+    // Jangan render semula panel IPC GO! langsung. Kalau permainan sedang
+    // berjalan, poll 2 saat akan papar teks bahasa baharu dengan sendirinya.
+    // Kalau peserta masih di skrin pilih nama/avatar, render semula akan
+    // memadam apa yang dia sedang taip.
+    if(activePanel === 'ipcgo'){ return; }
     renderPanel(activePanel);
   }
-  else if(currentScreenId === 'screen-coordinator'){ renderCoordinator(); }
+  else if(currentScreenId === 'screen-coordinator'){
+    // Panel koordinator mengandungi kawalan permainan. Render semula penuh
+    // semasa permainan LIVE akan reset paparan soalan/pemasa, jadi kita
+    // biarkan poll yang kemas kini teksnya.
+    if(goGameLive) return;
+    renderCoordinator();
+  }
 }
 document.querySelectorAll('.lang-toggle').forEach(btn=>{
   btn.addEventListener('click', ()=> setLang(LANG === 'bm' ? 'en' : 'bm'));
@@ -1431,50 +1443,205 @@ const CERT_INFO = {
 
 const QUESTIONS_BM = [
   {q:"Apakah komponen asas 'Chain of Infection' yang perlu diputuskan untuk mengawal penularan jangkitan?",
-   opts:["Infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host","Hanya infectious agent dan susceptible host sahaja","Hand hygiene dan PPE sahaja","Antibiotic dan vaccination sahaja"],correct:0},
+   opts:["Infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host","Hand hygiene dan PPE sahaja","Antibiotic dan vaccination sahaja","Hanya infectious agent dan susceptible host sahaja"],correct:0},
   {q:"Antara berikut, yang manakah definisi paling tepat bagi Antimicrobial Resistance (AMR)?",
-   opts:["Keupayaan mikroorganisma untuk bertahan terhadap ubat antimikrob yang sepatutnya membunuh/menghalangnya","Kesan sampingan antibiotik terhadap pesakit","Alahan pesakit terhadap penisilin","Kegagalan peralatan perubatan disterilkan"],correct:0},
+   opts:["Keupayaan mikroorganisma untuk bertahan terhadap ubat antimikrob yang sepatutnya membunuh/menghalangnya","Alahan pesakit terhadap penisilin","Kegagalan peralatan perubatan disterilkan","Kesan sampingan antibiotik terhadap pesakit"],correct:0},
   {q:"Apakah salah satu langkah utama pencegahan Bloodstream Infection (BSI) berkaitan CLABSI?",
-   opts:["Amalan aseptic non-touch technique (ANTT) semasa insertion dan maintenance central line","Menukar central line setiap hari tanpa indikasi klinikal","Mengelakkan hand hygiene sebelum akses line untuk jimat masa","Membiarkan dressing central line lembap untuk selesa pesakit"],correct:0},
+   opts:["Membiarkan dressing central line lembap untuk selesa pesakit","Menukar central line setiap hari tanpa indikasi klinikal","Mengelakkan hand hygiene sebelum akses line untuk jimat masa","Amalan aseptic non-touch technique (ANTT) semasa insertion dan maintenance central line"],correct:3},
   {q:"Bilakah masa paling sesuai untuk mengeluarkan central venous catheter (CVC) bagi mengurangkan risiko BSI?",
-   opts:["Sebaik sahaja ia tidak lagi diperlukan secara klinikal","Hanya selepas 30 hari digunakan","Hanya apabila pesakit demam","Tidak perlu dikeluarkan selagi masih berfungsi"],correct:0},
+   opts:["Tidak perlu dikeluarkan selagi masih berfungsi","Hanya selepas 30 hari digunakan","Sebaik sahaja ia tidak lagi diperlukan secara klinikal","Hanya apabila pesakit demam"],correct:2},
   {q:"Apakah amalan yang BETUL semasa mengambil blood culture untuk mengelakkan kontaminasi?",
-   opts:["Membersihkan kulit dengan antiseptik dan membiarkan ia kering sepenuhnya sebelum venepuncture","Mengambil sampel dari IV line sedia ada tanpa persediaan tambahan","Menyentuh semula tapak selepas dibersihkan","Menggunakan botol kultur yang sama untuk dua pesakit berbeza"],correct:0},
+   opts:["Menyentuh semula tapak selepas dibersihkan","Membersihkan kulit dengan antiseptik dan membiarkan ia kering sepenuhnya sebelum venepuncture","Menggunakan botol kultur yang sama untuk dua pesakit berbeza","Mengambil sampel dari IV line sedia ada tanpa persediaan tambahan"],correct:1},
   {q:"Apakah kesilapan (DON'T) yang sering berlaku semasa pengambilan blood culture di wad?",
-   opts:["Mengambil volume darah yang tidak mencukupi untuk botol kultur","Melabel botol dengan nama dan nombor pesakit yang betul","Menggunakan teknik aseptik yang betul","Menghantar sampel ke makmal dalam masa yang ditetapkan"],correct:0},
+   opts:["Menggunakan teknik aseptik yang betul","Menghantar sampel ke makmal dalam masa yang ditetapkan","Mengambil volume darah yang tidak mencukupi untuk botol kultur","Melabel botol dengan nama dan nombor pesakit yang betul"],correct:2},
   {q:"Antara berikut, yang manakah langkah pencegahan SSI sebelum pembedahan (pre-operative)?",
-   opts:["Surgical antibiotic prophylaxis diberikan dalam 60 minit sebelum insisi","Mencukur kawasan pembedahan sehari sebelum operasi","Mengelakkan mandi sebelum pembedahan","Memberikan antibiotik selepas insisi dibuat"],correct:0},
+   opts:["Mengelakkan mandi sebelum pembedahan","Surgical antibiotic prophylaxis diberikan dalam 60 minit sebelum insisi","Memberikan antibiotik selepas insisi dibuat","Mencukur kawasan pembedahan sehari sebelum operasi"],correct:1},
   {q:"Apakah kaedah yang disyorkan untuk penyediaan kulit sebelum pembedahan bagi mengurangkan risiko SSI?",
-   opts:["Menggunakan antiseptik berasaskan alkohol (cth: chlorhexidine-alcohol)","Mencukur kawasan pembedahan sejam sebelum operasi","Tidak membersihkan kulit langsung sebelum insisi","Menggunakan air paip sahaja"],correct:0},
+   opts:["Mencukur kawasan pembedahan sejam sebelum operasi","Tidak membersihkan kulit langsung sebelum insisi","Menggunakan antiseptik berasaskan alkohol (cth: chlorhexidine-alcohol)","Menggunakan air paip sahaja"],correct:2},
   {q:"Manakah antara berikut adalah faktor risiko pesakit (patient-related) untuk SSI?",
-   opts:["Diabetes mellitus tidak terkawal, obesiti, dan status pemakanan lemah","Penggunaan sarung tangan steril oleh pembedah","Ventilasi bilik pembedahan yang baik","Tempoh pembedahan yang singkat"],correct:0},
+   opts:["Ventilasi bilik pembedahan yang baik","Penggunaan sarung tangan steril oleh pembedah","Tempoh pembedahan yang singkat","Diabetes mellitus tidak terkawal, obesiti, dan status pemakanan lemah"],correct:3},
   {q:"Apakah matlamat utama program Antimicrobial Stewardship (AMS)?",
-   opts:["Memastikan penggunaan antibiotik yang optimum bagi hasil rawatan terbaik & membendung AMR","Meningkatkan penggunaan antibiotik spektrum luas bagi semua kes","Memanjangkan tempoh terapi antibiotik untuk semua pesakit","Menggantikan tugas Infection Control Doctor sepenuhnya"],correct:0}
+   opts:["Menggantikan tugas Infection Control Doctor sepenuhnya","Meningkatkan penggunaan antibiotik spektrum luas bagi semua kes","Memanjangkan tempoh terapi antibiotik untuk semua pesakit","Memastikan penggunaan antibiotik yang optimum bagi hasil rawatan terbaik & membendung AMR"],correct:3}
 ];
 
 const QUESTIONS_EN = [
   {q:"What are the basic components of the 'Chain of Infection' that must be broken to control disease spread?",
-   opts:["Infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host","Only the infectious agent and susceptible host","Hand hygiene and PPE only","Antibiotics and vaccination only"],correct:0},
+   opts:["Infectious agent, reservoir, portal of exit, mode of transmission, portal of entry, susceptible host","Hand hygiene and PPE only","Antibiotics and vaccination only","Only the infectious agent and susceptible host"],correct:0},
   {q:"Which of the following is the most accurate definition of Antimicrobial Resistance (AMR)?",
-   opts:["The ability of microorganisms to survive antimicrobial drugs that would normally kill or inhibit them","Side effects of antibiotics on patients","Patient allergy to penicillin","Failure to sterilise medical equipment"],correct:0},
+   opts:["The ability of microorganisms to survive antimicrobial drugs that would normally kill or inhibit them","Patient allergy to penicillin","Failure to sterilise medical equipment","Side effects of antibiotics on patients"],correct:0},
   {q:"What is one of the key steps in preventing CLABSI-related Bloodstream Infection (BSI)?",
-   opts:["Practising aseptic non-touch technique (ANTT) during central line insertion and maintenance","Changing the central line daily without clinical indication","Skipping hand hygiene before line access to save time","Leaving central line dressing damp for patient comfort"],correct:0},
+   opts:["Leaving central line dressing damp for patient comfort","Changing the central line daily without clinical indication","Skipping hand hygiene before line access to save time","Practising aseptic non-touch technique (ANTT) during central line insertion and maintenance"],correct:3},
   {q:"When is the most appropriate time to remove a central venous catheter (CVC) to reduce BSI risk?",
-   opts:["As soon as it is no longer clinically required","Only after 30 days of use","Only when the patient develops fever","It does not need to be removed as long as it is functioning"],correct:0},
+   opts:["It does not need to be removed as long as it is functioning","Only after 30 days of use","As soon as it is no longer clinically required","Only when the patient develops fever"],correct:2},
   {q:"What is the CORRECT practice when taking a blood culture to avoid contamination?",
-   opts:["Cleaning the skin with antiseptic and allowing it to dry completely before venepuncture","Drawing the sample from an existing IV line without extra preparation","Re-touching the site after it has been cleaned","Using the same culture bottle for two different patients"],correct:0},
+   opts:["Re-touching the site after it has been cleaned","Cleaning the skin with antiseptic and allowing it to dry completely before venepuncture","Using the same culture bottle for two different patients","Drawing the sample from an existing IV line without extra preparation"],correct:1},
   {q:"What mistake (DON'T) commonly occurs during blood culture collection on the ward?",
-   opts:["Drawing an insufficient blood volume for the culture bottle","Labelling the bottle with the correct patient name and number","Using proper aseptic technique","Sending the sample to the lab within the required time"],correct:0},
+   opts:["Using proper aseptic technique","Sending the sample to the lab within the required time","Drawing an insufficient blood volume for the culture bottle","Labelling the bottle with the correct patient name and number"],correct:2},
   {q:"Which of the following is a pre-operative step for SSI prevention?",
-   opts:["Surgical antibiotic prophylaxis given within 60 minutes before incision","Shaving the surgical site a day before the operation","Avoiding a shower before surgery","Giving antibiotics after the incision is made"],correct:0},
+   opts:["Avoiding a shower before surgery","Surgical antibiotic prophylaxis given within 60 minutes before incision","Giving antibiotics after the incision is made","Shaving the surgical site a day before the operation"],correct:1},
   {q:"What is the recommended method for skin preparation before surgery to reduce SSI risk?",
-   opts:["Using an alcohol-based antiseptic (e.g. chlorhexidine-alcohol)","Shaving the surgical site an hour before the operation","Not cleaning the skin at all before incision","Using tap water only"],correct:0},
+   opts:["Shaving the surgical site an hour before the operation","Not cleaning the skin at all before incision","Using an alcohol-based antiseptic (e.g. chlorhexidine-alcohol)","Using tap water only"],correct:2},
   {q:"Which of the following is a patient-related risk factor for SSI?",
-   opts:["Uncontrolled diabetes mellitus, obesity, and poor nutritional status","Use of sterile gloves by the surgeon","Good operating theatre ventilation","Short duration of surgery"],correct:0},
+   opts:["Good operating theatre ventilation","Use of sterile gloves by the surgeon","Short duration of surgery","Uncontrolled diabetes mellitus, obesity, and poor nutritional status"],correct:3},
   {q:"What is the main goal of the Antimicrobial Stewardship (AMS) programme?",
-   opts:["Ensuring optimal antibiotic use for the best treatment outcomes & containing AMR","Increasing broad-spectrum antibiotic use for all cases","Extending antibiotic therapy duration for all patients","Fully replacing the role of the Infection Control Doctor"],correct:0}
+   opts:["Fully replacing the role of the Infection Control Doctor","Increasing broad-spectrum antibiotic use for all cases","Extending antibiotic therapy duration for all patients","Ensuring optimal antibiotic use for the best treatment outcomes & containing AMR"],correct:3}
 ];
 let QUESTIONS = QUESTIONS_BM;
+
+/* =========================================================
+   SOALAN POST-TEST (BERASINGAN daripada Pre-Test)
+   ---------------------------------------------------------
+   Sebelum ni Pre-Test & Post-Test kongsi set soalan yang SAMA, jadi peserta
+   nampak soalan identik dua kali dan markah post-test naik tanpa benar-benar
+   menunjukkan pembelajaran. Set di bawah menguji tajuk yang sama (AMR, asas
+   IPC, pencegahan BSI/CLABSI, blood culture, SSI, AMS) tetapi pada aras
+   kognitif LEBIH TINGGI — aplikasi, analisis dan penilaian klinikal, bukan
+   sekadar ingat definisi.
+
+   Aras: Q1-Q3 aplikasi · Q4-Q7 analisis senario · Q8-Q10 pertimbangan klinikal
+   IPC GO! guna set KETIGA sendiri (GO_QUESTIONS) — lihat di bawah.
+========================================================= */
+const POSTTEST_QUESTIONS_BM = [
+  {q:"Pesakit di wad terbuka disahkan CRE positif. Tindakan mana yang PALING terus memutuskan mode of transmission dalam Chain of Infection?",
+   opts:["Menghadkan lawatan keluarga sahaja","Memberi antibiotik profilaksis kepada pesakit sekatil","Memantau CRP pesakit setiap hari","Contact precautions dengan peralatan dedicated untuk pesakit itu"],correct:3},
+
+  {q:"Doktor tanggalkan sarung tangan selepas pasang CBD, terus pakai sarung tangan baharu untuk ambil blood culture pesakit lain. Apa kesilapan KRITIKAL di sini?",
+   opts:["Sarung tangan sepatutnya dipakai dua lapis","Tiada kesilapan — sarung tangan baharu sudah memadai","CBD sepatutnya dipasang selepas blood culture diambil dulu","Tiada hand hygiene antara tanggal sarung tangan lama dan pakai yang baharu"],correct:3},
+
+  {q:"Berapa ml darah diperlukan untuk SETIAP botol supaya hasil blood culture tepat pada pesakit dewasa?",
+   opts:["10 ml","6 ml","5 ml","20 ml"],correct:0},
+
+  {q:"Dua set blood culture diambil. Selepas 4 hari, HANYA satu botol dari satu set tumbuh coagulase-negative Staphylococcus. Pesakit stabil, tiada demam. Apa tafsiran PALING munasabah?",
+   opts:["Tanda endocarditis — rujuk untuk pembedahan segera","Berkemungkinan besar kontaminan — nilai semula secara klinikal, jangan terus mula vancomycin","Bakteremia sebenar — mula vancomycin serta-merta","Kegagalan makmal — abaikan keputusan sepenuhnya"],correct:1},
+
+  {q:"Pesakit ada CVC selama 8 hari, tiba-tiba demam tanpa sumber lain yang jelas. Apa tindakan PALING tepat sebelum mula antibiotik?",
+   opts:["Tukar dressing CVC sahaja dan pantau 48 jam","Tanggalkan CVC serta-merta pada semua pesakit demam","Tukar CVC secara rutin melalui guidewire tanpa kultur","Ambil paired blood cultures (dari CVC DAN vena periferal) sebelum dos antibiotik pertama diberi"],correct:3},
+
+  {q:"Ikut bukti terkini, kenyataan mana yang BETUL tentang peripheral IV catheter (PIVC)?",
+   opts:["Ditukar bila ada indikasi klinikal, bukan ikut jadual rutin","PIVC tidak pernah menyebabkan bloodstream infection","Dressing telus wajib ditukar setiap hari walaupun bersih dan melekat","Wajib ditukar setiap 48 jam tanpa mengira keadaan"],correct:0},
+
+  {q:"Pembedahan kolorektal elektif, insisi pukul 9.00 pagi. Bila masa PALING sesuai beri antibiotik profilaksis IV?",
+   opts:["Dalam tempoh 60 minit sebelum insisi","12 jam sebelum pembedahan pada malam sebelumnya","Serta-merta selepas insisi dibuat","Selepas pembedahan selesai, sebelum pesakit ke wad"],correct:0},
+
+  {q:"Antara elemen bundle ini, yang mana ada bukti PALING kukuh kurangkan Surgical Site Infection?",
+   opts:["Sambung antibiotik profilaksis sampai 5 hari selepas pembedahan","Pasang wound drain secara rutin pada semua kes","Kekalkan normothermia perioperatif","Cukur tapak pembedahan guna pisau cukur malam sebelumnya"],correct:2},
+
+  {q:"Pesakit atas piperacillin-tazobactam empirik. Hari ke-3, kultur tumbuh E. coli sensitif co-amoxiclav dan pesakit makin baik. Apa tindakan AMS PALING sesuai?",
+   opts:["Teruskan piperacillin-tazobactam sehingga 14 hari","Hentikan semua antibiotik serta-merta pada hari ke-3","De-escalate ke co-amoxiclav dan tetapkan tempoh rawatan yang jelas","Tambah vancomycin sebagai perlindungan tambahan"],correct:2},
+
+  {q:"Pesakit nak disediakan untuk pembedahan dan bulu di kawasan insisi kena dibuang. Alat mana yang PATUT digunakan untuk elak SSI?",
+   opts:["Scissor","Clipper","Shaver (pisau cukur)","Strapping tape"],correct:1}
+];
+
+const POSTTEST_QUESTIONS_EN = [
+  {q:"A patient in an open ward is confirmed to carry Carbapenem-Resistant Enterobacterales (CRE). Which action MOST directly breaks the 'mode of transmission' link in the Chain of Infection?",
+   opts:["Restricting family visits only","Giving prophylactic antibiotics to the patient in the next bed","Monitoring the patient's CRP daily","Contact precautions with dedicated equipment for that patient"],correct:3},
+
+  {q:"A doctor removes gloves after inserting a CBD (Continuous Bladder Drainage), then immediately puts on new gloves to take a blood culture from another patient. What is the CRITICAL omission here?",
+   opts:["Gloves should have been double-layered","There is no omission — new gloves are sufficient","The CBD should have been inserted after the blood culture was taken","No hand hygiene between removing the old gloves and donning the new ones"],correct:3},
+
+  {q:"How much blood is required in EACH bottle to obtain an accurate blood culture result in an adult patient?",
+   opts:["10 ml","6 ml","5 ml","20 ml"],correct:0},
+
+  {q:"Two blood culture sets are taken. After 4 days, only ONE bottle from one set grows coagulase-negative Staphylococcus. The patient is stable and afebrile. What is the MOST reasonable interpretation?",
+   opts:["A sign of endocarditis — refer for urgent surgery","Likely a contaminant — reassess clinically rather than starting vancomycin automatically","True bacteraemia — start vancomycin immediately","Laboratory failure — disregard the result entirely"],correct:1},
+
+  {q:"A patient with a CVC in situ for 8 days develops a new fever with no other obvious source. What is the MOST appropriate action before starting antibiotics?",
+   opts:["Change the CVC dressing only and observe for 48 hours","Remove the CVC immediately in every febrile patient","Routinely exchange the CVC over a guidewire without cultures","Take paired blood cultures (from the CVC AND a peripheral vein) before the first antibiotic dose"],correct:3},
+
+  {q:"Based on current evidence, which statement about peripheral IV catheters (PIVC) is CORRECT?",
+   opts:["They are replaced when clinically indicated, rather than on a fixed routine schedule","PIVCs never cause bloodstream infection","Transparent dressings must be changed daily even when clean and intact","They must be replaced every 48 hours regardless of condition"],correct:0},
+
+  {q:"An elective colorectal operation is scheduled with incision at 9:00 AM. When should IV prophylactic antibiotics be given?",
+   opts:["Within 60 minutes before incision","12 hours before surgery, the night before","Immediately after the incision is made","After surgery is completed, before the patient returns to the ward"],correct:0},
+
+  {q:"Which bundle element has the STRONGEST evidence for reducing Surgical Site Infection?",
+   opts:["Continuing prophylactic antibiotics for 5 days after surgery","Routinely inserting a wound drain in all cases","Maintaining perioperative normothermia","Shaving the surgical site with a razor the night before"],correct:2},
+
+  {q:"A patient is on empirical piperacillin-tazobactam. On day 3, cultures grow E. coli sensitive to co-amoxiclav and the patient is improving clinically. What is the MOST appropriate AMS action?",
+   opts:["Continue piperacillin-tazobactam for a full 14 days","Stop all antibiotics immediately on day 3","De-escalate to co-amoxiclav and set a defined treatment duration","Add vancomycin for additional cover"],correct:2},
+
+  {q:"A patient must be prepared for surgery and hair at the incision site needs to be removed. Which instrument SHOULD be used to prevent SSI?",
+   opts:["Scissors","Clipper","Shaver (razor)","Strapping tape"],correct:1}
+];
+let POSTTEST_QUESTIONS = POSTTEST_QUESTIONS_BM;
+
+/* =========================================================
+   SOALAN IPC GO! (SET KETIGA — berasingan dari Pre & Post-Test)
+   ---------------------------------------------------------
+   IPC GO! ialah kuiz langsung berpasukan dengan pemasa, jadi soalan sengaja
+   dibuat PENDEK dan pantas dibaca di skrin projektor. Gayanya "spot the
+   mistake" dan amalan harian di wad, selaras dengan 4 stesen praktikal
+   bengkel. Ia TIDAK mengulang soalan Pre-Test atau Post-Test supaya
+   permainan kekal segar dan markah kedua-dua ujian tidak terjejas.
+========================================================= */
+const GO_QUESTIONS_BM = [
+  {q:"Sebelum menyentuh pesakit, apakah 'moment' hand hygiene mengikut WHO 5 Moments?",
+   opts:["Moment 2","Moment 3","Moment 1","Moment 4"],correct:2},
+
+  {q:"Doktor menyapu tapak suntikan dengan alkohol swab, lalu terus mencucuk tanpa menunggu. Apa yang salah?",
+   opts:["Alkohol swab tidak sepatutnya digunakan langsung","Perlu sapu tiga kali berturut-turut","Alkohol perlu dibiar kering dahulu sebelum cucukan","Tiada yang salah"],correct:2},
+
+  {q:"Berapa lamakah masa minimum menggosok tangan dengan alcohol-based handrub?",
+   opts:["5 saat","3 saat","2 minit","20–30 saat"],correct:3},
+
+  {q:"Semasa memakai PPE penuh, apakah item PERTAMA yang dipakai?",
+   opts:["N95","Pelindung mata","Sarung tangan","Gown"],correct:3},
+
+  {q:"Blood culture diambil SELEPAS antibiotik dos pertama diberi. Apakah kesannya?",
+   opts:["Tiada kesan langsung","Peluang mengesan organisma menurun","Keputusan keluar lebih cepat","Organisma lebih mudah tumbuh"],correct:1},
+
+  {q:"Jururawat menyentuh telefon bimbit semasa memakai sarung tangan, kemudian menyambung dressing luka. Apa tindakan betul?",
+   opts:["Sapu sarung tangan dengan alkohol","Tanggal sarung tangan, hand hygiene, pakai sarung tangan baharu","Tukar telefon sahaja","Teruskan sahaja kerana sarung tangan masih ada"],correct:1},
+
+  {q:"Dressing CVC kelihatan lembap dan tepinya terangkat. Apakah tindakan?",
+   opts:["Tukar dressing serta-merta secara aseptik","Biarkan jika pesakit tiada demam","Tunggu jadual tukar mingguan","Tampal pita tambahan di atasnya"],correct:0},
+
+  {q:"Apakah larutan antiseptik yang disyorkan untuk penyediaan kulit sebelum pembedahan?",
+   opts:["Air suam dan sabun biasa","Hidrogen peroksida","Normal saline sahaja","Larutan antiseptik berasaskan alkohol"],correct:3},
+
+  {q:"Apakah singkatan 'AMS' dalam konteks bengkel ini?",
+   opts:["Antimicrobial Stewardship","Antibiotic Medical Service","Advanced Medication System","Acute Microbial Syndrome"],correct:0},
+
+  {q:"Sarung tangan dipakai untuk semua pesakit sepanjang round tanpa ditukar. Apakah risiko utama?",
+   opts:["Sarung tangan cepat koyak","Kos sarung tangan meningkat","Penularan silang organisma antara pesakit","Tiada risiko selagi sarung tangan bersih"],correct:2}
+];
+
+const GO_QUESTIONS_EN = [
+  {q:"Before touching a patient, which hand hygiene moment applies under WHO 5 Moments?",
+   opts:["Moment 2","Moment 3","Moment 1","Moment 4"],correct:2},
+
+  {q:"A doctor wipes the injection site with an alcohol swab, then punctures immediately. What is wrong?",
+   opts:["Alcohol swabs should not be used at all","It must be wiped three times in a row","The alcohol must be allowed to dry before puncture","Nothing is wrong"],correct:2},
+
+  {q:"What is the minimum rubbing time for alcohol-based handrub?",
+   opts:["5 seconds","3 seconds","2 minutes","20–30 seconds"],correct:3},
+
+  {q:"When donning full PPE, which item goes on FIRST?",
+   opts:["N95 respirator","Eye protection","Gloves","Gown"],correct:3},
+
+  {q:"A blood culture is taken AFTER the first antibiotic dose. What is the effect?",
+   opts:["No effect at all","The chance of detecting the organism drops","Results come out faster","The organism grows more easily"],correct:1},
+
+  {q:"A nurse touches a mobile phone while gloved, then continues a wound dressing. What is correct?",
+   opts:["Wipe the gloves with alcohol","Remove gloves, perform hand hygiene, don new gloves","Only change the phone","Just continue since gloves are still on"],correct:1},
+
+  {q:"A CVC dressing looks damp with lifting edges. What should be done?",
+   opts:["Change the dressing immediately using aseptic technique","Leave it if the patient has no fever","Wait for the scheduled weekly change","Apply extra tape over it"],correct:0},
+
+  {q:"Which antiseptic solution is recommended for surgical skin preparation?",
+   opts:["Warm water and ordinary soap","Hydrogen peroxide","Normal saline alone","An alcohol-based antiseptic solution"],correct:3},
+
+  {q:"What does 'AMS' stand for in the context of this workshop?",
+   opts:["Antimicrobial Stewardship","Antibiotic Medical Service","Advanced Medication System","Acute Microbial Syndrome"],correct:0},
+
+  {q:"Gloves are worn for every patient throughout the round without changing. What is the main risk?",
+   opts:["Gloves tear more easily","Glove costs increase","Cross-transmission of organisms between patients","No risk as long as gloves look clean"],correct:2}
+];
+let GO_QUESTIONS = GO_QUESTIONS_BM;
+/* Set soalan untuk sesuatu ujian. IPC GO! sengaja TIDAK guna ini —
+   permainan ada set sendiri (GO_QUESTIONS). */
+function quizSet(kind){ return kind === 'posttest' ? POSTTEST_QUESTIONS : QUESTIONS; }
 
 const SCHEDULE = [
   {time:"8.00 – 8.30 AM", topic:"Registration & Pre-Test", speaker:""},
@@ -2631,7 +2798,14 @@ async function renderAttendance(main, preloadedRecord){
 }
 
 /* ---------- PRE/POST TEST ---------- */
+/* Draf jawapan kuiz yang BELUM dihantar. Disimpan di luar renderQuiz()
+   supaya bila peserta tukar bahasa di tengah kuiz, jawapan dan kedudukan
+   soalan TIDAK hilang — sebelum ni kedua-duanya pemboleh ubah tempatan,
+   jadi setiap toggle bahasa memulakan semula kuiz dari soalan 1.
+   Selamat kerana susunan pilihan BM & EN adalah identik. */
+let quizDraft = { pretest: null, posttest: null };
 async function renderQuiz(main, kind, unlocked, preloadedSaved){
+  const QSET = quizSet(kind);
   const label = kind==='pretest' ? tr('quiz_pretest_title') : tr('quiz_posttest_title');
   if(!unlocked){
     main.innerHTML = `
@@ -2648,22 +2822,25 @@ async function renderQuiz(main, kind, unlocked, preloadedSaved){
   if(saved){
     return renderQuizResult(main, kind, saved);
   }
-  let idx = 0;
-  const answers = new Array(QUESTIONS.length).fill(null);
+  if(!quizDraft[kind] || quizDraft[kind].answers.length !== QSET.length){
+    quizDraft[kind] = { answers: new Array(QSET.length).fill(null), idx: 0 };
+  }
+  const answers = quizDraft[kind].answers;
+  let idx = quizDraft[kind].idx;
 
   main.innerHTML = `
-    <div class="panel-head"><span class="eyebrow">${tr('quiz_pretest_eyebrow')}</span><h2>${label}</h2><p>${LANG==='en' ? `Answer all ${QUESTIONS.length} questions. Your answers are saved automatically.` : `Jawab semua ${QUESTIONS.length} soalan. Jawapan akan disimpan secara automatik.`}</p></div>
+    <div class="panel-head"><span class="eyebrow">${tr('quiz_pretest_eyebrow')}</span><h2>${label}</h2><p>${LANG==='en' ? `Answer all ${QSET.length} questions. Your answers are saved automatically.` : `Jawab semua ${QSET.length} soalan. Jawapan akan disimpan secara automatik.`}</p></div>
     <div class="card">
       <div class="q-progress">
-        <div class="q-progress-bar"><div class="q-progress-fill" id="qp-fill" style="width:${100/QUESTIONS.length}%;"></div></div>
-        <div class="q-progress-label" id="qp-label">1 / ${QUESTIONS.length}</div>
+        <div class="q-progress-bar"><div class="q-progress-fill" id="qp-fill" style="width:${100*(idx+1)/QSET.length}%;"></div></div>
+        <div class="q-progress-label" id="qp-label">${idx+1} / ${QSET.length}</div>
       </div>
       <div id="q-blocks"></div>
     </div>
   `;
   const blocksEl = document.getElementById('q-blocks');
-  blocksEl.innerHTML = QUESTIONS.map((q,qi)=>`
-    <div class="q-block ${qi===0?'active':''}" data-qi="${qi}">
+  blocksEl.innerHTML = QSET.map((q,qi)=>`
+    <div class="q-block ${qi===idx?'active':''}" data-qi="${qi}">
       <p class="q-text">${qi+1}. ${q.q}</p>
       <div class="opt-list">
         ${q.opts.map((o,oi)=>`
@@ -2673,12 +2850,25 @@ async function renderQuiz(main, kind, unlocked, preloadedSaved){
       </div>
       <div class="q-nav">
         <button class="btn btn-ghost" data-nav="prev" data-qi="${qi}" ${qi===0?'style="visibility:hidden;"':''}>← ${LANG==='en'?'Back':'Sebelum'}</button>
-        ${qi === QUESTIONS.length-1
+        ${qi === QSET.length-1
           ? `<button class="btn btn-primary" id="btn-submit-quiz" style="width:auto;" disabled>${tr('quiz_submit')}</button>`
           : `<button class="btn btn-primary" style="width:auto;" data-nav="next" data-qi="${qi}" disabled>${tr('quiz_next')}</button>`}
       </div>
     </div>
   `).join('');
+
+  // Pulihkan paparan jawapan yang sudah dipilih sebelum tukar bahasa.
+  answers.forEach((oi, qi)=>{
+    if(oi === null) return;
+    const chosen = blocksEl.querySelector(`.opt-btn[data-qi="${qi}"][data-oi="${oi}"]`);
+    if(chosen) chosen.classList.add('selected');
+    const nb = blocksEl.querySelector(`[data-nav="next"][data-qi="${qi}"]`);
+    if(nb) nb.disabled = false;
+    if(qi === QSET.length-1){
+      const sb = document.getElementById('btn-submit-quiz');
+      if(sb) sb.disabled = false;
+    }
+  });
 
   blocksEl.querySelectorAll('.opt-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -2697,23 +2887,27 @@ async function renderQuiz(main, kind, unlocked, preloadedSaved){
       const targetIdx = dir==='next' ? qi+1 : qi-1;
       blocksEl.querySelector(`.q-block[data-qi="${qi}"]`).classList.remove('active');
       blocksEl.querySelector(`.q-block[data-qi="${targetIdx}"]`).classList.add('active');
-      document.getElementById('qp-fill').style.width = (100*(targetIdx+1)/QUESTIONS.length)+'%';
-      document.getElementById('qp-label').textContent = (targetIdx+1)+' / '+QUESTIONS.length;
+      document.getElementById('qp-fill').style.width = (100*(targetIdx+1)/QSET.length)+'%';
+      document.getElementById('qp-label').textContent = (targetIdx+1)+' / '+QSET.length;
+      idx = targetIdx;
+      quizDraft[kind].idx = targetIdx;
     });
   });
   document.getElementById('btn-submit-quiz').addEventListener('click', async function submitHandler(e){
       let score = 0;
-      QUESTIONS.forEach((q,qi)=>{ if(answers[qi]===q.correct) score++; });
-      const result = {answers, score, total:QUESTIONS.length, submittedAt:new Date().toISOString()};
+      QSET.forEach((q,qi)=>{ if(answers[qi]===q.correct) score++; });
+      const result = {answers, score, total:QSET.length, submittedAt:new Date().toISOString()};
       const btn = e.target;
       btn.disabled = true; btn.textContent = LANG==='en' ? "Submitting..." : "Menghantar...";
       await sSet(kind+':'+key, result, false);
-      await sAppendUnique(kind+'-results', {name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, score, total:QUESTIONS.length}, 'ic', true);
+      await sAppendUnique(kind+'-results', {name:currentUser.name, ic:currentUser.ic, dept:currentUser.dept, score, total:QSET.length}, 'ic', true);
+      quizDraft[kind] = null;   // kuiz dah dihantar — buang draf
       patchPanelCache({[kind+':'+key]: result});
       renderQuizResult(main, kind, result);
   }, {once:true});
 }
 function renderQuizResult(main, kind, result){
+  const QSET = quizSet(kind);
   const label = kind==='pretest' ? tr('quiz_pretest_title') : tr('quiz_posttest_title');
   main.innerHTML = `
     <div class="panel-head"><span class="eyebrow">${tr('quiz_pretest_eyebrow')}</span><h2>${label}</h2></div>
@@ -2725,7 +2919,7 @@ function renderQuizResult(main, kind, result){
     </div>
     <div class="card">
       <h3>${LANG==='en' ? 'Answer Review' : 'Semakan Jawapan'}</h3>
-      ${QUESTIONS.map((q,qi)=>{
+      ${QSET.map((q,qi)=>{
         const correct = result.answers[qi]===q.correct;
         return `<div style="padding:10px 0;border-bottom:1px solid #F6EAE1;">
           <div style="font-size:13.5px;font-weight:600;margin-bottom:4px;">${qi+1}. ${q.q}</div>
@@ -3046,7 +3240,7 @@ async function pollIpcGo(){
 
   if(state.status === 'question'){
     const qi = state.qIndex;
-    const q = QUESTIONS[qi % QUESTIONS.length];
+    const q = GO_QUESTIONS[qi % GO_QUESTIONS.length];
     const elapsed = (Date.now() - state.startedAt) / 1000;
     const remaining = Math.max(0, GO_TIME_LIMIT - elapsed);
     const pct = Math.round((remaining/GO_TIME_LIMIT)*100);
@@ -3089,7 +3283,7 @@ async function pollIpcGo(){
   if(state.status === 'results'){
     stopGoSuspenseMusic();
     const qi = state.qIndex;
-    const q = QUESTIONS[qi % QUESTIONS.length];
+    const q = GO_QUESTIONS[qi % GO_QUESTIONS.length];
     const mine = answers[key];
     const correct = mine && mine.oi === q.correct;
     const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score);
@@ -3598,12 +3792,13 @@ async function renderCoordinator(){
           if(val === null) continue;
           const existing = await sGet(kind+':'+key, false);
           // Kekalkan jawapan asal kalau ada — kita cuma pinda markah.
+          const kindTotal = quizSet(kind).length;
           const rec = Object.assign({answers:[], submittedAt:new Date().toISOString()}, existing||{}, {
-            score: val, total, editedByCoordinator: true, editedAt: new Date().toISOString()
+            score: val, total: kindTotal, editedByCoordinator: true, editedAt: new Date().toISOString()
           });
           await sSet(kind+':'+key, rec, false);
           await sAppendUnique(kind+'-results',
-            {name:p.name, ic:p.ic, dept:p.dept||'', score:val, total}, 'ic', true);
+            {name:p.name, ic:p.ic, dept:p.dept||'', score:val, total: kindTotal}, 'ic', true);
         }
         toast(tr('co_score_saved'));
         panelDataCache = { fetchedAt: 0, data: null };
@@ -3703,12 +3898,18 @@ async function generateAndDownloadReport(info, statusEl, format){
   const preList = parseRecords(preRecords);
   const postList = parseRecords(postRecords);
 
+  // Pre-Test dan Post-Test kini guna set soalan BERBEZA, jadi statistik
+  // setiap soalan dikira daripada set masing-masing. Soalan dipasangkan
+  // mengikut nombor (Q1 pre lwn Q1 post) kerana kedua-dua set menguji
+  // tajuk yang sama mengikut turutan yang sama.
   const questions = QUESTIONS.map((q, qi)=>{
+    const qPost = POSTTEST_QUESTIONS[qi] || q;
     let preCorrect=0, preWrong=0, postCorrect=0, postWrong=0;
     preList.forEach(r=>{ if(r.answers && r.answers[qi]!=null){ if(r.answers[qi]===q.correct) preCorrect++; else preWrong++; } });
-    postList.forEach(r=>{ if(r.answers && r.answers[qi]!=null){ if(r.answers[qi]===q.correct) postCorrect++; else postWrong++; } });
+    postList.forEach(r=>{ if(r.answers && r.answers[qi]!=null){ if(r.answers[qi]===qPost.correct) postCorrect++; else postWrong++; } });
     return {
       text: q.q,
+      textPost: qPost.q,
       preCorrect, preWrong,
       postCorrect, postWrong,
       prePct: (preCorrect+preWrong) ? Math.round(100*preCorrect/(preCorrect+preWrong)) : 0,
@@ -3775,10 +3976,15 @@ async function generateAndDownloadReport(info, statusEl, format){
   statusEl.textContent = "Laporan berjaya dimuat turun: " + result.fileName;
 }
 let coordGoQIndexGuess = -1;
+/* Ditetapkan oleh poll koordinator. Digunakan oleh setLang() untuk elak
+   render semula panel koordinator PENUH semasa permainan sedang berjalan —
+   itu punca permainan "terganggu" dan nampak macam perlu restart. */
+let goGameLive = false;
 async function renderCoordGoPanel(){
   const panel = document.getElementById('coord-go-panel');
   if(!panel || !isCoordinator) return;
   const { state, players, answers } = await fetchGoSnapshot(coordGoQIndexGuess);
+  goGameLive = state.status !== 'idle';
   coordGoQIndexGuess = state.qIndex;
   const playerCount = Object.keys(players).length;
 
@@ -3800,12 +4006,12 @@ async function renderCoordGoPanel(){
   }
 
   if(state.status === 'question'){
-    const q = QUESTIONS[state.qIndex % QUESTIONS.length];
+    const q = GO_QUESTIONS[state.qIndex % GO_QUESTIONS.length];
     const answeredCount = Object.keys(answers).length;
     const elapsed = (Date.now()-state.startedAt)/1000;
     const remaining = Math.max(0, GO_TIME_LIMIT-elapsed);
     panel.innerHTML = `
-      <div class="go-host-question">Soalan ${state.qIndex+1} / ${QUESTIONS.length}: ${q.q}</div>
+      <div class="go-host-question">Soalan ${state.qIndex+1} / ${GO_QUESTIONS.length}: ${q.q}</div>
       <p style="font-size:12.5px;color:#8A6355;">⏱ ${Math.ceil(remaining)}s tinggal &nbsp;·&nbsp; ${answeredCount}/${playerCount} telah menjawab</p>
       <div class="go-tile-grid">
         ${q.opts.map((o,oi)=>`
@@ -3820,11 +4026,11 @@ async function renderCoordGoPanel(){
   }
 
   if(state.status === 'results'){
-    const q = QUESTIONS[state.qIndex % QUESTIONS.length];
+    const q = GO_QUESTIONS[state.qIndex % GO_QUESTIONS.length];
     const counts = [0,0,0,0];
     Object.values(answers).forEach(a=>{ if(counts[a.oi]!=null) counts[a.oi]++; });
     const total = Object.keys(answers).length || 1;
-    const isLast = state.qIndex >= QUESTIONS.length-1;
+    const isLast = state.qIndex >= GO_QUESTIONS.length-1;
     const list = Object.entries(players).map(([k,v])=>({...v,key:k})).sort((a,b)=>b.score-a.score).slice(0,5);
     panel.innerHTML = `
       <div class="go-host-question">Keputusan Soalan ${state.qIndex+1}: ${q.q}</div>
@@ -3882,7 +4088,7 @@ async function startGoQuestion(qIndex){
   renderCoordGoPanel();
 }
 async function revealGoResults(qIndex){
-  const q = QUESTIONS[qIndex % QUESTIONS.length];
+  const q = GO_QUESTIONS[qIndex % GO_QUESTIONS.length];
   const answers = await fetchGoAnswers(qIndex);
   const players = await fetchGoPlayers();
   const updates = [];
